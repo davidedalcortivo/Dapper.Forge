@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dapper.Forge.Core\Dapper.Forge.Core.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Dapper.Forge.MySql\Dapper.Forge.MySql.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Dapper.Forge.Oracle\Dapper.Forge.Oracle.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Dapper.Forge.PostgreSql\Dapper.Forge.PostgreSql.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Dapper.Forge.SqlServer\Dapper.Forge.SqlServer.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+</Project>

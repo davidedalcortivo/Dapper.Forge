@@ -1,0 +1,27 @@
+﻿using Dapper.Forge.Core.Abstractions.Strategies;
+using Dapper.Forge.Core.Caching;
+using Dapper.Forge.Core.Models;
+using System.Text;
+
+
+namespace Dapper.Forge.MySql.Strategies
+{
+    internal partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
+    {
+        protected override DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
+        {
+            StringBuilder sqlBuilder = new();
+
+            if (!string.IsNullOrWhiteSpace(clause))
+            {
+                sqlBuilder.AppendLine();
+                sqlBuilder.AppendLine("    WHERE");
+                sqlBuilder.Append("        ");
+                sqlBuilder.Append(clause);
+            }
+
+            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.ExistsSql.Render(sqlBuilder);
+            return new(sql, parameters);
+        }
+    }
+}
