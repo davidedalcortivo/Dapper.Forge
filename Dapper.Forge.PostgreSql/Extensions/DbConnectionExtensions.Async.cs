@@ -2,6 +2,7 @@
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.PostgreSql.Strategies;
 using Npgsql;
+using System.Collections;
 using System.Linq.Expressions;
 
 
@@ -159,7 +160,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return await DbExecutionStrategy.Instance.UpsertAsync(connection, entity, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<IReadOnlyList<TEntity?>> GetByIdRangeAsync<TEntity>(this NpgsqlConnection connection, IEnumerable<object> ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<IReadOnlyList<TEntity?>> GetByIdRangeAsync<TEntity>(this NpgsqlConnection connection, IEnumerable ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             return await DbExecutionStrategy.Instance.GetByIdRangeAsync<TEntity>(connection, ids, preserveDuplicates, preserveNulls, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
@@ -179,7 +180,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return await DbExecutionStrategy.Instance.DeleteRangeAsync(connection, entities, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> DeleteRangeAsync<TEntity>(this NpgsqlConnection connection, IEnumerable<object> ids, int batchSize = 500, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> DeleteRangeAsync<TEntity>(this NpgsqlConnection connection, IEnumerable ids, int batchSize = 500, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             return await DbExecutionStrategy.Instance.DeleteRangeAsync<TEntity>(connection, ids, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }

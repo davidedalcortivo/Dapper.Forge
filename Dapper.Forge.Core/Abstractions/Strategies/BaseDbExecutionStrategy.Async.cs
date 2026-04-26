@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Models;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using System.Collections;
 using System.Data.Common;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -142,24 +143,41 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return await connection.ExecuteAsync(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
         }
 
-        public virtual async Task<IReadOnlyList<TEntity?>> GetByIdRangeAsync<TEntity>(DbConnection connection, IEnumerable<object> ids, bool preserveDuplicates, bool preserveNulls, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public virtual async Task<IReadOnlyList<TEntity?>> GetByIdRangeAsync<TEntity>(DbConnection connection, IEnumerable ids, bool preserveDuplicates, bool preserveNulls, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            object[] idArray = preserveDuplicates ? ids as object[] ?? [.. ids] : [.. ids.Distinct()];
-            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.GetByIdRangeCommands<TEntity>(idArray, true, batchSize, chunkSize);
+            List<object?> idList = [];
+
+            if (preserveDuplicates)
+            {
+                foreach (object? id in ids)
+                    idList.Add(id);
+            }
+            else
+            {
+                HashSet<object?> idSet = [];
+
+                foreach (object? id in ids)
+                {
+                    if (idSet.Add(id))
+                        idList.Add(id);
+                }
+            }
+
+            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.GetByIdRangeCommands<TEntity>(idList, batchSize, chunkSize);
             List<TEntity> entityList = [];
 
             if (commands.Count <= 0)
                 return entityList;
 
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            Func<TEntity, object?> propertyGetters = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idPropertyInfo.Name];
-            Dictionary<object, List<int>> indexesById = new(idArray.Length);
-            TEntity?[] entityArray = new TEntity?[idArray.Length];
+            Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idPropertyInfo.Name];
+            Dictionary<object, List<int>> indexesById = new(idList.Count);
+            TEntity?[] entityArray = new TEntity?[idList.Count];
 
-            for (int i = 0; i < idArray.Length; i++)
+            for (int i = 0; i < idList.Count; i++)
             {
-                if (!indexesById.TryGetValue(idArray[i], out List<int>? indexes))
-                    indexesById[idArray[i]] = indexes = [];
+                if (!indexesById.TryGetValue(idList[i]!, out List<int>? indexes))
+                    indexesById[idList[i]!] = indexes = [];
 
                 indexes.Add(i);
             }
@@ -170,7 +188,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
                 foreach (TEntity entity in entities)
                 {
-                    object id = propertyGetters(entity)!;
+                    object id = propertyGetter(entity)!;
                     List<int> indexes = indexesById[id];
 
                     foreach (int index in indexes)
@@ -208,7 +226,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return await ExecuteRangeAsync(connection, commands, transaction, commandTimeout, cancellationToken);
         }
 
-        public virtual async Task<int> DeleteRangeAsync<TEntity>(DbConnection connection, IEnumerable<object> ids, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public virtual async Task<int> DeleteRangeAsync<TEntity>(DbConnection connection, IEnumerable ids, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.DeleteRangeCommands<TEntity>(ids, batchSize, chunkSize);
             return await ExecuteRangeAsync(connection, commands, transaction, commandTimeout, cancellationToken);

@@ -2,6 +2,7 @@
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.MySql.Strategies;
 using MySqlConnector;
+using System.Collections;
 using System.Linq.Expressions;
 
 
@@ -159,9 +160,9 @@ namespace Dapper.Forge.MySql.Extensions
             return DbCommandStrategy.Instance.UpsertCommand(entity);
         }
 
-        public static IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(this MySqlConnection _, IEnumerable<object> ids, bool preserveDuplicates = false, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(this MySqlConnection _, IEnumerable ids, int batchSize = 500) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetByIdRangeCommands<TEntity>(ids, preserveDuplicates, batchSize, 0);
+            return DbCommandStrategy.Instance.GetByIdRangeCommands<TEntity>(ids, batchSize, 0);
         }
 
         public static IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(this MySqlConnection _, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
@@ -179,7 +180,7 @@ namespace Dapper.Forge.MySql.Extensions
             return DbCommandStrategy.Instance.DeleteRangeCommands(entities, batchSize, 0);
         }
 
-        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this MySqlConnection _, IEnumerable<object> ids, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this MySqlConnection _, IEnumerable ids, int batchSize = 500) where TEntity : class
         {
             return DbCommandStrategy.Instance.DeleteRangeCommands<TEntity>(ids, batchSize, 0);
         }

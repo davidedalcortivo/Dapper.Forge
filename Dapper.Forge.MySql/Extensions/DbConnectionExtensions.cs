@@ -2,6 +2,7 @@
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.MySql.Strategies;
 using MySqlConnector;
+using System.Collections;
 using System.Linq.Expressions;
 
 
@@ -159,7 +160,7 @@ namespace Dapper.Forge.MySql.Extensions
             return DbExecutionStrategy.Instance.Upsert(connection, entity, transaction, commandTimeout);
         }
 
-        public static IReadOnlyList<TEntity?> GetByIdRange<TEntity>(this MySqlConnection connection, IEnumerable<object> ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static IReadOnlyList<TEntity?> GetByIdRange<TEntity>(this MySqlConnection connection, IEnumerable ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             return DbExecutionStrategy.Instance.GetByIdRange<TEntity>(connection, ids, preserveDuplicates, preserveNulls, batchSize, 0, transaction, commandTimeout);
         }
@@ -179,7 +180,7 @@ namespace Dapper.Forge.MySql.Extensions
             return DbExecutionStrategy.Instance.DeleteRange(connection, entities, batchSize, 0, transaction, commandTimeout);
         }
 
-        public static int DeleteRange<TEntity>(this MySqlConnection connection, IEnumerable<object> ids, int batchSize = 500, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static int DeleteRange<TEntity>(this MySqlConnection connection, IEnumerable ids, int batchSize = 500, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             return DbExecutionStrategy.Instance.DeleteRange<TEntity>(connection, ids, batchSize, 0, transaction, commandTimeout);
         }

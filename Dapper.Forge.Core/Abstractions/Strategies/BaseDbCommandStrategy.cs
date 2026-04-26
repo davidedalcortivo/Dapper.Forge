@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Models;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -240,11 +241,31 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public abstract DbCommandInfo UpsertCommand<TEntity>(TEntity entity) where TEntity : class;
 
-        public virtual IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(IEnumerable<object> ids, bool preserveDuplicates, int batchSize, int chunkSize) where TEntity : class
+        public virtual IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
         {
             EnsureCache<TEntity>();
-            object[] idArray = preserveDuplicates ? ids as object[] ?? [.. ids] : [.. ids.Distinct()];
-            return BuildInRangeCommands<TEntity>(SqlBuilderCache<TEntity, TStrategy>.GetByIdRangeSql, idArray, batchSize, chunkSize, null, true);
+            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
+            List<object> idList;
+
+            if (ids is List<object?> list)
+            {
+                foreach (object? id in list)
+                    EnsureIdType<TEntity>(idPropertyInfo, id);
+
+                idList = list!;
+            }
+            else
+            {
+                idList = [];
+
+                foreach (object? id in ids)
+                {
+                    EnsureIdType<TEntity>(idPropertyInfo, id);
+                    idList.Add(id);
+                }
+            }
+
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.GetByIdRangeSql, idList, batchSize, chunkSize, idPropertyInfo, true);
         }
 
         public abstract IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
@@ -328,17 +349,25 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             EnsureCache<TEntity>();
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            Func<TEntity, object?> propertyGetters = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idPropertyInfo.Name];
+            Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idPropertyInfo.Name];
 
-            object[] idArray = [.. entities.Select(x => propertyGetters(x))!];
-            return BuildInRangeCommands<TEntity>(SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idArray, batchSize, chunkSize, idPropertyInfo, false);
+            List<object> idList = [.. entities.Select(x => propertyGetter(x)!)];
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idPropertyInfo, false);
         }
 
-        public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(IEnumerable<object> ids, int batchSize, int chunkSize) where TEntity : class
+        public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
         {
             EnsureCache<TEntity>();
-            object[] idArray = ids as object[] ?? [.. ids];
-            return BuildInRangeCommands<TEntity>(SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idArray, batchSize, chunkSize, null, false);
+            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
+            List<object> idList = [];
+
+            foreach (object? id in ids)
+            {
+                EnsureIdType<TEntity>(idPropertyInfo, id);
+                idList.Add(id);
+            }
+
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idPropertyInfo, false);
         }
 
         public abstract IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;

@@ -3,6 +3,7 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.SqlServer.Strategies;
 using Microsoft.Data.SqlClient;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -162,7 +163,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbExecutionStrategy.Instance.Upsert(connection, entity, transaction, commandTimeout);
         }
 
-        public static IReadOnlyList<TEntity?> GetByIdRange<TEntity>(this SqlConnection connection, IEnumerable<object> ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static IReadOnlyList<TEntity?> GetByIdRange<TEntity>(this SqlConnection connection, IEnumerable ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount);
             return DbExecutionStrategy.Instance.GetByIdRange<TEntity>(connection, ids, preserveDuplicates, preserveNulls, batchSize, 0, transaction, commandTimeout);
@@ -189,7 +190,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbExecutionStrategy.Instance.DeleteRange(connection, entities, batchSize, SqlDialectStrategy.Instance.MaxParameterCount, transaction, commandTimeout);
         }
 
-        public static int DeleteRange<TEntity>(this SqlConnection connection, IEnumerable<object> ids, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static int DeleteRange<TEntity>(this SqlConnection connection, IEnumerable ids, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             return DbExecutionStrategy.Instance.DeleteRange<TEntity>(connection, ids, batchSize, SqlDialectStrategy.Instance.MaxParameterCount, transaction, commandTimeout);
         }

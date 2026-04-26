@@ -3,6 +3,7 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.SqlServer.Strategies;
 using Microsoft.Data.SqlClient;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -162,10 +163,10 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.UpsertCommand(entity);
         }
 
-        public static IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(this SqlConnection _, IEnumerable<object> ids, bool preserveDuplicates = false, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(this SqlConnection _, IEnumerable ids, int batchSize = 500) where TEntity : class
         {
             batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount);
-            return DbCommandStrategy.Instance.GetByIdRangeCommands<TEntity>(ids, preserveDuplicates, batchSize, 0);
+            return DbCommandStrategy.Instance.GetByIdRangeCommands<TEntity>(ids, batchSize, 0);
         }
 
         public static IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(this SqlConnection _, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
@@ -189,7 +190,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.DeleteRangeCommands(entities, batchSize, SqlDialectStrategy.Instance.MaxParameterCount);
         }
 
-        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this SqlConnection _, IEnumerable<object> ids, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this SqlConnection _, IEnumerable ids, int batchSize = 500) where TEntity : class
         {
             return DbCommandStrategy.Instance.DeleteRangeCommands<TEntity>(ids, batchSize, SqlDialectStrategy.Instance.MaxParameterCount);
         }

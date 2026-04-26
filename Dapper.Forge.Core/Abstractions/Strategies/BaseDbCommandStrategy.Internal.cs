@@ -17,8 +17,9 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             SqlBuilderCache<TEntity, TStrategy>.Initialize(sqlBuilderStrategy);
         }
 
-        protected virtual void EnsureIdType<TEntity>(PropertyInfo idPropertyInfo, object id) where TEntity : class
+        protected virtual void EnsureIdType<TEntity>(PropertyInfo idPropertyInfo, object? id) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(id, nameof(id));
             Type idType = id.GetType();
 
             if (idPropertyInfo.PropertyType != idType)
@@ -193,18 +194,17 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        protected virtual List<DbCommandInfo> BuildInRangeCommands<TEntity>(SqlTemplate sqlTemplate, object[] idArray, int batchSize, int chunkSize, PropertyInfo? idPropertyInfo, bool useUnion) where TEntity : class
+        protected virtual List<DbCommandInfo> BuildInRangeCommands<TEntity, TKey>(SqlTemplate sqlTemplate, List<object> idList, int batchSize, int chunkSize, PropertyInfo idPropertyInfo, bool useUnion) where TEntity : class where TKey : notnull
         {
             List<DbCommandInfo> commands = [];
 
-            if (idArray.Length <= 0)
+            if (idList.Count <= 0)
                 return commands;
 
-            if (idPropertyInfo is null)
-            {
-                idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-                EnsureIdType<TEntity>(idPropertyInfo, idArray[0]);
-            }
+            TKey[] idArray = new TKey[idList.Count];
+
+            for (int i = 0; i < idArray.Length; i++)
+                idArray[i] = (TKey)idList[i];
 
             batchSize = batchSize <= 0 ? idArray.Length : batchSize;
             int j = 0;

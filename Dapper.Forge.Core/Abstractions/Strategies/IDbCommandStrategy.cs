@@ -1,5 +1,6 @@
 ﻿using Dapper.Forge.Core.Abstractions.Models;
 using Dapper.Forge.Core.Models;
+using System.Collections;
 using System.Linq.Expressions;
 
 
@@ -31,11 +32,11 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         DbCommandInfo DeleteCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo DeleteCommand<TEntity>(IFilterNode? filterNode) where TEntity : class;
         DbCommandInfo UpsertCommand<TEntity>(TEntity entity) where TEntity : class;
-        IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(IEnumerable<object> ids, bool preserveDuplicates, int batchSize, int chunkSize) where TEntity : class;
+        IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(IEnumerable ids, int batchSize, int chunkSize) where TEntity : class;
         IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
         IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
         IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
-        IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(IEnumerable<object> ids, int batchSize, int chunkSize) where TEntity : class;
+        IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(IEnumerable ids, int batchSize, int chunkSize) where TEntity : class;
         IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
         DbCommandInfo ExistsCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo ExistsCommand<TEntity>(IFilterNode? filterNode) where TEntity : class;

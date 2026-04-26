@@ -1,5 +1,6 @@
 ﻿using Dapper.Forge.Core.Abstractions.Models;
 using Dapper.Forge.Core.Models;
+using System.Collections;
 using System.Data.Common;
 using System.Linq.Expressions;
 
@@ -33,11 +34,11 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         int Delete<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
         int Delete<TEntity>(DbConnection connection, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
         int Upsert<TEntity>(DbConnection connection, TEntity entity, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
-        IReadOnlyList<TEntity?> GetByIdRange<TEntity>(DbConnection connection, IEnumerable<object> ids, bool preserveDuplicates, bool preserveNulls, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
+        IReadOnlyList<TEntity?> GetByIdRange<TEntity>(DbConnection connection, IEnumerable ids, bool preserveDuplicates, bool preserveNulls, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
         int UpdateRange<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
         int InsertRange<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
         int DeleteRange<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
-        int DeleteRange<TEntity>(DbConnection connection, IEnumerable<object> ids, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
+        int DeleteRange<TEntity>(DbConnection connection, IEnumerable ids, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
         int UpsertRange<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
         bool Exists<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
         bool Exists<TEntity>(DbConnection connection, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout) where TEntity : class;
@@ -86,11 +87,11 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         Task<int> DeleteAsync<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
         Task<int> DeleteAsync<TEntity>(DbConnection connection, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
         Task<int> UpsertAsync<TEntity>(DbConnection connection, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
-        Task<IReadOnlyList<TEntity?>> GetByIdRangeAsync<TEntity>(DbConnection connection, IEnumerable<object> ids, bool preserveDuplicates, bool preserveNulls, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
+        Task<IReadOnlyList<TEntity?>> GetByIdRangeAsync<TEntity>(DbConnection connection, IEnumerable ids, bool preserveDuplicates, bool preserveNulls, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
         Task<int> UpdateRangeAsync<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
         Task<int> InsertRangeAsync<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
         Task<int> DeleteRangeAsync<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
-        Task<int> DeleteRangeAsync<TEntity>(DbConnection connection, IEnumerable<object> ids, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
+        Task<int> DeleteRangeAsync<TEntity>(DbConnection connection, IEnumerable ids, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
         Task<int> UpsertRangeAsync<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
         Task<bool> ExistsAsync<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
         Task<bool> ExistsAsync<TEntity>(DbConnection connection, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;
