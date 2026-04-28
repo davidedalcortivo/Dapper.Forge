@@ -20,7 +20,7 @@ namespace Dapper.Forge.MySql.Strategies
 
             sqlBuilder.Append("INSERT INTO ");
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.AppendLine(" (");
+            sqlBuilder.Append(" (");
             AppendColumns<TEntity>(sqlBuilder, "    ", insertPropertyInfos, false, null);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine(")");
@@ -39,7 +39,7 @@ namespace Dapper.Forge.MySql.Strategies
             }
 
             sqlBuilder.AppendLine("AS new");
-            sqlBuilder.AppendLine("ON DUPLICATE KEY UPDATE");
+            sqlBuilder.Append("ON DUPLICATE KEY UPDATE");
             AppendSetColumns<TEntity>(sqlBuilder, "    ", updatePropertyInfos, "new", null);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
 

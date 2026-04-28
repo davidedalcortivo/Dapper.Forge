@@ -54,7 +54,7 @@ namespace Dapper.Forge.MySql.Strategies
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
-            if (entityArray.Length <= 0)
+            if (entityArray.Length == 0)
                 return commands;
             
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
@@ -121,7 +121,7 @@ namespace Dapper.Forge.MySql.Strategies
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
-            if (entityArray.Length <= 0)
+            if (entityArray.Length == 0)
                 return commands;
 
             ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.PropertyInfos;

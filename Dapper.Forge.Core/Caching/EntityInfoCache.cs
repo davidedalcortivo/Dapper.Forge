@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using Dapper.Forge.Core.Utilities;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
@@ -20,21 +21,27 @@ namespace Dapper.Forge.Core.Caching
 
         static EntityInfoCache()
         {
+            Type entityType = typeof(TEntity);
             PropertyInfo? idNamedPropertyInfo = null;
+
+            HashSet<string> seenPropertyNames = new(StringComparer.OrdinalIgnoreCase);
             Stack<PropertyInfo> stack = new();
             int keyCount = 0;
 
-            for (Type? type = typeof(TEntity); type is not null; type = type.BaseType)
+            for (Type? type = entityType; type is not null; type = type.BaseType)
             {
                 foreach (PropertyInfo propertyInfo in type
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                    .Where(x => !(x.GetMethod?.IsVirtual ?? true))
+                    .Where(x => !x.IsDefined(typeof(NotMappedAttribute), true))
                     .Reverse())
                 {
+                    if (!seenPropertyNames.Add(propertyInfo.Name))
+                        continue;
+
                     if (propertyInfo.IsDefined(typeof(KeyAttribute), true))
                     {
                         if (keyCount++ > 1)
-                            throw new InvalidOperationException($"Multiple properties in the entity {typeof(TEntity)} are marked with the [Key] attribute. Only one property can be marked as the key.");
+                            throw new InvalidOperationException($"Multiple properties in the entity {entityType} are marked with the [Key] attribute. Only one property can be marked as the key.");
 
                         IdPropertyInfo = propertyInfo;
                     }
@@ -49,16 +56,16 @@ namespace Dapper.Forge.Core.Caching
             if (IdPropertyInfo is null)
             {
                 if (idNamedPropertyInfo is null)
-                    throw new InvalidOperationException($"No property in the entity {typeof(TEntity)} is marked with the [Key] attribute or named 'Id'. One property must be marked as the key or named 'Id' to be used as the identifier for the entity.");
+                    throw new InvalidOperationException($"No property in the entity {entityType} is marked with the [Key] attribute or named 'Id'. One property must be marked as the key or named 'Id' to be used as the identifier for the entity.");
 
                 IdPropertyInfo = idNamedPropertyInfo;
             }
 
-            TableName = typeof(TEntity).GetCustomAttribute<TableAttribute>()?.Name ?? $"{typeof(TEntity).Name}s";
+            TableName = entityType.GetCustomAttribute<TableAttribute>()?.Name ?? $"{entityType.Name}s";
 
             PropertyInfos = [.. stack];
-            UpdatePropertyInfos = [.. PropertyInfos.Where(x => !(x == IdPropertyInfo || x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
-            InsertPropertyInfos = [.. PropertyInfos.Where(x => !(x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
+            UpdatePropertyInfos = [.. PropertyInfos.Where(x => !(x == IdPropertyInfo || x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption != DatabaseGeneratedOption.None))];
+            InsertPropertyInfos = [.. PropertyInfos.Where(x => !(x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption != DatabaseGeneratedOption.None))];
 
             ImmutableDictionary<string, string>.Builder columnNamesBuilder = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
             ImmutableDictionary<string, PropertyInfo>.Builder PropertyInfosBuilder = ImmutableDictionary.CreateBuilder<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
@@ -72,19 +79,7 @@ namespace Dapper.Forge.Core.Caching
                 MethodInfo? getMethod = propertyInfo.GetMethod;
 
                 if (getMethod is not null)
-                {
-                    ParameterExpression instanceParam = Expression.Parameter(typeof(TEntity), "instance");
-                    Expression instanceCast = instanceParam;
-
-                    if (propertyInfo.DeclaringType is not null && propertyInfo.DeclaringType != typeof(TEntity))
-                        instanceCast = Expression.Convert(instanceParam, propertyInfo.DeclaringType);
-
-                    Expression propertyAccess = Expression.Property(instanceCast, propertyInfo);
-                    UnaryExpression convertResult = Expression.Convert(propertyAccess, typeof(object));
-                    Func<TEntity, object?> lambda = Expression.Lambda<Func<TEntity, object?>>(convertResult, instanceParam).Compile();
-
-                    PropertyGettersBuilder[propertyInfo.Name] = lambda;
-                }
+                    PropertyGettersBuilder[propertyInfo.Name] = PropertyHelper.BuildGetterExpression<TEntity>(propertyInfo);
             }
 
             ColumnNamesByPropertyName = columnNamesBuilder.ToImmutable();

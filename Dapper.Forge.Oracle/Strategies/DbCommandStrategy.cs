@@ -64,7 +64,7 @@ namespace Dapper.Forge.Oracle.Strategies
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
-            if (entityArray.Length <= 0)
+            if (entityArray.Length == 0)
                 return commands;
 
             string tableName = EntityInfoCache<TEntity>.TableName;

@@ -20,9 +20,8 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             StringBuilder sqlBuilder = new();
 
-            sqlBuilder.AppendLine("SELECT TOP ({})");
+            sqlBuilder.Append("SELECT TOP ({})");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            sqlBuilder.AppendLine();
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
             sqlBuilder.Append("{}");
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
@@ -42,26 +41,26 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             sqlBuilder.AppendLine("IF EXISTS (");
             sqlBuilder.AppendLine("    SELECT");
-            sqlBuilder.AppendLine("        1");
+            sqlBuilder.Append("        1");
             AppendFromTable<TEntity>(sqlBuilder, "    ", null);
             sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine("        WITH (UPDLOCK, HOLDLOCK)");
-            AppendWhereClause<TEntity>(sqlBuilder, "    ", clause);
+            sqlBuilder.Append("        WITH (UPDLOCK, HOLDLOCK)");
+            AppendWhereClause(sqlBuilder, "    ", clause);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine(")");
             sqlBuilder.AppendLine("BEGIN");
             sqlBuilder.Append("    UPDATE ");
             sqlBuilder.AppendLine(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuilder.AppendLine("    SET");
-            sqlBuilder.AppendLine("{}");
-            AppendWhereClause<TEntity>(sqlBuilder, "    ", clause);
+            sqlBuilder.Append("{}");
+            AppendWhereClause(sqlBuilder, "    ", clause);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
             sqlBuilder.AppendLine("END");
             sqlBuilder.AppendLine("ELSE");
             sqlBuilder.AppendLine("BEGIN");
             sqlBuilder.Append("    INSERT INTO ");
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.AppendLine(" (");
+            sqlBuilder.Append(" (");
             AppendColumns<TEntity>(sqlBuilder, "        ", propertyInfos, false, null);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine("    )");
@@ -109,11 +108,11 @@ namespace Dapper.Forge.SqlServer.Strategies
             AppendUpdateRange<TEntity>(sqlBuilder, ["UPDLOCK", "HOLDLOCK"], sourceTable, targetTable, clause);
             sqlBuilder.Append("INSERT INTO ");
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.AppendLine(" (");
+            sqlBuilder.Append(" (");
             AppendColumns<TEntity>(sqlBuilder, "    ", insertPropertyInfos, false, null);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine(")");
-            sqlBuilder.AppendLine("SELECT");
+            sqlBuilder.Append("SELECT");
             AppendColumns<TEntity>(sqlBuilder, "    ", insertPropertyInfos, true, null);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine("FROM (");
@@ -126,11 +125,11 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuilder.AppendLine(")");
             sqlBuilder.AppendLine("WHERE NOT EXISTS (");
             sqlBuilder.AppendLine("    SELECT");
-            sqlBuilder.AppendLine("        1");
+            sqlBuilder.Append("        1");
             AppendFromTable<TEntity>(sqlBuilder, "    ", targetTable);
             sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine("        WITH (UPDLOCK, HOLDLOCK)");
-            AppendWhereClause<TEntity>(sqlBuilder, "    ", clause);
+            sqlBuilder.Append("        WITH (UPDLOCK, HOLDLOCK)");
+            AppendWhereClause(sqlBuilder, "    ", clause);
             sqlBuilder.AppendLine();
             sqlBuilder.Append(')');
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
@@ -146,7 +145,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuilder.AppendLine("    CAST(");
             sqlBuilder.AppendLine("        EXISTS (");
             sqlBuilder.AppendLine("            SELECT");
-            sqlBuilder.AppendLine("                1");
+            sqlBuilder.Append("                1");
             AppendFromTable<TEntity>(sqlBuilder, "            ", null);
             sqlBuilder.AppendLine("{}");
             sqlBuilder.AppendLine("        )");

@@ -1,15 +1,33 @@
 ﻿using Dapper.Forge.Console;
+using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.PostgreSql.Extensions;
 using Npgsql;
+using System.Collections.Immutable;
+using System.Reflection;
+using System.Xml.Linq;
 
 
-NpgsqlConnection connection = new();
+NpgsqlConnection connection = new("");
 
 List<SortDescriptor> sorts = [];
 sorts.Add(new("Id", "desc"));
 sorts.Add(new("StringValue", SortDirection.Descending));
 sorts.Add(new("GuidValue", "descending"));
+sorts.Add(SortDescriptor.For<TestTable>(x => x.GuidValue, "descending"));
+
+
+PropertyInfo[] propertyInfos = ParamPropertyCache.GetProperties(new { Id = 3, stringa = "ciao" });
+propertyInfos = ParamPropertyCache.GetProperties(new { Id = 3, stringa = "ciao" });
+propertyInfos = ParamPropertyCache.GetProperties(new {});
+propertyInfos = ParamPropertyCache.GetProperties(new { Id = 3, stringa = "hola" });
+propertyInfos = ParamPropertyCache.GetProperties(new { Id = 4 });
+
+ImmutableDictionary<string, Func<object, object?>> paramGetterCache = ParamGetterCache.GetGetters(new { Id = 3, stringa = "ciao" });
+paramGetterCache = ParamGetterCache.GetGetters(new { Id = 3, stringa = "ciao" });
+paramGetterCache = ParamGetterCache.GetGetters(new { });
+paramGetterCache = ParamGetterCache.GetGetters(new { Id = 3, stringa = "hola" });
+
 
 List<FilterDescriptor> filters = [];
 filters.Add(new("StringValue", "ciao", ComparisonOperator.Equal));

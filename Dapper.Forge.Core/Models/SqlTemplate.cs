@@ -6,7 +6,7 @@ namespace Dapper.Forge.Core.Models
     public sealed class SqlTemplate
     {
         private readonly Segment[] _segments;
-        private readonly int _literalsLength;
+        private int _literalsLength;
 
         private readonly struct Segment
         {
@@ -30,7 +30,7 @@ namespace Dapper.Forge.Core.Models
         public SqlTemplate(string template, string terminator)
         {
             List<Segment> segments = [];
-            StringBuilder current = new();
+            StringBuilder stringBuilder = new();
 
             for (int i = 0; i < template.Length; i++)
             {
@@ -44,14 +44,7 @@ namespace Dapper.Forge.Core.Models
 
                 if (i + j >= template.Length && terminator.Length > 0 && j >= terminator.Length)
                 {
-                    if (current.Length > 0)
-                    {
-                        string lit = current.ToString();
-                        segments.Add(new(lit, false, false));
-                        _literalsLength += lit.Length;
-                        current.Clear();
-                    }
-
+                    Flush(stringBuilder, segments);
                     segments.Add(new(terminator, false, true));
 
                     i += j - 1;
@@ -60,31 +53,18 @@ namespace Dapper.Forge.Core.Models
 
                 if (template[i] == '{' && i + 1 < template.Length && template[i + 1] == '}')
                 {
-                    if (current.Length > 0)
-                    {
-                        string lit = current.ToString();
-                        segments.Add(new(lit, false, false));
-                        _literalsLength += lit.Length;
-                        current.Clear();
-                    }
-
+                    Flush(stringBuilder, segments);
                     segments.Add(new(string.Empty, true, false));
 
                     i++;
                 }
                 else
                 {
-                    current.Append(template[i]);
+                    stringBuilder.Append(template[i]);
                 }
             }
 
-            if (current.Length > 0)
-            {
-                string lit = current.ToString();
-                segments.Add(new(lit, false, false));
-                _literalsLength += lit.Length;
-            }
-
+            Flush(stringBuilder, segments);
             _segments = [.. segments];
         }
 
@@ -98,44 +78,56 @@ namespace Dapper.Forge.Core.Models
             return Render(true, args);
         }
 
+        private void Flush(StringBuilder stringBuilder, List<Segment> segments)
+        {
+            if (stringBuilder.Length > 0)
+            {
+                string literals = stringBuilder.ToString();
+
+                segments.Add(new(literals, false, false));
+                _literalsLength += literals.Length;
+                stringBuilder.Clear();
+            }
+        }
+
         private string Render(bool excludeLastTerminator, params object[] args)
         {
-            StringBuilder sb = new(_literalsLength);
-            int argIndex = 0;
+            StringBuilder stringBuilder = new(_literalsLength);
+            int j = 0;
 
             for (int i = 0; i < _segments.Length; i++)
             {
-                Segment seg = _segments[i];
+                Segment segment = _segments[i];
 
                 if (!excludeLastTerminator || !_segments[i].IsLastTerminator)
                 {
-                    if (seg.IsPlaceholder && argIndex < args.Length)
+                    if (segment.IsPlaceholder && j < args.Length)
                     {
-                        object arg = args[argIndex++];
+                        object arg = args[j++];
 
                         switch (arg)
                         {
                             case string s:
-                                sb.Append(s);
+                                stringBuilder.Append(s);
                                 break;
 
-                            case StringBuilder sbExternal:
-                                sb.Append(sbExternal);
+                            case StringBuilder sb:
+                                stringBuilder.Append(sb);
                                 break;
 
                             default:
-                                sb.Append(arg.ToString());
+                                stringBuilder.Append(arg.ToString());
                                 break;
                         }
                     }
                     else
                     {
-                        sb.Append(seg.Text);
+                        stringBuilder.Append(segment.Text);
                     }
                 }
             }
 
-            return sb.ToString();
+            return stringBuilder.ToString();
         }
     }
 }

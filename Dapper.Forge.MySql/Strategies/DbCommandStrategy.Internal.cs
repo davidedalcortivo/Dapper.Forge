@@ -12,7 +12,7 @@ namespace Dapper.Forge.MySql.Strategies
         {
             StringBuilder sqlBuilder = new();
 
-            if (!string.IsNullOrWhiteSpace(clause))
+            if (clause is not null)
             {
                 sqlBuilder.AppendLine();
                 sqlBuilder.AppendLine("    WHERE");

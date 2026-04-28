@@ -22,9 +22,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             StringBuilder sqlBuilder = new();
 
-            sqlBuilder.AppendLine("SELECT");
+            sqlBuilder.Append("SELECT");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            sqlBuilder.AppendLine();
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
             sqlBuilder.Append("{}");
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
@@ -38,9 +37,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             StringBuilder sqlBuilder = new();
 
-            sqlBuilder.AppendLine("SELECT");
+            sqlBuilder.Append("SELECT");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            sqlBuilder.AppendLine();
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
             sqlBuilder.AppendLine("{}");
             sqlBuilder.AppendLine("FETCH FIRST");
@@ -59,12 +57,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             StringBuilder sqlBuilder = new();
             string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]) + " = {}";
 
-            sqlBuilder.AppendLine("SELECT");
+            sqlBuilder.Append("SELECT");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            sqlBuilder.AppendLine();
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
-            sqlBuilder.AppendLine();
-            AppendWhereClause<TEntity>(sqlBuilder, string.Empty, clause);
+            AppendWhereClause(sqlBuilder, string.Empty, clause);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
@@ -94,7 +90,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             sqlBuilder.Append("INSERT INTO ");
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.AppendLine(" (");
+            sqlBuilder.Append(" (");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, false, null);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine(")");
@@ -132,12 +128,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]));
             string clause = inPrefix + "{}" + inSuffix;
 
-            sqlBuilder.AppendLine("SELECT");
+            sqlBuilder.Append("SELECT");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            sqlBuilder.AppendLine();
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
-            sqlBuilder.AppendLine();
-            AppendWhereClause<TEntity>(sqlBuilder, string.Empty, clause);
+            AppendWhereClause(sqlBuilder, string.Empty, clause);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
@@ -154,7 +148,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             sqlBuilder.Append("INSERT INTO ");
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.AppendLine(" (");
+            sqlBuilder.Append(" (");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, false, null);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine(")");
@@ -177,8 +171,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             sqlBuilder.Append("DELETE FROM ");
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.AppendLine();
-            AppendWhereClause<TEntity>(sqlBuilder, string.Empty, clause);
+            AppendWhereClause(sqlBuilder, string.Empty, clause);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
@@ -194,7 +187,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuilder.AppendLine("    CASE");
             sqlBuilder.AppendLine("        WHEN EXISTS (");
             sqlBuilder.AppendLine("            SELECT");
-            sqlBuilder.AppendLine("                1");
+            sqlBuilder.Append("                1");
             AppendFromTable<TEntity>(sqlBuilder, "            ", null);
             sqlBuilder.AppendLine("{}");
             sqlBuilder.AppendLine("        )");

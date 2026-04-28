@@ -16,9 +16,8 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             sqlBuilder.Append("UPDATE ");
             sqlBuilder.AppendLine(targetTable);
-            sqlBuilder.AppendLine("SET");
+            sqlBuilder.Append("SET");
             AppendSetColumns<TEntity>(sqlBuilder, "    ", updatePropertyInfos, sourceTable, null);
-            sqlBuilder.AppendLine();
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, targetTable);
             sqlBuilder.AppendLine();
 
@@ -45,8 +44,8 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             sqlBuilder.Append(" (");
             AppendColumnsInline<TEntity>(sqlBuilder, propertyInfos, false, null);
-            sqlBuilder.AppendLine(")");
-            AppendOnClause<TEntity>(sqlBuilder, string.Empty, clause);
+            sqlBuilder.Append(')');
+            AppendOnClause(sqlBuilder, string.Empty, clause);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
         }
     }

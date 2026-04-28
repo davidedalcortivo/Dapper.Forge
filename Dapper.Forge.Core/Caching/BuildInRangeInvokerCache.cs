@@ -5,10 +5,10 @@ using System.Reflection;
  
 namespace Dapper.Forge.Core.Caching
 {
-    internal static class BuildInRangeInvokerCache
+    public static class BuildInRangeInvokerCache
     {
         private delegate List<DbCommandInfo> BuildInRangeInvoker(SqlTemplate sqlTemplate, List<object> idList, int batchSize, int chunkSize, PropertyInfo idPropertyInfo, bool useUnion);
-        private static readonly ConcurrentDictionary<Type, BuildInRangeInvoker> _cache = [];
+        private static readonly ConcurrentDictionary<Type, BuildInRangeInvoker> _cache = new();
 
         public static List<DbCommandInfo> Invoke<TEntity>(object instance, SqlTemplate sqlTemplate, List<object> idList, int batchSize, int chunkSize, PropertyInfo idPropertyInfo, bool useUnion) where TEntity : class
         {

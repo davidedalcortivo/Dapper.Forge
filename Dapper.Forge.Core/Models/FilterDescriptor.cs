@@ -1,4 +1,5 @@
 ﻿using Dapper.Forge.Core.Abstractions.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Linq.Expressions;
 
 
@@ -21,17 +22,9 @@ namespace Dapper.Forge.Core.Models
             IgnoreCase = ignoreCase;
         }
 
-        public static FilterDescriptor For<TEntity>(Expression<Func<TEntity, object?>> selector, ComparisonOperator comparisonOperator, object? value, bool not = false, bool ignoreCase = false)
+        public static FilterDescriptor For<TEntity>(Expression<Func<TEntity, object?>> selector, ComparisonOperator comparisonOperator, object? value, bool not = false, bool ignoreCase = false) where TEntity : class
         {
-            Expression body = selector.Body;
-
-            if (body is UnaryExpression unaryExpr && body.NodeType == ExpressionType.Convert)
-                body = unaryExpr.Operand;
-
-            if (body is not MemberExpression memberExpr)
-                throw new ArgumentException("The provided expression is not valid. Expected a simple member access expression.", nameof(selector));
-
-            return new FilterDescriptor(memberExpr.Member.Name, value, comparisonOperator, not, ignoreCase);
+            return new(PropertyHelper.GetPropertyName(selector), value, comparisonOperator, not, ignoreCase);
         }
     }
 

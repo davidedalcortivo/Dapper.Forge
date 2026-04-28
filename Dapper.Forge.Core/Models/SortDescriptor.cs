@@ -1,6 +1,10 @@
-﻿namespace Dapper.Forge.Core.Models
+﻿using Dapper.Forge.Core.Utilities;
+using System.Linq.Expressions;
+
+
+namespace Dapper.Forge.Core.Models
 {
-    public class SortDescriptor
+    public sealed class SortDescriptor
     {
         public string PropertyName { get; }
         public SortDirection SortDirection { get; }
@@ -22,6 +26,16 @@
             PropertyName = propertyName;
             SortDirection = sortDirection.Equals("desc", StringComparison.OrdinalIgnoreCase) ||
                 sortDirection.Equals("descending", StringComparison.OrdinalIgnoreCase) ? SortDirection.Descending : SortDirection.Ascending;
+        }
+
+        public static SortDescriptor For<TEntity>(Expression<Func<TEntity, object?>> selector, SortDirection sortDirection) where TEntity : class
+        {
+            return new(PropertyHelper.GetPropertyName(selector), sortDirection);
+        }
+
+        public static SortDescriptor For<TEntity>(Expression<Func<TEntity, object?>> selector, string sortDirection) where TEntity : class
+        {
+            return new(PropertyHelper.GetPropertyName(selector), sortDirection);
         }
     }
 

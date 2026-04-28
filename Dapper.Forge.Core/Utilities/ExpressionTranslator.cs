@@ -352,7 +352,7 @@ namespace Dapper.Forge.Core.Utilities
             Expression element = m.Object is not null ? m.Arguments[0] : m.Arguments[1];
             string colSql = ExtractSql(element);
 
-            if (values.Count <= 0 && !hasNull)
+            if (values.Count == 0 && !hasNull)
             {
                 ctx.Current.Append("(1 = 0)");
                 return m;

@@ -176,7 +176,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.GetByIdRangeCommands<TEntity>(idList, batchSize, chunkSize);
             List<TEntity> entityList = [];
 
-            if (commands.Count <= 0)
+            if (commands.Count == 0)
                 return entityList;
 
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;

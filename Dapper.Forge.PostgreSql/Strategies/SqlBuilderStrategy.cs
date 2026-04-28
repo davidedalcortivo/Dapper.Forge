@@ -20,9 +20,8 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
             StringBuilder sqlBuilder = new();
 
-            sqlBuilder.AppendLine("SELECT");
+            sqlBuilder.Append("SELECT");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            sqlBuilder.AppendLine();
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
             sqlBuilder.AppendLine("{}");
             sqlBuilder.AppendLine("LIMIT");
@@ -56,7 +55,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuilder.Append(" AS ");
             sqlBuilder.AppendLine(targetTable);
-            sqlBuilder.AppendLine("SET");
+            sqlBuilder.Append("SET");
             AppendSetColumns<TEntity>(sqlBuilder, "    ", updatePropertyInfos, sourceTable, null);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine("FROM (");
@@ -66,8 +65,8 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuilder.Append(sourceTable);
             sqlBuilder.Append(" (");
             AppendColumnsInline<TEntity>(sqlBuilder, propertyInfos, false, null);
-            sqlBuilder.AppendLine(")");
-            AppendWhereClause<TEntity>(sqlBuilder, string.Empty, clause);
+            sqlBuilder.Append(')');
+            AppendWhereClause(sqlBuilder, string.Empty, clause);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
@@ -84,7 +83,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
             sqlBuilder.AppendLine("SELECT EXISTS(");
             sqlBuilder.AppendLine("    SELECT");
-            sqlBuilder.AppendLine("        1");
+            sqlBuilder.Append("        1");
             AppendFromTable<TEntity>(sqlBuilder, "    ", null);
             sqlBuilder.AppendLine("{}");
             sqlBuilder.Append(')');

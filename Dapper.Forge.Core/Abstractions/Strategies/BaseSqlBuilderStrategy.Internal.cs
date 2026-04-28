@@ -11,7 +11,12 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
     {
         protected virtual void AppendColumns<TEntity>(StringBuilder sqlBuilder, string indentation, ImmutableArray<PropertyInfo> propertyInfos, bool useAlias, string? table) where TEntity : class
         {
+            if (propertyInfos.Length == 0)
+                return;
+
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+
+            sqlBuilder.AppendLine();
 
             for (int i = 0; i < propertyInfos.Length; i++)
             {
@@ -20,7 +25,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
                 sqlBuilder.Append(indentation);
 
-                if (!string.IsNullOrWhiteSpace(table))
+                if (table is not null)
                 {
                     sqlBuilder.Append(table);
                     sqlBuilder.Append('.');
@@ -36,12 +41,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
                 if (i < propertyInfos.Length - 1)
                     sqlBuilder.AppendLine(",");
-
             }
         }
 
         protected virtual void AppendColumnsInline<TEntity>(StringBuilder sqlBuilder, ImmutableArray<PropertyInfo> propertyInfos, bool useAlias, string? table) where TEntity : class
         {
+            if (propertyInfos.Length == 0)
+                return;
+
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             for (int i = 0; i < propertyInfos.Length; i++)
@@ -49,7 +56,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 PropertyInfo propertyInfo = propertyInfos[i];
                 string columnName = columnNamesByPropertyName[propertyInfo.Name];
 
-                if (!string.IsNullOrWhiteSpace(table))
+                if (table is not null)
                 {
                     sqlBuilder.Append(table);
                     sqlBuilder.Append('.');
@@ -65,21 +72,24 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
                 if (i < propertyInfos.Length - 1)
                     sqlBuilder.Append(", ");
-
             }
         }
 
         protected virtual void AppendSetColumns<TEntity>(StringBuilder sqlBuilder, string indentation, ImmutableArray<PropertyInfo> propertyInfos, string? sourceTable, string? targetTable) where TEntity : class
         {
+            if (propertyInfos.Length == 0)
+                return;
+
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+
+            sqlBuilder.AppendLine();
 
             for (int i = 0; i < propertyInfos.Length; i++)
             {
                 string column = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyInfos[i].Name]);
-
                 sqlBuilder.Append(indentation);
 
-                if (!string.IsNullOrWhiteSpace(targetTable))
+                if (targetTable is not null)
                 {
                     sqlBuilder.Append(targetTable);
                     sqlBuilder.Append('.');
@@ -88,7 +98,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 sqlBuilder.Append(column);
                 sqlBuilder.Append(" = ");
 
-                if (!string.IsNullOrWhiteSpace(sourceTable))
+                if (sourceTable is not null)
                 {
                     sqlBuilder.Append(sourceTable);
                     sqlBuilder.Append('.');
@@ -105,23 +115,25 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
 
+            sqlBuilder.AppendLine();
             sqlBuilder.Append(indentation);
             sqlBuilder.AppendLine("FROM");
             sqlBuilder.Append(indentation);
             sqlBuilder.Append("    ");
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
 
-            if (!string.IsNullOrWhiteSpace(alias))
+            if (alias is not null)
             {
                 sqlBuilder.Append(" AS ");
                 sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(alias));
             }
         }
 
-        protected virtual void AppendWhereClause<TEntity>(StringBuilder sqlBuilder, string indentation, string? clause) where TEntity : class
+        protected virtual void AppendWhereClause(StringBuilder sqlBuilder, string indentation, string? clause)
         {
-            if (!string.IsNullOrWhiteSpace(clause))
+            if (clause is not null)
             {
+                sqlBuilder.AppendLine();
                 sqlBuilder.Append(indentation);
                 sqlBuilder.AppendLine("WHERE");
                 sqlBuilder.Append(indentation);
@@ -130,10 +142,11 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             }
         }
 
-        protected virtual void AppendOnClause<TEntity>(StringBuilder sqlBuilder, string indentation, string? clause) where TEntity : class
+        protected virtual void AppendOnClause(StringBuilder sqlBuilder, string indentation, string? clause)
         {
-            if (!string.IsNullOrWhiteSpace(clause))
+            if (clause is not null)
             {
+                sqlBuilder.AppendLine();
                 sqlBuilder.Append(indentation);
                 sqlBuilder.AppendLine("ON");
                 sqlBuilder.Append(indentation);
@@ -149,7 +162,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuilder.AppendLine("SELECT");
             sqlBuilder.Append("    ");
             sqlBuilder.Append(aggregateName);
-            sqlBuilder.AppendLine("({})");
+            sqlBuilder.Append("({})");
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
             sqlBuilder.Append("{}");
             sqlBuilder.Append(SqlDialectStrategy.Terminator);

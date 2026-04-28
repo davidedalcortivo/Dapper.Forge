@@ -44,21 +44,21 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         DbCommandInfo CountCommand<TEntity>(Expression<Func<TEntity, object?>>? selector, IFilterNode? filterNode) where TEntity : class;
         DbCommandInfo CountCommand<TEntity>(string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo CountCommand<TEntity>(string? propertyName, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo AvgCommand<TEntity>(Expression<Func<TEntity, decimal?>>? selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo AvgCommand<TEntity>(Expression<Func<TEntity, decimal?>>? selector, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo AvgCommand<TEntity>(string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo AvgCommand<TEntity>(string? propertyName, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo SumCommand<TEntity>(Expression<Func<TEntity, decimal?>>? selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo SumCommand<TEntity>(Expression<Func<TEntity, decimal?>>? selector, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo SumCommand<TEntity>(string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo SumCommand<TEntity>(string? propertyName, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo MinCommand<TEntity>(Expression<Func<TEntity, decimal?>>? selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo MinCommand<TEntity>(Expression<Func<TEntity, decimal?>>? selector, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo MinCommand<TEntity>(string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo MinCommand<TEntity>(string? propertyName, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo MaxCommand<TEntity>(Expression<Func<TEntity, decimal?>>? selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo MaxCommand<TEntity>(Expression<Func<TEntity, decimal?>>? selector, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo MaxCommand<TEntity>(string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo MaxCommand<TEntity>(string? propertyName, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo AvgCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo AvgCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo AvgCommand<TEntity>(string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo AvgCommand<TEntity>(string propertyName, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo SumCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo SumCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo SumCommand<TEntity>(string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo SumCommand<TEntity>(string propertyName, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo MinCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo MinCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo MinCommand<TEntity>(string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo MinCommand<TEntity>(string propertyName, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo MaxCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo MaxCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo MaxCommand<TEntity>(string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo MaxCommand<TEntity>(string propertyName, IFilterNode? filterNode) where TEntity : class;
     }
 }

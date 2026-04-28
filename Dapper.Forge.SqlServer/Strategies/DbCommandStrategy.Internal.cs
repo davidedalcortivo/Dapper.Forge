@@ -15,10 +15,10 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             AppendClauseAndSort<TEntity>(sqlBuilder, clause, sortDescriptors, true);
 
-            string takeParameter = SqlDialectStrategy.RenderParameter("take");
-            parameters.Add(takeParameter, take);
+            string takeName = "take";
+            parameters.Add(takeName, take);
 
-            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.GetFirstSql.Render(takeParameter, sqlBuilder);
+            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.GetFirstSql.Render(SqlDialectStrategy.RenderParameter(takeName), sqlBuilder);
             return new(sql, parameters);
         }
     }

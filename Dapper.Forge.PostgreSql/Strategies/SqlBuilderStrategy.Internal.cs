@@ -22,7 +22,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
             sqlBuilder.Append("INSERT INTO ");
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.AppendLine(" (");
+            sqlBuilder.Append(" (");
             AppendColumns<TEntity>(sqlBuilder, "    ", insertPropertyInfos, false, null);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine(")");
@@ -44,7 +44,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]));
             sqlBuilder.AppendLine(")");
             sqlBuilder.AppendLine("DO UPDATE");
-            sqlBuilder.AppendLine("SET");
+            sqlBuilder.Append("SET");
             AppendSetColumns<TEntity>(sqlBuilder, "    ", updatePropertyInfos, "EXCLUDED", null);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
             return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);

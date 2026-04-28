@@ -55,7 +55,7 @@ namespace Dapper.Forge.Core.Utilities
                     else values.Add(item);
                 }
 
-                if (values.Count <= 0 && !hasNull)
+                if (values.Count == 0 && !hasNull)
                 {
                     sql = "1 = 0";
                 }
@@ -110,7 +110,7 @@ namespace Dapper.Forge.Core.Utilities
 
         private static void TranslateGroup(FilterGroup g, SqlTranslationContext ctx)
         {
-            if (g.FilterNodes.Count <= 0)
+            if (g.FilterNodes.Count == 0)
             {
                 ctx.Current.Append("(1 = 1)");
                 return;

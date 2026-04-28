@@ -20,9 +20,8 @@ namespace Dapper.Forge.MySql.Strategies
 
             StringBuilder sqlBuilder = new();
 
-            sqlBuilder.AppendLine("SELECT");
+            sqlBuilder.Append("SELECT");
             AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            sqlBuilder.AppendLine();
             AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
             sqlBuilder.AppendLine("{}");
             sqlBuilder.AppendLine("LIMIT");
@@ -58,10 +57,10 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuilder.AppendLine("JOIN (");
             sqlBuilder.AppendLine("{}");
             sqlBuilder.Append(") AS ");
-            sqlBuilder.AppendLine(sourceTable);
-            AppendOnClause<TEntity>(sqlBuilder, string.Empty, clause);
+            sqlBuilder.Append(sourceTable);
+            AppendOnClause(sqlBuilder, string.Empty, clause);
             sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine("SET");
+            sqlBuilder.Append("SET");
             AppendSetColumns<TEntity>(sqlBuilder, "    ", updatePropertyInfos, sourceTable, targetTable);
             sqlBuilder.Append(SqlDialectStrategy.Terminator);
 
@@ -79,7 +78,7 @@ namespace Dapper.Forge.MySql.Strategies
 
             sqlBuilder.AppendLine("SELECT EXISTS(");
             sqlBuilder.AppendLine("    SELECT");
-            sqlBuilder.AppendLine("        1");
+            sqlBuilder.Append("        1");
             AppendFromTable<TEntity>(sqlBuilder, "    ", null);
             sqlBuilder.AppendLine("{}");
             sqlBuilder.Append(')');

@@ -10,7 +10,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             int result = 0;
 
-            if (commands.Count <= 0)
+            if (commands.Count == 0)
                 return result;
 
             bool ownsTransaction = transaction is null;
@@ -49,7 +49,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             int result = 0;
 
-            if (commands.Count <= 0)
+            if (commands.Count == 0)
                 return result;
 
             bool ownsTransaction = transaction is null;

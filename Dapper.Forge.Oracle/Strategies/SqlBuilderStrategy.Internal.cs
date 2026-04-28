@@ -44,22 +44,22 @@ namespace Dapper.Forge.Oracle.Strategies
             }
 
             sqlBuilder.Append(") AS ");
-            sqlBuilder.AppendLine(sourceTable);
-            AppendOnClause<TEntity>(sqlBuilder, string.Empty, clause);
+            sqlBuilder.Append(sourceTable);
+            AppendOnClause(sqlBuilder, string.Empty, clause);
             sqlBuilder.AppendLine();
             sqlBuilder.AppendLine("WHEN MATCHED THEN");
-            sqlBuilder.AppendLine("    UPDATE SET");
+            sqlBuilder.Append("    UPDATE SET");
             AppendSetColumns<TEntity>(sqlBuilder, "        ", updatePropertyInfos, sourceTable, targetTable);
 
             if (appendInsert)
             {
                 sqlBuilder.AppendLine();
                 sqlBuilder.AppendLine("WHEN NOT MATCHED THEN");
-                sqlBuilder.AppendLine("    INSERT (");
+                sqlBuilder.Append("    INSERT (");
                 AppendColumns<TEntity>(sqlBuilder, "        ", insertPropertyInfos, false, null);
                 sqlBuilder.AppendLine();
                 sqlBuilder.AppendLine("    )");
-                sqlBuilder.AppendLine("    VALUES (");
+                sqlBuilder.Append("    VALUES (");
                 AppendColumns<TEntity>(sqlBuilder, "        ", insertPropertyInfos, false, sourceTable);
                 sqlBuilder.AppendLine();
                 sqlBuilder.Append("    )");

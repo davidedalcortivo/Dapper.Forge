@@ -4,14 +4,18 @@ using System.Reflection;
 
 namespace Dapper.Forge.Core.Caching
 {
-    internal static class ParamPropertyCache
+    public static class ParamPropertyCache
     {
-        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _cache = [];
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _cache = new();
+
+        public static PropertyInfo[] GetProperties(Type type)
+        {
+            return _cache.GetOrAdd(type, static x => x.GetProperties());
+        }
 
         public static PropertyInfo[] GetProperties(object param)
         {
-            Type type = param.GetType();
-            return _cache.GetOrAdd(type, static x => x.GetProperties());
+            return GetProperties(param.GetType());
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             List<SortDescriptor> sortDescriptorList = sortDescriptors is null ? [] : sortDescriptors.AsList();
 
-            if (!string.IsNullOrWhiteSpace(clause))
+            if (clause is not null)
             {
                 sqlBuilder.AppendLine();
                 sqlBuilder.AppendLine("WHERE");
@@ -58,7 +58,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 sqlBuilder.Append(clause);
             }
 
-            if (forceSorting && sortDescriptorList.Count <= 0)
+            if (forceSorting && sortDescriptorList.Count == 0)
                 sortDescriptorList.Add(new(EntityInfoCache<TEntity>.IdPropertyInfo.Name));
 
             if (sortDescriptorList.Count > 0)
@@ -93,10 +93,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             AppendClauseAndSort<TEntity>(sqlBuilder, clause, sortDescriptors, true);
 
-            string takeParameter = SqlDialectStrategy.RenderParameter("take");
-            parameters.Add(takeParameter, take);
+            string takeName = "take";
+            parameters.Add(takeName, take);
 
-            string sql = SqlBuilderCache<TEntity, TStrategy>.GetFirstSql.Render(sqlBuilder, takeParameter);
+            string sql = SqlBuilderCache<TEntity, TStrategy>.GetFirstSql.Render(sqlBuilder, SqlDialectStrategy.RenderParameter(takeName));
             return new(sql, parameters);
         }
 
@@ -114,18 +114,18 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             {
                 AppendClauseAndSort<TEntity>(sqlBuilder, clause, sortDescriptors, true);
 
-                string skipParameter = SqlDialectStrategy.RenderParameter("skip");
-                string takeParameter = SqlDialectStrategy.RenderParameter("take");
+                string skipName = "skip";
+                string takeName = "take";
 
-                sqlBuilder.Append(SqlDialectStrategy.Pagination(skipParameter, takeParameter));
+                sqlBuilder.Append(SqlDialectStrategy.Pagination(SqlDialectStrategy.RenderParameter(skipName), SqlDialectStrategy.RenderParameter(takeName)));
 
                 parameters ??= new();
-                parameters.Add(skipParameter, skip);
+                parameters.Add(skipName, skip);
 
                 if (useTake)
-                    parameters.Add(takeParameter, take);
+                    parameters.Add(takeName, take);
                 else
-                    parameters.Add(takeParameter, long.MaxValue);
+                    parameters.Add(takeName, long.MaxValue);
             }
             else
             {
@@ -166,7 +166,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                     sqlBuilder.AppendLine(",");
             }
 
-            if (!string.IsNullOrWhiteSpace(clause))
+            if (clause is not null)
             {
                 sqlBuilder.AppendLine();
                 sqlBuilder.AppendLine("WHERE");
@@ -182,7 +182,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             StringBuilder sqlBuilder = new();
 
-            if (!string.IsNullOrWhiteSpace(clause))
+            if (clause is not null)
             {
                 sqlBuilder.AppendLine();
                 sqlBuilder.AppendLine("WHERE");
@@ -198,7 +198,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             List<DbCommandInfo> commands = [];
 
-            if (idList.Count <= 0)
+            if (idList.Count == 0)
                 return commands;
 
             TKey[] idArray = new TKey[idList.Count];
@@ -257,7 +257,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             StringBuilder sqlBuilder = new();
 
-            if (!string.IsNullOrWhiteSpace(clause))
+            if (clause is not null)
             {
                 sqlBuilder.AppendLine();
                 sqlBuilder.AppendLine("        WHERE");
@@ -276,7 +276,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             StringBuilder sqlBuilder = new();
             string column = propertyName is not null ? SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyName]) : "*";
 
-            if (!string.IsNullOrWhiteSpace(clause))
+            if (clause is not null)
             {
                 sqlBuilder.AppendLine();
                 sqlBuilder.AppendLine("WHERE");
@@ -290,18 +290,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual DbCommandInfo BuildAggregateCommand<TEntity, TSelector>(SqlTemplate sqlTemplate, Expression<Func<TEntity, TSelector>>? selector, string? clause, DynamicParameters? parameters) where TEntity : class
         {
-            if (selector is null)
-                return BuildAggregateCommand<TEntity>(sqlTemplate, null, clause, parameters);
-
-            Expression body = selector.Body;
-
-            if (body is UnaryExpression unaryExpr && body.NodeType == ExpressionType.Convert)
-                body = unaryExpr.Operand;
-
-            if (body is not MemberExpression memberExpr)
-                throw new ArgumentException("The provided expression is not valid. Expected a simple member access expression.", nameof(selector));
-
-            return BuildAggregateCommand<TEntity>(sqlTemplate, memberExpr.Member.Name, clause, parameters);
+            return BuildAggregateCommand<TEntity>(sqlTemplate, selector is null ? null : PropertyHelper.GetPropertyName(selector), clause, parameters);
         }
     }
 }
