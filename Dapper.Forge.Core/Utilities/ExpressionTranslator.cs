@@ -24,7 +24,7 @@ namespace Dapper.Forge.Core.Utilities
 
             visitor.Visit(expression);
 
-            return (ctx.Current.ToString(), ctx.Parameters);
+            return (ctx.SqlBuffer.ToString(), ctx.Parameters);
         }
 
         public (string, DynamicParameters?) Translate(ISqlDialectStrategy strategy, IFilterNode node, DynamicParameters? parameters = null)
@@ -89,7 +89,7 @@ namespace Dapper.Forge.Core.Utilities
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            ctx.Current.Append(ctx.AddParameter(node.Value));
+            ctx.SqlBuffer.Append(ctx.AddParameter(node.Value));
             return node;
         }
 
@@ -97,14 +97,14 @@ namespace Dapper.Forge.Core.Utilities
         {
             if (node.Expression is ParameterExpression)
             {
-                ctx.Current.Append(ctx.Strategy.RenderIdentifier(node.Member.Name));
+                ctx.SqlBuffer.Append(ctx.Strategy.RenderIdentifier(node.Member.Name));
                 return node;
             }
 
             if (!TryEval(node, out object? value))
                 throw new NotSupportedException($"Impossibile valutare {node}");
 
-            ctx.Current.Append(ctx.AddParameter(value));
+            ctx.SqlBuffer.Append(ctx.AddParameter(value));
             return node;
         }
 
@@ -112,9 +112,9 @@ namespace Dapper.Forge.Core.Utilities
         {
             if (node.NodeType == ExpressionType.Not)
             {
-                ctx.Current.Append("NOT (");
+                ctx.SqlBuffer.Append("NOT (");
                 Visit(node.Operand);
-                ctx.Current.Append(')');
+                ctx.SqlBuffer.Append(')');
                 return node;
             }
 
@@ -159,7 +159,7 @@ namespace Dapper.Forge.Core.Utilities
                     Expression col = leftNull ? node.Right : node.Left;
                     string sql = ExtractSql(col);
 
-                    ctx.Current.Append(
+                    ctx.SqlBuffer.Append(
                         node.NodeType == ExpressionType.Equal
                             ? ctx.Strategy.IsNull(sql)
                             : ctx.Strategy.IsNotNull(sql)
@@ -169,7 +169,7 @@ namespace Dapper.Forge.Core.Utilities
                 }
             }
 
-            ctx.Current.Append('(');
+            ctx.SqlBuffer.Append('(');
             Visit(node.Left);
 
             string op = node.NodeType switch
@@ -185,9 +185,9 @@ namespace Dapper.Forge.Core.Utilities
                 _ => throw new NotSupportedException($"Operatore non supportato: {node.NodeType}")
             };
 
-            ctx.Current.Append($" {op} ");
+            ctx.SqlBuffer.Append($" {op} ");
             Visit(node.Right);
-            ctx.Current.Append(')');
+            ctx.SqlBuffer.Append(')');
             return node;
         }
 
@@ -226,13 +226,13 @@ namespace Dapper.Forge.Core.Utilities
                 bool aNull = IsNull(a);
                 bool bNull = IsNull(b);
 
-                if (aNull && bNull) { ctx.Current.Append("(1 = 1)"); return m; }
-                if (aNull ^ bNull) { ctx.Current.Append("(1 = 0)"); return m; }
+                if (aNull && bNull) { ctx.SqlBuffer.Append("(1 = 1)"); return m; }
+                if (aNull ^ bNull) { ctx.SqlBuffer.Append("(1 = 0)"); return m; }
 
                 string left = ExtractSql(a, ignoreCase);
                 string right = ExtractSql(b, ignoreCase);
 
-                ctx.Current.Append($"({left} = {right})");
+                ctx.SqlBuffer.Append($"({left} = {right})");
                 return m;
             }
 
@@ -245,7 +245,7 @@ namespace Dapper.Forge.Core.Utilities
 
                 if (raw is null)
                 {
-                    ctx.Current.Append("(1 = 0)");
+                    ctx.SqlBuffer.Append("(1 = 0)");
                     return m;
                 }
 
@@ -263,7 +263,7 @@ namespace Dapper.Forge.Core.Utilities
                     _ => throw new NotSupportedException()
                 };
 
-                ctx.Current.Append($"({ctx.Strategy.Like(col, pat)})");
+                ctx.SqlBuffer.Append($"({ctx.Strategy.Like(col, pat)})");
                 return m;
             }
 
@@ -286,34 +286,34 @@ namespace Dapper.Forge.Core.Utilities
             switch (be.NodeType)
             {
                 case ExpressionType.Equal:
-                    if (aNull && bNull) { ctx.Current.Append("(1 = 1)"); return be; }
-                    if (aNull ^ bNull) { ctx.Current.Append("(1 = 0)"); return be; }
-                    ctx.Current.Append($"({a} = {b})");
+                    if (aNull && bNull) { ctx.SqlBuffer.Append("(1 = 1)"); return be; }
+                    if (aNull ^ bNull) { ctx.SqlBuffer.Append("(1 = 0)"); return be; }
+                    ctx.SqlBuffer.Append($"({a} = {b})");
                     return be;
 
                 case ExpressionType.LessThan:
-                    ctx.Current.Append("(" +
+                    ctx.SqlBuffer.Append("(" +
                         $"({ctx.Strategy.IsNull(a)} AND {ctx.Strategy.IsNotNull(b)}) OR " +
                         $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNotNull(b)} AND {a} < {b})" +
                         ")");
                     return be;
 
                 case ExpressionType.GreaterThan:
-                    ctx.Current.Append("(" +
+                    ctx.SqlBuffer.Append("(" +
                         $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNull(b)}) OR " +
                         $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNotNull(b)} AND {a} > {b})" +
                         ")");
                     return be;
 
                 case ExpressionType.LessThanOrEqual:
-                    ctx.Current.Append("(" +
+                    ctx.SqlBuffer.Append("(" +
                         $"({ctx.Strategy.IsNull(a)} AND {ctx.Strategy.IsNotNull(b)}) OR " +
                         $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNotNull(b)} AND {a} <= {b})" +
                         ")");
                     return be;
 
                 case ExpressionType.GreaterThanOrEqual:
-                    ctx.Current.Append("(" +
+                    ctx.SqlBuffer.Append("(" +
                         $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNull(b)}) OR " +
                         $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNotNull(b)} AND {a} >= {b})" +
                         ")");
@@ -333,7 +333,7 @@ namespace Dapper.Forge.Core.Utilities
 
             if (raw is null && typeof(IEnumerable).IsAssignableFrom(m.Object?.Type ?? m.Arguments[0].Type))
             {
-                ctx.Current.Append("(1 = 0)");
+                ctx.SqlBuffer.Append("(1 = 0)");
                 return m;
             }
 
@@ -354,7 +354,7 @@ namespace Dapper.Forge.Core.Utilities
 
             if (values.Count == 0 && !hasNull)
             {
-                ctx.Current.Append("(1 = 0)");
+                ctx.SqlBuffer.Append("(1 = 0)");
                 return m;
             }
 
@@ -369,7 +369,7 @@ namespace Dapper.Forge.Core.Utilities
                 parts.Add(ctx.Strategy.In(colSql, p));
             }
 
-            ctx.Current.Append("(" + string.Join(" OR ", parts) + ")");
+            ctx.SqlBuffer.Append("(" + string.Join(" OR ", parts) + ")");
             return m;
         }
     }

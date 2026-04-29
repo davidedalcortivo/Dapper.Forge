@@ -90,19 +90,19 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual string Pagination(string skipParameter, string takeParameter)
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sb = new();
 
-            sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine("OFFSET");
-            sqlBuilder.Append("    ");
-            sqlBuilder.Append(skipParameter);
-            sqlBuilder.AppendLine(" ROWS");
-            sqlBuilder.AppendLine("FETCH NEXT");
-            sqlBuilder.Append("    ");
-            sqlBuilder.Append(takeParameter);
-            sqlBuilder.Append(" ROWS ONLY");
+            sb.AppendLine();
+            sb.AppendLine("OFFSET");
+            sb.Append("    ");
+            sb.Append(skipParameter);
+            sb.AppendLine(" ROWS");
+            sb.AppendLine("FETCH NEXT");
+            sb.Append("    ");
+            sb.Append(takeParameter);
+            sb.Append(" ROWS ONLY");
 
-            return sqlBuilder.ToString();
+            return sb.ToString();
         }
     }
 }

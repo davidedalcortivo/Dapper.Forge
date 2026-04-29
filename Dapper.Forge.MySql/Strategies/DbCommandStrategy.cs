@@ -16,11 +16,11 @@ namespace Dapper.Forge.MySql.Strategies
 
         public override DbCommandInfo UpsertCommand<TEntity>(TEntity entity) where TEntity : class
         {
-            EnsureCache<TEntity>();
+            WarmUpCache<TEntity>();
             ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
             DynamicParameters parameters = new();
 
             for (int i = 0; i < insertPropertyInfos.Length; i++)
@@ -28,29 +28,29 @@ namespace Dapper.Forge.MySql.Strategies
                 string parameterName = insertPropertyInfos[i].Name;
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
-                sqlBuilder.Append("    ");
+                sqlBuffer.Append("    ");
 
                 if (parameterValue is null)
                 {
-                    sqlBuilder.Append(SqlDialectStrategy.NullValue);
+                    sqlBuffer.Append(SqlDialectStrategy.NullValue);
                 }
                 else
                 {
-                    sqlBuilder.Append(SqlDialectStrategy.RenderParameter(parameterName));
+                    sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
                     parameters.Add(parameterName, parameterValue);
                 }
 
                 if (i < insertPropertyInfos.Length - 1)
-                    sqlBuilder.AppendLine(",");
+                    sqlBuffer.AppendLine(",");
             }
 
-            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(sqlBuilder);
+            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
 
         public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            EnsureCache<TEntity>();
+            WarmUpCache<TEntity>();
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
@@ -69,12 +69,12 @@ namespace Dapper.Forge.MySql.Strategies
             {
                 int end = Math.Min(i + batchSize, entityArray.Length);
 
-                StringBuilder sqlBuilder = new();
+                StringBuilder sqlBuffer = new();
                 DynamicParameters parameters = new();
 
                 for (int j = i; j < end; j++)
                 {
-                    sqlBuilder.Append("    SELECT ");
+                    sqlBuffer.Append("    SELECT ");
 
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
@@ -82,33 +82,33 @@ namespace Dapper.Forge.MySql.Strategies
                         object? parameterValue = propertyGetters[k](entityArray[j]);
 
                         if (parameterValue is null)
-                            sqlBuilder.Append(SqlDialectStrategy.NullValue);
+                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
                         else
                         {
                             string parameterName = propertyInfo.Name + j;
 
-                            sqlBuilder.Append(SqlDialectStrategy.RenderParameter(parameterName));
+                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
                             parameters.Add(parameterName, parameterValue);
                         }
 
                         if (j == i)
                         {
-                            sqlBuilder.Append(" AS ");
-                            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyInfo.Name]));
+                            sqlBuffer.Append(" AS ");
+                            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyInfo.Name]));
                         }
 
                         if (k < propertyInfos.Length - 1)
-                            sqlBuilder.Append(", ");
+                            sqlBuffer.Append(", ");
                     }
 
                     if (j < end - 1)
                     {
-                        sqlBuilder.AppendLine();
-                        sqlBuilder.AppendLine("    UNION ALL");
+                        sqlBuffer.AppendLine();
+                        sqlBuffer.AppendLine("    UNION ALL");
                     }
                 }
 
-                string sql = updateRangeSql.Render(sqlBuilder);
+                string sql = updateRangeSql.Render(sqlBuffer);
                 commands.Add(new(sql, parameters));
             }
 
@@ -117,7 +117,7 @@ namespace Dapper.Forge.MySql.Strategies
 
         public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            EnsureCache<TEntity>();
+            WarmUpCache<TEntity>();
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
@@ -134,12 +134,12 @@ namespace Dapper.Forge.MySql.Strategies
             {
                 int end = Math.Min(i + batchSize, entityArray.Length);
 
-                StringBuilder sqlBuilder = new();
+                StringBuilder sqlBuffer = new();
                 DynamicParameters parameters = new();
 
                 for (int j = i; j < end; j++)
                 {
-                    sqlBuilder.Append("    (");
+                    sqlBuffer.Append("    (");
 
                     for (int k = 0; k < insertPropertyInfos.Length; k++)
                     {
@@ -148,25 +148,25 @@ namespace Dapper.Forge.MySql.Strategies
 
                         if (parameterValue is null)
                         {
-                            sqlBuilder.Append(SqlDialectStrategy.NullValue);
+                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
                         }
                         else
                         {
-                            sqlBuilder.Append(SqlDialectStrategy.RenderParameter(parameterName));
+                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
                             parameters.Add(parameterName, parameterValue);
                         }
 
                         if (k < insertPropertyInfos.Length - 1)
-                            sqlBuilder.Append(", ");
+                            sqlBuffer.Append(", ");
                     }
 
-                    sqlBuilder.Append(')');
+                    sqlBuffer.Append(')');
 
                     if (j < end - 1)
-                        sqlBuilder.AppendLine(",");
+                        sqlBuffer.AppendLine(",");
                 }
 
-                string sql = upsertRangeSql.Render(sqlBuilder);
+                string sql = upsertRangeSql.Render(sqlBuffer);
                 commands.Add(new(sql, parameters));
             }
 

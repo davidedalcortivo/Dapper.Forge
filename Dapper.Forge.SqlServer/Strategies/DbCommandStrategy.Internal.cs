@@ -10,15 +10,15 @@ namespace Dapper.Forge.SqlServer.Strategies
     {
         protected override DbCommandInfo BuildGetFirstCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor>? sortDescriptors, int take) where TEntity : class
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
             parameters ??= new();
 
-            AppendClauseAndSort<TEntity>(sqlBuilder, clause, sortDescriptors, true);
+            AppendWhereClauseAndSorting<TEntity>(sqlBuffer, clause, sortDescriptors, true);
 
             string takeName = "take";
             parameters.Add(takeName, take);
 
-            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.GetFirstSql.Render(SqlDialectStrategy.RenderParameter(takeName), sqlBuilder);
+            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.GetFirstSql.Render(SqlDialectStrategy.RenderParameter(takeName), sqlBuffer);
             return new(sql, parameters);
         }
     }

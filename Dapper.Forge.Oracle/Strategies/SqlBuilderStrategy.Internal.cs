@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -23,51 +24,51 @@ namespace Dapper.Forge.Oracle.Strategies
             string targetTable = SqlDialectStrategy.RenderIdentifier("target");
             string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("MERGE INTO ");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.Append(" AS ");
-            sqlBuilder.AppendLine(targetTable);
-            sqlBuilder.AppendLine("USING (");
+            sqlBuffer.Append("MERGE INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(targetTable);
+            sqlBuffer.AppendLine("USING (");
 
             if (isRange)
             {
-                sqlBuilder.AppendLine("{}");
+                sqlBuffer.AppendLine("{}");
             }
             else
             {
-                sqlBuilder.AppendLine("    SELECT");
-                sqlBuilder.AppendLine("{}");
-                sqlBuilder.AppendLine("    FROM");
-                sqlBuilder.AppendLine("        dual");
+                sqlBuffer.AppendLine("    SELECT");
+                sqlBuffer.AppendLine("{}");
+                sqlBuffer.AppendLine("    FROM");
+                sqlBuffer.AppendLine("        dual");
             }
 
-            sqlBuilder.Append(") AS ");
-            sqlBuilder.Append(sourceTable);
-            AppendOnClause(sqlBuilder, string.Empty, clause);
-            sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine("WHEN MATCHED THEN");
-            sqlBuilder.Append("    UPDATE SET");
-            AppendSetColumns<TEntity>(sqlBuilder, "        ", updatePropertyInfos, sourceTable, targetTable);
+            sqlBuffer.Append(") AS ");
+            sqlBuffer.Append(sourceTable);
+            sqlBuffer.AppendOnClause(string.Empty, clause);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("WHEN MATCHED THEN");
+            sqlBuffer.Append("    UPDATE SET");
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "        ", updatePropertyInfos, sourceTable, targetTable);
 
             if (appendInsert)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("WHEN NOT MATCHED THEN");
-                sqlBuilder.Append("    INSERT (");
-                AppendColumns<TEntity>(sqlBuilder, "        ", insertPropertyInfos, false, null);
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("    )");
-                sqlBuilder.Append("    VALUES (");
-                AppendColumns<TEntity>(sqlBuilder, "        ", insertPropertyInfos, false, sourceTable);
-                sqlBuilder.AppendLine();
-                sqlBuilder.Append("    )");
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("WHEN NOT MATCHED THEN");
+                sqlBuffer.Append("    INSERT (");
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, false, null);
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("    )");
+                sqlBuffer.Append("    VALUES (");
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, false, sourceTable);
+                sqlBuffer.AppendLine();
+                sqlBuffer.Append("    )");
             }
 
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
     }
 }

@@ -10,17 +10,17 @@ namespace Dapper.Forge.PostgreSql.Strategies
     {
         protected override DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
             if (clause is not null)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("    WHERE");
-                sqlBuilder.Append("        ");
-                sqlBuilder.Append(clause);
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("    WHERE");
+                sqlBuffer.Append("        ");
+                sqlBuffer.Append(clause);
             }
 
-            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.ExistsSql.Render(sqlBuilder);
+            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.ExistsSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
     }

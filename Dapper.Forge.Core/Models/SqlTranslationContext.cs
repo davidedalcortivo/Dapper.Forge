@@ -10,27 +10,27 @@ namespace Dapper.Forge.Core.Models
 
         public ISqlDialectStrategy Strategy { get; }
         public int ParamIndex { get; set; }
-        public StringBuilder Current { get; private set; }
+        public StringBuilder SqlBuffer { get; private set; }
         public DynamicParameters? Parameters { get; private set; }
 
         public SqlTranslationContext(ISqlDialectStrategy strategy, DynamicParameters? parameters = null)
         {
             _stack = new();
             Strategy = strategy;
-            Current = new();
+            SqlBuffer = new();
             Parameters = parameters;
         }
 
         public void Push()
         {
-            _stack.Push(Current);
-            Current = new();
+            _stack.Push(SqlBuffer);
+            SqlBuffer = new();
         }
 
         public string Pop()
         {
-            string sql = Current.ToString();
-            Current = _stack.Pop();
+            string sql = SqlBuffer.ToString();
+            SqlBuffer = _stack.Pop();
             return sql;
         }
 

@@ -30,7 +30,7 @@ namespace Dapper.Forge.Core.Models
         public SqlTemplate(string template, string terminator)
         {
             List<Segment> segments = [];
-            StringBuilder stringBuilder = new();
+            StringBuilder sqlBuffer = new();
 
             for (int i = 0; i < template.Length; i++)
             {
@@ -44,7 +44,7 @@ namespace Dapper.Forge.Core.Models
 
                 if (i + j >= template.Length && terminator.Length > 0 && j >= terminator.Length)
                 {
-                    Flush(stringBuilder, segments);
+                    Flush(sqlBuffer, segments);
                     segments.Add(new(terminator, false, true));
 
                     i += j - 1;
@@ -53,18 +53,18 @@ namespace Dapper.Forge.Core.Models
 
                 if (template[i] == '{' && i + 1 < template.Length && template[i + 1] == '}')
                 {
-                    Flush(stringBuilder, segments);
+                    Flush(sqlBuffer, segments);
                     segments.Add(new(string.Empty, true, false));
 
                     i++;
                 }
                 else
                 {
-                    stringBuilder.Append(template[i]);
+                    sqlBuffer.Append(template[i]);
                 }
             }
 
-            Flush(stringBuilder, segments);
+            Flush(sqlBuffer, segments);
             _segments = [.. segments];
         }
 
@@ -78,21 +78,21 @@ namespace Dapper.Forge.Core.Models
             return Render(true, args);
         }
 
-        private void Flush(StringBuilder stringBuilder, List<Segment> segments)
+        private void Flush(StringBuilder sqlBuffer, List<Segment> segments)
         {
-            if (stringBuilder.Length > 0)
+            if (sqlBuffer.Length > 0)
             {
-                string literals = stringBuilder.ToString();
+                string literals = sqlBuffer.ToString();
 
                 segments.Add(new(literals, false, false));
                 _literalsLength += literals.Length;
-                stringBuilder.Clear();
+                sqlBuffer.Clear();
             }
         }
 
         private string Render(bool excludeLastTerminator, params object[] args)
         {
-            StringBuilder stringBuilder = new(_literalsLength);
+            StringBuilder sqlBuffer = new(_literalsLength);
             int j = 0;
 
             for (int i = 0; i < _segments.Length; i++)
@@ -108,26 +108,26 @@ namespace Dapper.Forge.Core.Models
                         switch (arg)
                         {
                             case string s:
-                                stringBuilder.Append(s);
+                                sqlBuffer.Append(s);
                                 break;
 
                             case StringBuilder sb:
-                                stringBuilder.Append(sb);
+                                sqlBuffer.Append(sb);
                                 break;
 
                             default:
-                                stringBuilder.Append(arg.ToString());
+                                sqlBuffer.Append(arg.ToString());
                                 break;
                         }
                     }
                     else
                     {
-                        stringBuilder.Append(segment.Text);
+                        sqlBuffer.Append(segment.Text);
                     }
                 }
             }
 
-            return stringBuilder.ToString();
+            return sqlBuffer.ToString();
         }
     }
 }

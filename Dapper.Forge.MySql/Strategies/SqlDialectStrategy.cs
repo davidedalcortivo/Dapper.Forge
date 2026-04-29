@@ -20,17 +20,17 @@ namespace Dapper.Forge.MySql.Strategies
 
         public override string Pagination(string skipParameter, string takeParameter)
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine("LIMIT");
-            sqlBuilder.Append("    ");
-            sqlBuilder.AppendLine(takeParameter);
-            sqlBuilder.AppendLine("OFFSET");
-            sqlBuilder.Append("    ");
-            sqlBuilder.Append(skipParameter);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("LIMIT");
+            sqlBuffer.Append("    ");
+            sqlBuffer.AppendLine(takeParameter);
+            sqlBuffer.AppendLine("OFFSET");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(skipParameter);
 
-            return sqlBuilder.ToString();
+            return sqlBuffer.ToString();
         }
     }
 }

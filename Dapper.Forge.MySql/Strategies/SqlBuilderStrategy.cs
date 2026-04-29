@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -18,17 +19,17 @@ namespace Dapper.Forge.MySql.Strategies
         {
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("SELECT");
-            AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
-            sqlBuilder.AppendLine("{}");
-            sqlBuilder.AppendLine("LIMIT");
-            sqlBuilder.Append("    {}");
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("SELECT");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, true, null);
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
+            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine("LIMIT");
+            sqlBuffer.Append("    {}");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public override SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class
@@ -48,23 +49,23 @@ namespace Dapper.Forge.MySql.Strategies
             string targetTable = SqlDialectStrategy.RenderIdentifier("target");
             string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("UPDATE ");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.Append(" AS ");
-            sqlBuilder.AppendLine(targetTable);
-            sqlBuilder.AppendLine("JOIN (");
-            sqlBuilder.AppendLine("{}");
-            sqlBuilder.Append(") AS ");
-            sqlBuilder.Append(sourceTable);
-            AppendOnClause(sqlBuilder, string.Empty, clause);
-            sqlBuilder.AppendLine();
-            sqlBuilder.Append("SET");
-            AppendSetColumns<TEntity>(sqlBuilder, "    ", updatePropertyInfos, sourceTable, targetTable);
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("UPDATE ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(targetTable);
+            sqlBuffer.AppendLine("JOIN (");
+            sqlBuffer.AppendLine("{}");
+            sqlBuffer.Append(") AS ");
+            sqlBuffer.Append(sourceTable);
+            sqlBuffer.AppendOnClause(string.Empty, clause);
+            sqlBuffer.AppendLine();
+            sqlBuffer.Append("SET");
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updatePropertyInfos, sourceTable, targetTable);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
@@ -74,17 +75,17 @@ namespace Dapper.Forge.MySql.Strategies
 
         public override SqlTemplate ExistsSqlBuilder<TEntity>() where TEntity : class
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.AppendLine("SELECT EXISTS(");
-            sqlBuilder.AppendLine("    SELECT");
-            sqlBuilder.Append("        1");
-            AppendFromTable<TEntity>(sqlBuilder, "    ", null);
-            sqlBuilder.AppendLine("{}");
-            sqlBuilder.Append(')');
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.AppendLine("SELECT EXISTS(");
+            sqlBuffer.AppendLine("    SELECT");
+            sqlBuffer.Append("        1");
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "    ", null);
+            sqlBuffer.AppendLine("{}");
+            sqlBuffer.Append(')');
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
     }
 }

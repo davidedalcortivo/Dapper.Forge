@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -18,36 +19,36 @@ namespace Dapper.Forge.PostgreSql.Strategies
             ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("INSERT INTO ");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.Append(" (");
-            AppendColumns<TEntity>(sqlBuilder, "    ", insertPropertyInfos, false, null);
-            sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine(")");
-            sqlBuilder.Append("VALUES");
+            sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(" (");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, false, null);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine(")");
+            sqlBuffer.Append("VALUES");
 
             if (isRange)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("{}");
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("{}");
             }
             else
             {
-                sqlBuilder.AppendLine(" (");
-                sqlBuilder.AppendLine("{}");
-                sqlBuilder.AppendLine(")");
+                sqlBuffer.AppendLine(" (");
+                sqlBuffer.AppendLine("{}");
+                sqlBuffer.AppendLine(")");
             }
             
-            sqlBuilder.Append("ON CONFLICT (");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]));
-            sqlBuilder.AppendLine(")");
-            sqlBuilder.AppendLine("DO UPDATE");
-            sqlBuilder.Append("SET");
-            AppendSetColumns<TEntity>(sqlBuilder, "    ", updatePropertyInfos, "EXCLUDED", null);
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("ON CONFLICT (");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]));
+            sqlBuffer.AppendLine(")");
+            sqlBuffer.AppendLine("DO UPDATE");
+            sqlBuffer.Append("SET");
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updatePropertyInfos, "EXCLUDED", null);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
     }
 }

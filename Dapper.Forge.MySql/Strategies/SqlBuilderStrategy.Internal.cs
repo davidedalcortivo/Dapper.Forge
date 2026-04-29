@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -16,34 +17,34 @@ namespace Dapper.Forge.MySql.Strategies
             ImmutableArray<PropertyInfo> updatePropertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
             ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("INSERT INTO ");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.Append(" (");
-            AppendColumns<TEntity>(sqlBuilder, "    ", insertPropertyInfos, false, null);
-            sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine(")");
-            sqlBuilder.Append("VALUES");
+            sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(" (");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, false, null);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine(")");
+            sqlBuffer.Append("VALUES");
 
             if (isRange)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("{}");
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("{}");
             }
             else
             {
-                sqlBuilder.AppendLine(" (");
-                sqlBuilder.AppendLine("{}");
-                sqlBuilder.Append(") ");
+                sqlBuffer.AppendLine(" (");
+                sqlBuffer.AppendLine("{}");
+                sqlBuffer.Append(") ");
             }
 
-            sqlBuilder.AppendLine("AS new");
-            sqlBuilder.Append("ON DUPLICATE KEY UPDATE");
-            AppendSetColumns<TEntity>(sqlBuilder, "    ", updatePropertyInfos, "new", null);
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.AppendLine("AS new");
+            sqlBuffer.Append("ON DUPLICATE KEY UPDATE");
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updatePropertyInfos, "new", null);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
     }
 }

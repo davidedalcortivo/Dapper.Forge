@@ -12,7 +12,7 @@ namespace Dapper.Forge.Core.Utilities
         {
             SqlTranslationContext ctx = new(strategy, parameters);
             TranslateNode(node, ctx);
-            return (ctx.Current.ToString(), ctx.Parameters);
+            return (ctx.SqlBuffer.ToString(), ctx.Parameters);
         }
 
         private static void TranslateNode(IFilterNode node, SqlTranslationContext ctx)
@@ -105,34 +105,34 @@ namespace Dapper.Forge.Core.Utilities
             if (f.Not)
                 sql = $"NOT ({sql})";
 
-            ctx.Current.Append(sql);
+            ctx.SqlBuffer.Append(sql);
         }
 
         private static void TranslateGroup(FilterGroup g, SqlTranslationContext ctx)
         {
             if (g.FilterNodes.Count == 0)
             {
-                ctx.Current.Append("(1 = 1)");
+                ctx.SqlBuffer.Append("(1 = 1)");
                 return;
             }
 
             string logical = g.LogicalOperator == LogicalOperator.AndAlso ? "AND" : "OR";
 
-            ctx.Current.Append('(');
+            ctx.SqlBuffer.Append('(');
 
             for (int i = 0; i < g.FilterNodes.Count; i++)
             {
                 TranslateNode(g.FilterNodes[i], ctx);
                 if (i < g.FilterNodes.Count - 1)
-                    ctx.Current.Append($" {logical} ");
+                    ctx.SqlBuffer.Append($" {logical} ");
             }
 
-            ctx.Current.Append(')');
+            ctx.SqlBuffer.Append(')');
 
             if (g.Not)
             {
-                ctx.Current.Insert(0, "NOT (");
-                ctx.Current.Append(')');
+                ctx.SqlBuffer.Insert(0, "NOT (");
+                ctx.SqlBuffer.Append(')');
             }
         }
     }

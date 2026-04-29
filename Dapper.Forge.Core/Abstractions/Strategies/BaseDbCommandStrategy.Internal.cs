@@ -12,11 +12,6 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 {
     public abstract partial class BaseDbCommandStrategy<TStrategy> : IDbCommandStrategy where TStrategy : ISqlBuilderStrategy
     {
-        protected virtual void EnsureCache<TEntity>() where TEntity : class
-        {
-            SqlBuilderCache<TEntity, TStrategy>.Initialize(sqlBuilderStrategy);
-        }
-
         protected virtual void EnsureIdType<TEntity>(PropertyInfo idPropertyInfo, object? id) where TEntity : class
         {
             ArgumentNullException.ThrowIfNull(id, nameof(id));
@@ -46,16 +41,16 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return (clause, parameters);
         }
 
-        protected virtual void AppendClauseAndSort<TEntity>(StringBuilder sqlBuilder, string? clause, IEnumerable<SortDescriptor>? sortDescriptors, bool forceSorting) where TEntity : class
+        protected virtual void AppendWhereClauseAndSorting<TEntity>(StringBuilder sqlBuffer, string? clause, IEnumerable<SortDescriptor>? sortDescriptors, bool forceSorting) where TEntity : class
         {
             List<SortDescriptor> sortDescriptorList = sortDescriptors is null ? [] : sortDescriptors.AsList();
 
             if (clause is not null)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("WHERE");
-                sqlBuilder.Append("    ");
-                sqlBuilder.Append(clause);
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("WHERE");
+                sqlBuffer.Append("    ");
+                sqlBuffer.Append(clause);
             }
 
             if (forceSorting && sortDescriptorList.Count == 0)
@@ -65,8 +60,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             {
                 ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("ORDER BY");
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("ORDER BY");
 
                 for (int i = 0; i < sortDescriptorList.Count; i++)
                 {
@@ -75,28 +70,28 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                     string columnName = columnNamesByPropertyName[sortDescriptor.PropertyName];
                     string sortDirection = sortDescriptor.SortDirection == SortDirection.Ascending ? "ASC" : "DESC";
 
-                    sqlBuilder.Append("    ");
-                    sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(columnName));
-                    sqlBuilder.Append(' ');
-                    sqlBuilder.Append(sortDirection);
+                    sqlBuffer.Append("    ");
+                    sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnName));
+                    sqlBuffer.Append(' ');
+                    sqlBuffer.Append(sortDirection);
 
                     if (i < sortDescriptorList.Count - 1)
-                        sqlBuilder.AppendLine(",");
+                        sqlBuffer.AppendLine(",");
                 }
             }
         }
 
         protected virtual DbCommandInfo BuildGetFirstCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor>? sortDescriptors, int take) where TEntity : class
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
             parameters ??= new();
 
-            AppendClauseAndSort<TEntity>(sqlBuilder, clause, sortDescriptors, true);
+            AppendWhereClauseAndSorting<TEntity>(sqlBuffer, clause, sortDescriptors, true);
 
-            string takeName = "take";
+            string takeName = nameof(take);
             parameters.Add(takeName, take);
 
-            string sql = SqlBuilderCache<TEntity, TStrategy>.GetFirstSql.Render(sqlBuilder, SqlDialectStrategy.RenderParameter(takeName));
+            string sql = SqlBuilderCache<TEntity, TStrategy>.GetFirstSql.Render(sqlBuffer, SqlDialectStrategy.RenderParameter(takeName));
             return new(sql, parameters);
         }
 
@@ -108,16 +103,15 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             if (!useSkip && useTake)
                 return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, take!.Value);
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
             if (useSkip)
             {
-                AppendClauseAndSort<TEntity>(sqlBuilder, clause, sortDescriptors, true);
+                string skipName = nameof(skip);
+                string takeName = nameof(take);
 
-                string skipName = "skip";
-                string takeName = "take";
-
-                sqlBuilder.Append(SqlDialectStrategy.Pagination(SqlDialectStrategy.RenderParameter(skipName), SqlDialectStrategy.RenderParameter(takeName)));
+                AppendWhereClauseAndSorting<TEntity>(sqlBuffer, clause, sortDescriptors, true);
+                sqlBuffer.Append(SqlDialectStrategy.Pagination(SqlDialectStrategy.RenderParameter(skipName), SqlDialectStrategy.RenderParameter(takeName)));
 
                 parameters ??= new();
                 parameters.Add(skipName, skip);
@@ -129,10 +123,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             }
             else
             {
-                AppendClauseAndSort<TEntity>(sqlBuilder, clause, sortDescriptors, false);
+                AppendWhereClauseAndSorting<TEntity>(sqlBuffer, clause, sortDescriptors, false);
             }
 
-            string sql = SqlBuilderCache<TEntity, TStrategy>.GetAllSql.Render(sqlBuilder);
+            string sql = SqlBuilderCache<TEntity, TStrategy>.GetAllSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
 
@@ -140,7 +134,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
             parameters ??= new();
 
             for (int i = 0; i < propertyInfos.Count; i++)
@@ -148,49 +142,49 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 string parameterName = propertyInfos[i].Name;
                 object? parameterValue = getter(parameterName);
 
-                sqlBuilder.Append("    ");
-                sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
-                sqlBuilder.Append(" = ");
+                sqlBuffer.Append("    ");
+                sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
+                sqlBuffer.Append(" = ");
 
                 if (parameterValue is null)
                 {
-                    sqlBuilder.Append(SqlDialectStrategy.NullValue);
+                    sqlBuffer.Append(SqlDialectStrategy.NullValue);
                 }
                 else
                 {
-                    sqlBuilder.Append(SqlDialectStrategy.RenderParameter(parameterName));
+                    sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
                     parameters.Add(parameterName, parameterValue);
                 }
 
                 if (i < propertyInfos.Count - 1)
-                    sqlBuilder.AppendLine(",");
+                    sqlBuffer.AppendLine(",");
             }
 
             if (clause is not null)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("WHERE");
-                sqlBuilder.Append("    ");
-                sqlBuilder.Append(clause);
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("WHERE");
+                sqlBuffer.Append("    ");
+                sqlBuffer.Append(clause);
             }
 
-            string sql = SqlBuilderCache<TEntity, TStrategy>.UpdateSql.Render(sqlBuilder);
+            string sql = SqlBuilderCache<TEntity, TStrategy>.UpdateSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
 
         protected virtual DbCommandInfo BuildDeleteCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
             if (clause is not null)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("WHERE");
-                sqlBuilder.Append("    ");
-                sqlBuilder.Append(clause);
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("WHERE");
+                sqlBuffer.Append("    ");
+                sqlBuffer.Append(clause);
             }
 
-            string sql = SqlBuilderCache<TEntity, TStrategy>.DeleteSql.Render(sqlBuilder);
+            string sql = SqlBuilderCache<TEntity, TStrategy>.DeleteSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
 
@@ -209,7 +203,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             batchSize = batchSize <= 0 ? idArray.Length : batchSize;
             int j = 0;
 
-            StringBuilder batchBuilder = new();
+            StringBuilder batchBuffer = new();
             DynamicParameters parameters = new();
             int _batchSize = batchSize;
             int s = 0;
@@ -220,33 +214,33 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                     _batchSize = Math.Min(chunkSize, batchSize - s);
 
                 int end = Math.Min(i + _batchSize, idArray.Length);
-                StringBuilder sqlBuilder = new();
+                StringBuilder sqlBuffer = new();
 
                 string parameterName = idPropertyInfo.Name + "Array" + j;
-                sqlBuilder.Append(SqlDialectStrategy.RenderParameter(parameterName));
+                sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
                 parameters.Add(parameterName, idArray[i..end]);
                 j++;
 
                 s += end - i;
 
-                batchBuilder.Append(sqlTemplate.RenderWithoutLastTerminator(sqlBuilder));
+                batchBuffer.Append(sqlTemplate.RenderWithoutLastTerminator(sqlBuffer));
 
                 if (s >= batchSize || end >= idArray.Length)
                 {
-                    batchBuilder.Append(SqlDialectStrategy.Terminator);
-                    commands.Add(new(batchBuilder.ToString(), parameters));
-                    batchBuilder.Clear();
+                    batchBuffer.Append(SqlDialectStrategy.Terminator);
+                    commands.Add(new(batchBuffer.ToString(), parameters));
+                    batchBuffer.Clear();
                     parameters = new();
                     s = 0;
                 }
                 else if (useUnion)
                 {
-                    batchBuilder.AppendLine();
-                    batchBuilder.AppendLine("UNION ALL");
+                    batchBuffer.AppendLine();
+                    batchBuffer.AppendLine("UNION ALL");
                 }
                 else
                 {
-                    batchBuilder.Append(SqlDialectStrategy.Terminator);
+                    batchBuffer.Append(SqlDialectStrategy.Terminator);
                 }
             }
 
@@ -255,17 +249,17 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
             if (clause is not null)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("        WHERE");
-                sqlBuilder.Append("            ");
-                sqlBuilder.Append(clause);
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("        WHERE");
+                sqlBuffer.Append("            ");
+                sqlBuffer.Append(clause);
             }
 
-            string sql = SqlBuilderCache<TEntity, TStrategy>.ExistsSql.Render(sqlBuilder);
+            string sql = SqlBuilderCache<TEntity, TStrategy>.ExistsSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
     
@@ -273,18 +267,18 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
             string column = propertyName is not null ? SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyName]) : "*";
 
             if (clause is not null)
             {
-                sqlBuilder.AppendLine();
-                sqlBuilder.AppendLine("WHERE");
-                sqlBuilder.Append("    ");
-                sqlBuilder.Append(clause);
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("WHERE");
+                sqlBuffer.Append("    ");
+                sqlBuffer.Append(clause);
             }
 
-            string sql = sqlTemplate.Render(column, sqlBuilder);
+            string sql = sqlTemplate.Render(column, sqlBuffer);
             return new(sql, parameters);
         }
 

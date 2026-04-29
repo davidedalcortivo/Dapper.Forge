@@ -1,5 +1,6 @@
 ﻿using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -20,32 +21,32 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("SELECT");
-            AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
-            sqlBuilder.Append("{}");
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("SELECT");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, true, null);
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
+            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public virtual SqlTemplate GetFirstSqlBuilder<TEntity>() where TEntity : class
         {
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("SELECT");
-            AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
-            sqlBuilder.AppendLine("{}");
-            sqlBuilder.AppendLine("FETCH FIRST");
-            sqlBuilder.Append("    {} ROWS ONLY");
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("SELECT");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, true, null);
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
+            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine("FETCH FIRST");
+            sqlBuffer.Append("    {} ROWS ONLY");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public virtual SqlTemplate GetByIdSqlBuilder<TEntity>() where TEntity : class
@@ -54,31 +55,31 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
             string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]) + " = {}";
 
-            sqlBuilder.Append("SELECT");
-            AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
-            AppendWhereClause(sqlBuilder, string.Empty, clause);
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("SELECT");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, true, null);
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
+            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public virtual SqlTemplate UpdateSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("UPDATE ");
-            sqlBuilder.AppendLine(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.AppendLine("SET");
-            sqlBuilder.Append("{}");
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("UPDATE ");
+            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.AppendLine("SET");
+            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public virtual SqlTemplate InsertSqlBuilder<TEntity>() where TEntity : class
@@ -86,34 +87,34 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             string tableName = EntityInfoCache<TEntity>.TableName;
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("INSERT INTO ");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.Append(" (");
-            AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, false, null);
-            sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine(")");
-            sqlBuilder.AppendLine("VALUES (");
-            sqlBuilder.AppendLine("{}");
-            sqlBuilder.Append(')');
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(" (");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, false, null);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine(")");
+            sqlBuffer.AppendLine("VALUES (");
+            sqlBuffer.AppendLine("{}");
+            sqlBuffer.Append(')');
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public virtual SqlTemplate DeleteSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("DELETE FROM ");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.Append("{}");
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("DELETE FROM ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public abstract SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class;
@@ -124,17 +125,17 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
             (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]));
             string clause = inPrefix + "{}" + inSuffix;
 
-            sqlBuilder.Append("SELECT");
-            AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, true, null);
-            AppendFromTable<TEntity>(sqlBuilder, string.Empty, null);
-            AppendWhereClause(sqlBuilder, string.Empty, clause);
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("SELECT");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, true, null);
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
+            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public abstract SqlTemplate UpdateRangeSqlBuilder<TEntity>() where TEntity : class;
@@ -144,19 +145,19 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             string tableName = EntityInfoCache<TEntity>.TableName;
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.Append("INSERT INTO ");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuilder.Append(" (");
-            AppendColumns<TEntity>(sqlBuilder, "    ", propertyInfos, false, null);
-            sqlBuilder.AppendLine();
-            sqlBuilder.AppendLine(")");
-            sqlBuilder.AppendLine("VALUES");
-            sqlBuilder.Append("{}");
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(" (");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, false, null);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine(")");
+            sqlBuffer.AppendLine("VALUES");
+            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public virtual SqlTemplate DeleteRangeSqlBuilder<TEntity>() where TEntity : class
@@ -165,38 +166,38 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
             (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]));
             string clause = inPrefix + "{}" + inSuffix;
 
-            sqlBuilder.Append("DELETE FROM ");
-            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            AppendWhereClause(sqlBuilder, string.Empty, clause);
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.Append("DELETE FROM ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public abstract SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class;
 
         public virtual SqlTemplate ExistsSqlBuilder<TEntity>() where TEntity : class
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.AppendLine("SELECT");
-            sqlBuilder.AppendLine("    CASE");
-            sqlBuilder.AppendLine("        WHEN EXISTS (");
-            sqlBuilder.AppendLine("            SELECT");
-            sqlBuilder.Append("                1");
-            AppendFromTable<TEntity>(sqlBuilder, "            ", null);
-            sqlBuilder.AppendLine("{}");
-            sqlBuilder.AppendLine("        )");
-            sqlBuilder.AppendLine("        THEN 1");
-            sqlBuilder.AppendLine("        ELSE 0");
-            sqlBuilder.Append("    END");
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.AppendLine("    CASE");
+            sqlBuffer.AppendLine("        WHEN EXISTS (");
+            sqlBuffer.AppendLine("            SELECT");
+            sqlBuffer.Append("                1");
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "            ", null);
+            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine("        )");
+            sqlBuffer.AppendLine("        THEN 1");
+            sqlBuffer.AppendLine("        ELSE 0");
+            sqlBuffer.Append("    END");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public virtual SqlTemplate CountSqlBuilder<TEntity>() where TEntity : class

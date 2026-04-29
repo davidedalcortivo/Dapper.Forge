@@ -23,17 +23,17 @@ namespace Dapper.Forge.Oracle.Strategies
 
         public override SqlTemplate InsertRangeSqlBuilder<TEntity>() where TEntity : class
         {
-            StringBuilder sqlBuilder = new();
+            StringBuilder sqlBuffer = new();
 
-            sqlBuilder.AppendLine("INSERT ALL");
-            sqlBuilder.AppendLine("{}");
-            sqlBuilder.AppendLine("SELECT");
-            sqlBuilder.AppendLine("    *");
-            sqlBuilder.AppendLine("FROM");
-            sqlBuilder.Append("    dual");
-            sqlBuilder.Append(SqlDialectStrategy.Terminator);
+            sqlBuffer.AppendLine("INSERT ALL");
+            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.AppendLine("    *");
+            sqlBuffer.AppendLine("FROM");
+            sqlBuffer.Append("    dual");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuilder.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
 
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class

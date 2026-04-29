@@ -29,12 +29,12 @@ namespace Dapper.Forge.Oracle.Strategies
             {
                 int end = Math.Min(i + batchSize, entityArray.Length);
 
-                StringBuilder sqlBuilder = new();
+                StringBuilder sqlBuffer = new();
                 DynamicParameters parameters = new();
 
                 for (int j = i; j < end; j++)
                 {
-                    sqlBuilder.Append("    SELECT ");
+                    sqlBuffer.Append("    SELECT ");
 
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
@@ -42,35 +42,35 @@ namespace Dapper.Forge.Oracle.Strategies
                         object? parameterValue = propertyGetters[k](entityArray[j]);
 
                         if (parameterValue is null)
-                            sqlBuilder.Append(SqlDialectStrategy.NullValue);
+                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
                         else
                         {
                             string parameterName = propertyInfo.Name + j;
 
-                            sqlBuilder.Append(SqlDialectStrategy.RenderParameter(parameterName));
+                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
                             parameters.Add(parameterName, parameterValue);
                         }
 
                         if (j == i)
                         {
-                            sqlBuilder.Append(" AS ");
-                            sqlBuilder.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyInfo.Name]));
+                            sqlBuffer.Append(" AS ");
+                            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyInfo.Name]));
                         }
 
                         if (k < propertyInfos.Length - 1)
-                            sqlBuilder.Append(", ");
+                            sqlBuffer.Append(", ");
                     }
 
-                    sqlBuilder.Append(" FROM dual");
+                    sqlBuffer.Append(" FROM dual");
 
                     if (j < end - 1)
                     {
-                        sqlBuilder.AppendLine();
-                        sqlBuilder.AppendLine("    UNION ALL");
+                        sqlBuffer.AppendLine();
+                        sqlBuffer.AppendLine("    UNION ALL");
                     }
                 }
 
-                string sql = sqlTemplate.Render(sqlBuilder);
+                string sql = sqlTemplate.Render(sqlBuffer);
                 commands.Add(new(sql, parameters));
             }
 

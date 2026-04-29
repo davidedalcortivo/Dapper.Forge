@@ -10,6 +10,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
     {
         ISqlDialectStrategy SqlDialectStrategy { get; }
 
+        void WarmUpCache<TEntity>() where TEntity : class;
         DbCommandInfo GetAllCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
         DbCommandInfo GetAllCommand<TEntity>(IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
         DbCommandInfo GetFirstCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
