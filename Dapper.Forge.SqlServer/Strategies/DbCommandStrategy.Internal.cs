@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Text;
 
 
@@ -13,9 +14,10 @@ namespace Dapper.Forge.SqlServer.Strategies
             StringBuilder sqlBuffer = new();
             parameters ??= new();
 
-            AppendWhereClauseAndSorting<TEntity>(sqlBuffer, clause, sortDescriptors, true);
+            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendSort<TEntity>(SqlDialectStrategy, sortDescriptors, true);
 
-            string takeName = "take";
+            string takeName = nameof(take);
             parameters.Add(takeName, take);
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.GetFirstSql.Render(SqlDialectStrategy.RenderParameter(takeName), sqlBuffer);

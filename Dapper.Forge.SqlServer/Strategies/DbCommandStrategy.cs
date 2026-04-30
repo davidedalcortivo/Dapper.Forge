@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -39,19 +40,8 @@ namespace Dapper.Forge.SqlServer.Strategies
                 updateBuffer.Append("        ");
                 updateBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
                 updateBuffer.Append(" = ");
-
-                if (parameterValue is null)
-                {
-                    updateBuffer.Append(SqlDialectStrategy.NullValue);
-                }
-                else
-                {
-                    updateBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                    parameters.Add(parameterName, parameterValue);
-                }
-
-                if (i < updatePropertyInfos.Length - 1)
-                    updateBuffer.AppendLine(",");
+                updateBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                updateBuffer.AppendSeparator(i, updatePropertyInfos.Length, false);
             }
 
             for (int i = 0; i < insertPropertyInfos.Length; i++)
@@ -60,14 +50,8 @@ namespace Dapper.Forge.SqlServer.Strategies
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 insertBuffer.Append("        ");
-
-                if (parameterValue is null)
-                    insertBuffer.Append(SqlDialectStrategy.NullValue);
-                else
-                    insertBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-
-                if (i < insertPropertyInfos.Length - 1)
-                    insertBuffer.AppendLine(",");
+                insertBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                insertBuffer.AppendSeparator(i, insertPropertyInfos.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(idParameter, updateBuffer, idParameter, insertBuffer);
@@ -109,28 +93,15 @@ namespace Dapper.Forge.SqlServer.Strategies
 
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
+                        string parameterName = propertyInfos[k].Name + j;
                         object? parameterValue = propertyGetters[k](entityArray[j]);
 
-                        if (parameterValue is null)
-                        {
-                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                        }
-                        else
-                        {
-                            string parameterName = propertyInfos[k].Name + j;
-
-                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                            parameters.Add(parameterName, parameterValue);
-                        }
-
-                        if (k < propertyInfos.Length - 1)
-                            sqlBuffer.Append(", ");
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');
-
-                    if (j < end - 1)
-                        sqlBuffer.AppendLine(",");
+                    sqlBuffer.AppendSeparator(j, end - 1, false);
 
                     s++;
                 }
@@ -184,28 +155,15 @@ namespace Dapper.Forge.SqlServer.Strategies
 
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
+                        string parameterName = propertyInfos[k].Name + j;
                         object? parameterValue = propertyGetters[k](entityArray[j]);
 
-                        if (parameterValue is null)
-                        {
-                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                        }
-                        else
-                        {
-                            string parameterName = propertyInfos[k].Name + j;
-
-                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                            parameters.Add(parameterName, parameterValue);
-                        }
-
-                        if (k < propertyInfos.Length - 1)
-                            sqlBuffer.Append(", ");
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');
-
-                    if (j < end - 1)
-                        sqlBuffer.AppendLine(",");
+                    sqlBuffer.AppendSeparator(j, end - 1, false);
 
                     s++;
                 }

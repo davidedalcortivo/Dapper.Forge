@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Text;
 
 
@@ -11,14 +12,7 @@ namespace Dapper.Forge.MySql.Strategies
         protected override DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
-
-            if (clause is not null)
-            {
-                sqlBuffer.AppendLine();
-                sqlBuffer.AppendLine("    WHERE");
-                sqlBuffer.Append("        ");
-                sqlBuffer.Append(clause);
-            }
+            sqlBuffer.AppendWhereClause("    ", clause);
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.ExistsSql.Render(sqlBuffer);
             return new(sql, parameters);

@@ -1,5 +1,6 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
+using Dapper.Forge.Core.Models;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -9,14 +10,28 @@ namespace Dapper.Forge.Core.Utilities
 {
     public static class SqlBufferExtensions
     {
-        public static StringBuilder AppendColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, string indentation, ImmutableArray<PropertyInfo> propertyInfos, bool useAlias, string? table) where TEntity : class
+        public static StringBuilder AppendSeparator(this StringBuilder sqlBuffer, int index, int count, bool inLine)
+        {
+            if (index < count - 1)
+            {
+                if (inLine)
+                    sqlBuffer.Append(", ");
+                else
+                    sqlBuffer.AppendLine(",");
+            }
+
+            return sqlBuffer;
+        }
+
+        public static StringBuilder AppendColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, string indentation, ImmutableArray<PropertyInfo> propertyInfos, string? table, bool useAlias, bool inLine) where TEntity : class
         {
             if (propertyInfos.Length == 0)
                 return sqlBuffer;
 
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            sqlBuffer.AppendLine();
+            if (!inLine)
+                sqlBuffer.AppendLine();
 
             for (int i = 0; i < propertyInfos.Length; i++)
             {
@@ -39,41 +54,7 @@ namespace Dapper.Forge.Core.Utilities
                     sqlBuffer.Append(strategy.RenderIdentifier(propertyInfo.Name));
                 }
 
-                if (i < propertyInfos.Length - 1)
-                    sqlBuffer.AppendLine(",");
-            }
-
-            return sqlBuffer;
-        }
-
-        public static StringBuilder AppendColumnsInline<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, ImmutableArray<PropertyInfo> propertyInfos, bool useAlias, string? table) where TEntity : class
-        {
-            if (propertyInfos.Length == 0)
-                return sqlBuffer;
-
-            ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
-
-            for (int i = 0; i < propertyInfos.Length; i++)
-            {
-                PropertyInfo propertyInfo = propertyInfos[i];
-                string columnName = columnNamesByPropertyName[propertyInfo.Name];
-
-                if (table is not null)
-                {
-                    sqlBuffer.Append(table);
-                    sqlBuffer.Append('.');
-                }
-
-                sqlBuffer.Append(strategy.RenderIdentifier(columnName));
-
-                if (useAlias && columnName != propertyInfo.Name)
-                {
-                    sqlBuffer.Append(" AS ");
-                    sqlBuffer.Append(strategy.RenderIdentifier(propertyInfo.Name));
-                }
-
-                if (i < propertyInfos.Length - 1)
-                    sqlBuffer.Append(", ");
+                sqlBuffer.AppendSeparator(i, propertyInfos.Length, inLine);
             }
 
             return sqlBuffer;
@@ -109,9 +90,7 @@ namespace Dapper.Forge.Core.Utilities
                 }
 
                 sqlBuffer.Append(column);
-
-                if (i < propertyInfos.Length - 1)
-                    sqlBuffer.AppendLine(",");
+                sqlBuffer.AppendSeparator(i, propertyInfos.Length, false);
             }
 
             return sqlBuffer;
@@ -162,6 +141,53 @@ namespace Dapper.Forge.Core.Utilities
                 sqlBuffer.Append(indentation);
                 sqlBuffer.Append("    ");
                 sqlBuffer.Append(clause);
+            }
+
+            return sqlBuffer;
+        }
+
+        public static StringBuilder AppendSort<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, IEnumerable<SortDescriptor>? sortDescriptors, bool forceSorting) where TEntity : class
+        {
+            List<SortDescriptor> sortDescriptorList = sortDescriptors is null ? [] : sortDescriptors.AsList();
+
+            if (forceSorting && sortDescriptorList.Count == 0)
+                sortDescriptorList.Add(new(EntityInfoCache<TEntity>.IdPropertyInfo.Name));
+
+            if (sortDescriptorList.Count > 0)
+            {
+                ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("ORDER BY");
+
+                for (int i = 0; i < sortDescriptorList.Count; i++)
+                {
+                    SortDescriptor sortDescriptor = sortDescriptorList[i];
+
+                    string columnName = columnNamesByPropertyName[sortDescriptor.PropertyName];
+                    string sortDirection = sortDescriptor.SortDirection == SortDirection.Ascending ? "ASC" : "DESC";
+
+                    sqlBuffer.Append("    ");
+                    sqlBuffer.Append(strategy.RenderIdentifier(columnName));
+                    sqlBuffer.Append(' ');
+                    sqlBuffer.Append(sortDirection);
+                    sqlBuffer.AppendSeparator(i, sortDescriptorList.Count, false);
+                }
+            }
+
+            return sqlBuffer;
+        }
+
+        public static StringBuilder AppendAndBindParameter(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, DynamicParameters parameters, string parameterName, object? parameterValue)
+        {
+            if (parameterValue is null)
+            {
+                sqlBuffer.Append(strategy.NullValue);
+            }
+            else
+            {
+                sqlBuffer.Append(strategy.RenderParameter(parameterName));
+                parameters.Add(parameterName, parameterValue);
             }
 
             return sqlBuffer;

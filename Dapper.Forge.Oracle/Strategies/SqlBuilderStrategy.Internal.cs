@@ -57,11 +57,11 @@ namespace Dapper.Forge.Oracle.Strategies
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("WHEN NOT MATCHED THEN");
                 sqlBuffer.Append("    INSERT (");
-                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, false, null);
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, null, false, false);
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("    )");
                 sqlBuffer.Append("    VALUES (");
-                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, false, sourceTable);
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, sourceTable, false, false);
                 sqlBuffer.AppendLine();
                 sqlBuffer.Append("    )");
             }

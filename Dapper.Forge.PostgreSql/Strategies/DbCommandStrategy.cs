@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -30,19 +31,8 @@ namespace Dapper.Forge.PostgreSql.Strategies
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 sqlBuffer.Append("    ");
-
-                if (parameterValue is null)
-                {
-                    sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                }
-                else
-                {
-                    sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                    parameters.Add(parameterName, parameterValue);
-                }
-
-                if (i < insertPropertyInfos.Length - 1)
-                    sqlBuffer.AppendLine(",");
+                sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                sqlBuffer.AppendSeparator(i, insertPropertyInfos.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(sqlBuffer);
@@ -78,26 +68,15 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
+                        string parameterName = propertyInfos[k].Name + j;
                         object? parameterValue = propertyGetters[k](entityArray[j]);
 
-                        if (parameterValue is null)
-                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                        else
-                        {
-                            string parameterName = propertyInfos[k].Name + j;
-
-                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                            parameters.Add(parameterName, parameterValue);
-                        }
-
-                        if (k < propertyInfos.Length - 1)
-                            sqlBuffer.Append(", ");
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');
-
-                    if (j < end - 1)
-                        sqlBuffer.AppendLine(",");
+                    sqlBuffer.AppendSeparator(j, end - 1, false);
                 }
 
                 string sql = updateRangeSql.Render(sqlBuffer);
@@ -138,24 +117,12 @@ namespace Dapper.Forge.PostgreSql.Strategies
                         string parameterName = insertPropertyInfos[k].Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
-                        if (parameterValue is null)
-                        {
-                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                        }
-                        else
-                        {
-                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                            parameters.Add(parameterName, parameterValue);
-                        }
-
-                        if (k < insertPropertyInfos.Length - 1)
-                            sqlBuffer.Append(", ");
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendSeparator(k, insertPropertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');
-
-                    if (j < end - 1)
-                        sqlBuffer.AppendLine(",");
+                    sqlBuffer.AppendSeparator(j, end - 1, false);
                 }
 
                 string sql = upsertRangeSql.Render(sqlBuffer);

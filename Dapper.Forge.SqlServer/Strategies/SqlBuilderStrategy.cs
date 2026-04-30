@@ -22,7 +22,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("SELECT TOP ({})");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, true, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.Append("{}");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
@@ -62,7 +62,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append("    INSERT INTO ");
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", propertyInfos, false, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", propertyInfos, null, false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("    )");
             sqlBuffer.AppendLine("    VALUES (");
@@ -110,11 +110,11 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append("INSERT INTO ");
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, false, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, null, false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, true, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, null, true, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("FROM (");
             sqlBuffer.AppendLine("    VALUES");
@@ -122,7 +122,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.AppendLine(") AS ");
             sqlBuffer.Append(sourceTable);
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumnsInline<TEntity>(SqlDialectStrategy, propertyInfos, false, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, propertyInfos, null, false, true);
             sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("WHERE NOT EXISTS (");
             sqlBuffer.AppendLine("    SELECT");

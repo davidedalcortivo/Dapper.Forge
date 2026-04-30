@@ -24,7 +24,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append("INSERT INTO ");
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, false, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, null, false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.Append("VALUES");

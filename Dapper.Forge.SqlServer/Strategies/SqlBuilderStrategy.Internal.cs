@@ -29,9 +29,7 @@ namespace Dapper.Forge.SqlServer.Strategies
                 for (int i = 0; i < sqlLocks.Length; i++)
                 {
                     sqlBuffer.Append(sqlLocks[i]);
-
-                    if (i < sqlLocks.Length - 1)
-                        sqlBuffer.Append(", ");
+                    sqlBuffer.AppendSeparator(i, sqlLocks.Length, true);
                 }
 
                 sqlBuffer.AppendLine(")");
@@ -44,7 +42,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(sourceTable);
 
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumnsInline<TEntity>(SqlDialectStrategy, propertyInfos, false, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, propertyInfos, null, false, true);
             sqlBuffer.Append(')');
             sqlBuffer.AppendOnClause(string.Empty, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);

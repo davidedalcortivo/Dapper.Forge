@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -39,26 +40,11 @@ namespace Dapper.Forge.Oracle.Strategies
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
                         PropertyInfo propertyInfo = propertyInfos[k];
+                        string parameterName = propertyInfo.Name + j;
                         object? parameterValue = propertyGetters[k](entityArray[j]);
 
-                        if (parameterValue is null)
-                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                        else
-                        {
-                            string parameterName = propertyInfo.Name + j;
-
-                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                            parameters.Add(parameterName, parameterValue);
-                        }
-
-                        if (j == i)
-                        {
-                            sqlBuffer.Append(" AS ");
-                            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyInfo.Name]));
-                        }
-
-                        if (k < propertyInfos.Length - 1)
-                            sqlBuffer.Append(", ");
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(" FROM dual");

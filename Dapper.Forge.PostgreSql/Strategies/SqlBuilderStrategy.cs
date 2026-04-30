@@ -22,7 +22,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, true, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.AppendLine("{}");
             sqlBuffer.AppendLine("LIMIT");
@@ -65,7 +65,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append(") AS ");
             sqlBuffer.Append(sourceTable);
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumnsInline<TEntity>(SqlDialectStrategy, propertyInfos, false, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, propertyInfos, null, false, true);
             sqlBuffer.Append(')');
             sqlBuffer.AppendWhereClause(string.Empty, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);

@@ -22,7 +22,7 @@ namespace Dapper.Forge.MySql.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, true, null);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.AppendLine("{}");
             sqlBuffer.AppendLine("LIMIT");

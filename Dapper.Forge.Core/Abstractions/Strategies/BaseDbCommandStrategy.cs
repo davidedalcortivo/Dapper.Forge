@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Models;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
@@ -139,7 +140,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName]) + " = " + SqlDialectStrategy.RenderParameter(idParameterName);
             parameters.Add(idParameterName, propertyGettersByPropertyName[idParameterName](entity));
 
-            return BuildUpdateCommand<TEntity>(propertyInfos, name => propertyGettersByPropertyName[name](entity), clause, parameters);
+            return BuildUpdateCommand<TEntity>(propertyInfos, x => propertyGettersByPropertyName[x](entity), clause, parameters);
         }
 
         public virtual DbCommandInfo UpdateCommand<TEntity>(object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
@@ -149,7 +150,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableDictionary<string, Func<object, object?>> paramGetterCache = ParamGetterCache.GetGetters(param);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildUpdateCommand<TEntity>(propertyInfos, name => paramGetterCache[name](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(propertyInfos, x => paramGetterCache[x](param), clause, parameters);
         }
 
         public virtual DbCommandInfo UpdateCommand<TEntity>(object param, IFilterNode? filterNode) where TEntity : class
@@ -159,7 +160,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableDictionary<string, Func<object, object?>> paramGetterCache = ParamGetterCache.GetGetters(param);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildUpdateCommand<TEntity>(propertyInfos, name => paramGetterCache[name](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(propertyInfos, x => paramGetterCache[x](param), clause, parameters);
         }
 
         public virtual DbCommandInfo InsertCommand<TEntity>(TEntity entity) where TEntity : class
@@ -178,19 +179,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 sqlBuffer.Append("    ");
-
-                if (parameterValue is null)
-                {
-                    sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                }
-                else
-                {
-                    sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                    parameters.Add(parameterName, parameterValue);
-                }
-
-                if (i < propertyInfos.Length - 1)
-                    sqlBuffer.AppendLine(",");
+                sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                sqlBuffer.AppendSeparator(i, propertyInfos.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.InsertSql.Render(sqlBuffer);
@@ -310,28 +300,15 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
+                        string parameterName = propertyInfos[k].Name + j;
                         object? parameterValue = propertyGetters[k](entityArray[j]);
 
-                        if (parameterValue is null)
-                        {
-                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                        }
-                        else
-                        {
-                            string parameterName = propertyInfos[k].Name + j;
-
-                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                            parameters.Add(parameterName, parameterValue);
-                        }
-
-                        if (k < propertyInfos.Length - 1)
-                            sqlBuffer.Append(", ");
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');
-
-                    if (j < end - 1)
-                        sqlBuffer.AppendLine(",");
+                    sqlBuffer.AppendSeparator(j, end - 1, false);
 
                     s++;
                 }

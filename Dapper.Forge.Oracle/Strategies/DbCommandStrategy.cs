@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -30,22 +31,10 @@ namespace Dapper.Forge.Oracle.Strategies
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 sqlBuffer.Append("        ");
-
-                if (parameterValue is null)
-                {
-                    sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                }
-                else
-                {
-                    sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                    parameters.Add(parameterName, parameterValue);
-                }
-
+                sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
                 sqlBuffer.Append(" AS ");
                 sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
-
-                if (i < propertyInfos.Length - 1)
-                    sqlBuffer.AppendLine(",");
+                sqlBuffer.AppendSeparator(i, propertyInfos.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(sqlBuffer);
@@ -83,9 +72,7 @@ namespace Dapper.Forge.Oracle.Strategies
             for (int i = 0; i < insertPropertyInfos.Length; i++)
             {
                 prefixBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[insertPropertyInfos[i].Name]));
-
-                if (i < insertPropertyInfos.Length - 1)
-                    prefixBuffer.Append(", ");
+                prefixBuffer.AppendSeparator(i, insertPropertyInfos.Length, true);
             }
 
             prefixBuffer.Append(") VALUES (");
@@ -104,20 +91,11 @@ namespace Dapper.Forge.Oracle.Strategies
                     for (int k = 0; k < insertPropertyInfos.Length; k++)
                     {
                         PropertyInfo propertyInfo = insertPropertyInfos[k];
+                        string parameterName = propertyInfo.Name + j;
                         object? parameterValue = propertyGetters[k](entityArray[j]);
 
-                        if (parameterValue is null)
-                            sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                        else
-                        {
-                            string parameterName = propertyInfo.Name + j;
-
-                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                            parameters.Add(parameterName, parameterValue);
-                        }
-
-                        if (k < insertPropertyInfos.Length - 1)
-                            sqlBuffer.Append(", ");
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendSeparator(k, insertPropertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');

@@ -5,7 +5,6 @@ using Dapper.Forge.PostgreSql.Extensions;
 using Npgsql;
 using System.Collections.Immutable;
 using System.Reflection;
-using System.Xml.Linq;
 
 
 NpgsqlConnection connection = new("");
