@@ -61,125 +61,13 @@ namespace Dapper.Forge.SqlServer.Strategies
         public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
             WarmUpCache<TEntity>();
-            TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
-            List<DbCommandInfo> commands = [];
-
-            if (entityArray.Length == 0)
-                return commands;
-
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
-            ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
-
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
-            Func<TEntity, object?>[] propertyGetters = [.. propertyInfos.Select(x => propertyGettersByPropertyName[x.Name])];
-            SqlTemplate updateRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql;
-
-            StringBuilder batchBuffer = new();
-            DynamicParameters parameters = new();
-            int _batchSize = batchSize;
-            int s = 0;
-
-            for (int i = 0; i < entityArray.Length; i += _batchSize)
-            {
-                if (chunkSize > 0 && chunkSize < _batchSize)
-                    _batchSize = Math.Min(chunkSize, batchSize - s);
-
-                int end = Math.Min(i + _batchSize, entityArray.Length);
-                StringBuilder sqlBuffer = new();
-
-                for (int j = i; j < end; j++)
-                {
-                    sqlBuffer.Append("        (");
-
-                    for (int k = 0; k < propertyInfos.Length; k++)
-                    {
-                        string parameterName = propertyInfos[k].Name + j;
-                        object? parameterValue = propertyGetters[k](entityArray[j]);
-
-                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
-                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
-                    }
-
-                    sqlBuffer.Append(')');
-                    sqlBuffer.AppendSeparator(j, end - 1, false);
-
-                    s++;
-                }
-
-                batchBuffer.Append(updateRangeSql.Render(sqlBuffer));
-
-                if (s >= batchSize || end >= entityArray.Length)
-                {
-                    commands.Add(new(batchBuffer.ToString(), parameters));
-                    batchBuffer.Clear();
-                    parameters = new();
-                    s = 0;
-                }
-            }
-
-            return commands;
+            return BuildUpsertRangeCommands(entities, batchSize, chunkSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql, true);
         }
 
         public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
             WarmUpCache<TEntity>();
-            TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
-            List<DbCommandInfo> commands = [];
-
-            if (entityArray.Length == 0)
-                return commands;
-
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
-            ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
-
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
-            Func<TEntity, object?>[] propertyGetters = [.. propertyInfos.Select(x => propertyGettersByPropertyName[x.Name])];
-            SqlTemplate upsertRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql;
-
-            StringBuilder batchBuffer = new();
-            DynamicParameters parameters = new();
-            int _batchSize = batchSize;
-            int s = 0;
-
-            for (int i = 0; i < entityArray.Length; i += _batchSize)
-            {
-                if (chunkSize > 0 && chunkSize < _batchSize)
-                    _batchSize = Math.Min(chunkSize, batchSize - s);
-
-                int end = Math.Min(i + _batchSize, entityArray.Length);
-                StringBuilder sqlBuffer = new();
-
-                for (int j = i; j < end; j++)
-                {
-                    sqlBuffer.Append("        (");
-
-                    for (int k = 0; k < propertyInfos.Length; k++)
-                    {
-                        string parameterName = propertyInfos[k].Name + j;
-                        object? parameterValue = propertyGetters[k](entityArray[j]);
-
-                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
-                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
-                    }
-
-                    sqlBuffer.Append(')');
-                    sqlBuffer.AppendSeparator(j, end - 1, false);
-
-                    s++;
-                }
-
-                batchBuffer.Append(upsertRangeSql.Render(sqlBuffer, sqlBuffer));
-
-                if (s >= batchSize || end >= entityArray.Length)
-                {
-                    commands.Add(new(batchBuffer.ToString(), parameters));
-                    batchBuffer.Clear();
-                    parameters = new();
-                    s = 0;
-                }
-            }
-
-            return commands;
+            return BuildUpsertRangeCommands(entities, batchSize, chunkSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql, false);
         }
     }
 }

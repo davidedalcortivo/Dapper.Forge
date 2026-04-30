@@ -2,6 +2,8 @@
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.Core.Utilities;
+using System.Collections.Immutable;
+using System.Reflection;
 using System.Text;
 
 
@@ -22,6 +24,67 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.GetFirstSql.Render(SqlDialectStrategy.RenderParameter(takeName), sqlBuffer);
             return new(sql, parameters);
+        }
+
+        private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize, SqlTemplate sqlTemplate, bool updateOnly) where TEntity : class
+        {
+            TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
+            List<DbCommandInfo> commands = [];
+
+            if (entityArray.Length == 0)
+                return commands;
+
+            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
+            ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
+            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
+
+            StringBuilder batchBuffer = new();
+            DynamicParameters parameters = new();
+            int _batchSize = batchSize;
+            int s = 0;
+
+            for (int i = 0; i < entityArray.Length; i += _batchSize)
+            {
+                if (chunkSize > 0 && chunkSize < _batchSize)
+                    _batchSize = Math.Min(chunkSize, batchSize - s);
+
+                int end = Math.Min(i + _batchSize, entityArray.Length);
+                StringBuilder sqlBuffer = new();
+
+                for (int j = i; j < end; j++)
+                {
+                    sqlBuffer.Append("        (");
+
+                    for (int k = 0; k < propertyInfos.Length; k++)
+                    {
+                        string parameterName = propertyInfos[k].Name;
+                        object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
+
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
+                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
+                    }
+
+                    sqlBuffer.Append(')');
+                    sqlBuffer.AppendSeparator(j, end, false);
+
+                    s++;
+                }
+
+                if (updateOnly)
+                    batchBuffer.Append(sqlTemplate.Render(sqlBuffer));
+                else
+                    batchBuffer.Append(sqlTemplate.Render(sqlBuffer, sqlBuffer));
+
+                if (s >= batchSize || end >= entityArray.Length)
+                {
+                    commands.Add(new(batchBuffer.ToString(), parameters));
+                    batchBuffer.Clear();
+                    parameters = new();
+                    s = 0;
+                }
+            }
+
+            return commands;
         }
     }
 }

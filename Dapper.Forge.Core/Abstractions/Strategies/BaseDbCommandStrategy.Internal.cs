@@ -92,7 +92,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        protected virtual DbCommandInfo BuildUpdateCommand<TEntity>(IReadOnlyList<PropertyInfo> propertyInfos, Func<string, object?> getter, string? clause, DynamicParameters? parameters) where TEntity : class
+        protected virtual DbCommandInfo BuildUpdateCommand<TEntity>(IReadOnlyList<PropertyInfo> propertyInfos, Func<string, object?> propertyGetter, string? clause, DynamicParameters? parameters) where TEntity : class
         {
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -102,7 +102,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             for (int i = 0; i < propertyInfos.Count; i++)
             {
                 string parameterName = propertyInfos[i].Name;
-                object? parameterValue = getter(parameterName);
+                object? parameterValue = propertyGetter(parameterName);
 
                 sqlBuffer.Append("    ");
                 sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));

@@ -276,10 +276,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
-
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
-            Func<TEntity, object?>[] propertyGetters = [.. propertyInfos.Select(x => propertyGettersByPropertyName[x.Name])];
             SqlTemplate insertRangeSql = SqlBuilderCache<TEntity, TStrategy>.InsertRangeSql;
+            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
 
             StringBuilder batchBuffer = new();
             DynamicParameters parameters = new();
@@ -300,15 +298,15 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
-                        string parameterName = propertyInfos[k].Name + j;
-                        object? parameterValue = propertyGetters[k](entityArray[j]);
+                        string parameterName = propertyInfos[k].Name;
+                        object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
-                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
                         sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');
-                    sqlBuffer.AppendSeparator(j, end - 1, false);
+                    sqlBuffer.AppendSeparator(j, end, false);
 
                     s++;
                 }

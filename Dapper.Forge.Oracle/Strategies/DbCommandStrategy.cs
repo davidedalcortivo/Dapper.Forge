@@ -60,9 +60,7 @@ namespace Dapper.Forge.Oracle.Strategies
             ImmutableArray <PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
-
             batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
-            Func<TEntity, object?>[] propertyGetters = [.. insertPropertyInfos.Select(x => propertyGettersByPropertyName[x.Name])];
 
             StringBuilder prefixBuffer = new();
             prefixBuffer.Append("    INTO ");
@@ -91,10 +89,10 @@ namespace Dapper.Forge.Oracle.Strategies
                     for (int k = 0; k < insertPropertyInfos.Length; k++)
                     {
                         PropertyInfo propertyInfo = insertPropertyInfos[k];
-                        string parameterName = propertyInfo.Name + j;
-                        object? parameterValue = propertyGetters[k](entityArray[j]);
+                        string parameterName = propertyInfo.Name;
+                        object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
-                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
                         sqlBuffer.AppendSeparator(k, insertPropertyInfos.Length, true);
                     }
 

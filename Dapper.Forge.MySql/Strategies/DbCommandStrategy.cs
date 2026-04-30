@@ -50,10 +50,8 @@ namespace Dapper.Forge.MySql.Strategies
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
-
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
-            Func<TEntity, object?>[] propertyGetters = [.. propertyInfos.Select(x => propertyGettersByPropertyName[x.Name])];
             SqlTemplate updateRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql;
+            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
 
             for (int i = 0; i < entityArray.Length; i += batchSize)
             {
@@ -69,10 +67,10 @@ namespace Dapper.Forge.MySql.Strategies
                     for (int k = 0; k < propertyInfos.Length; k++)
                     {
                         PropertyInfo propertyInfo = propertyInfos[k];
-                        string parameterName = propertyInfo.Name + j;
-                        object? parameterValue = propertyGetters[k](entityArray[j]);
+                        string parameterName = propertyInfo.Name;
+                        object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
-                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
 
                         if (j == i)
                         {
@@ -108,9 +106,8 @@ namespace Dapper.Forge.MySql.Strategies
 
             ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
-
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
             SqlTemplate upsertRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql;
+            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
 
             for (int i = 0; i < entityArray.Length; i += batchSize)
             {
@@ -128,12 +125,12 @@ namespace Dapper.Forge.MySql.Strategies
                         string parameterName = insertPropertyInfos[k].Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
-                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
                         sqlBuffer.AppendSeparator(k, insertPropertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');
-                    sqlBuffer.AppendSeparator(j, end - 1, false);
+                    sqlBuffer.AppendSeparator(j, end, false);
                 }
 
                 string sql = upsertRangeSql.Render(sqlBuffer);
