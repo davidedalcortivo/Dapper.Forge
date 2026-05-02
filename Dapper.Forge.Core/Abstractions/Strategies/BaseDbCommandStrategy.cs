@@ -147,20 +147,20 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             WarmUpCache<TEntity>();
             PropertyInfo[] propertyInfos = ParamPropertyCache.GetProperties(param);
-            ImmutableDictionary<string, Func<object, object?>> paramGetterCache = ParamGetterCache.GetGetters(param);
+            ImmutableDictionary<string, Func<object, object?>> propertyGetters = ParamGetterCache.GetPropertyGetters(param);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildUpdateCommand<TEntity>(propertyInfos, x => paramGetterCache[x](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(propertyInfos, x => propertyGetters[x](param), clause, parameters);
         }
 
         public virtual DbCommandInfo UpdateCommand<TEntity>(object param, IFilterNode? filterNode) where TEntity : class
         {
             WarmUpCache<TEntity>();
             PropertyInfo[] propertyInfos = ParamPropertyCache.GetProperties(param);
-            ImmutableDictionary<string, Func<object, object?>> paramGetterCache = ParamGetterCache.GetGetters(param);
+            ImmutableDictionary<string, Func<object, object?>> propertyGetters = ParamGetterCache.GetPropertyGetters(param);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildUpdateCommand<TEntity>(propertyInfos, x => paramGetterCache[x](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(propertyInfos, x => propertyGetters[x](param), clause, parameters);
         }
 
         public virtual DbCommandInfo InsertCommand<TEntity>(TEntity entity) where TEntity : class

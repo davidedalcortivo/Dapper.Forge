@@ -22,10 +22,10 @@ propertyInfos = ParamPropertyCache.GetProperties(new {});
 propertyInfos = ParamPropertyCache.GetProperties(new { Id = 3, stringa = "hola" });
 propertyInfos = ParamPropertyCache.GetProperties(new { Id = 4 });
 
-ImmutableDictionary<string, Func<object, object?>> paramGetterCache = ParamGetterCache.GetGetters(new { Id = 3, stringa = "ciao" });
-paramGetterCache = ParamGetterCache.GetGetters(new { Id = 3, stringa = "ciao" });
-paramGetterCache = ParamGetterCache.GetGetters(new { });
-paramGetterCache = ParamGetterCache.GetGetters(new { Id = 3, stringa = "hola" });
+ImmutableDictionary<string, Func<object, object?>> paramGetterCache = ParamGetterCache.GetPropertyGetters(new { Id = 3, stringa = "ciao" });
+paramGetterCache = ParamGetterCache.GetPropertyGetters(new { Id = 3, stringa = "ciao" });
+paramGetterCache = ParamGetterCache.GetPropertyGetters(new { });
+paramGetterCache = ParamGetterCache.GetPropertyGetters(new { Id = 3, stringa = "hola" });
 
 
 List<FilterDescriptor> filters = [];

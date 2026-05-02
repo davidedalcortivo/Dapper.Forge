@@ -10,7 +10,7 @@ namespace Dapper.Forge.Core.Caching
     {
         private static readonly ConcurrentDictionary<Type, ImmutableDictionary<string, Func<object, object?>>> _cache = new();
 
-        public static ImmutableDictionary<string, Func<object, object?>> GetGetters(object param)
+        public static ImmutableDictionary<string, Func<object, object?>> GetPropertyGetters(object param)
         {
             return _cache.GetOrAdd(param.GetType(), Create);
         }

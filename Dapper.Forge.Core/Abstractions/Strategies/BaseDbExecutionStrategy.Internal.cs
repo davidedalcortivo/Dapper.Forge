@@ -6,6 +6,54 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 {
     public abstract partial class BaseDbExecutionStrategy<TStrategy> : IDbExecutionStrategy where TStrategy : IDbCommandStrategy
     {
+        protected virtual async Task<IReadOnlyList<TEntity>> QueryImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            if (sync)
+                return connection.Query<TEntity>(command.Sql, command.Parameters, transaction, true, commandTimeout).AsList();
+
+            return (await connection.QueryAsync<TEntity>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken))).AsList();
+        }
+
+        protected virtual async Task<TEntity> QueryFirstImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            if (sync)
+                return connection.QueryFirst<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
+
+            return await connection.QueryFirstAsync<TEntity>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+        }
+
+        protected virtual async Task<TEntity?> QueryFirstOrDefaultImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            if (sync)
+                return connection.QueryFirstOrDefault<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
+
+            return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+        }
+
+        protected virtual async Task<TEntity> QuerySingleImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            if (sync)
+                return connection.QuerySingle<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
+
+            return await connection.QuerySingleAsync<TEntity>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+        }
+
+        protected virtual async Task<TEntity?> QuerySingleOrDefaultImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            if (sync)
+                return connection.QuerySingleOrDefault<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
+
+            return await connection.QuerySingleOrDefaultAsync<TEntity>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+        }
+
+        protected virtual async Task<int> ExecuteImplAsync(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
+        {
+            if (sync)
+                return connection.Execute(command.Sql, command.Parameters, transaction, commandTimeout);
+
+            return await connection.ExecuteAsync(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+        }
+
         protected virtual async Task<int> ExecuteRangeImplAsync(DbConnection connection, bool sync, IReadOnlyList<DbCommandInfo> commands, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
         {
             int result = 0;
@@ -32,12 +80,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 _transaction ??= tempTransaction!;
 
                 foreach (DbCommandInfo command in commands)
-                {
-                    if (sync)
-                        result += connection.Execute(command.Sql, command.Parameters, _transaction, commandTimeout);
-                    else
-                        result += await connection.ExecuteAsync(new CommandDefinition(command.Sql, command.Parameters, _transaction, commandTimeout, cancellationToken: cancellationToken));
-                }
+                    result += await ExecuteImplAsync(connection, sync, command, _transaction, commandTimeout, cancellationToken);
 
                 if (ownsTransaction)
                 {
@@ -68,6 +111,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             }
 
             return result;
+        }
+
+        protected virtual async Task<T?> ExecuteScalarImplAsync<T>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
+        {
+            if (sync)
+                return connection.ExecuteScalar<T>(command.Sql, command.Parameters, transaction, commandTimeout);
+
+            return await connection.ExecuteScalarAsync<T>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
         }
     }
 }

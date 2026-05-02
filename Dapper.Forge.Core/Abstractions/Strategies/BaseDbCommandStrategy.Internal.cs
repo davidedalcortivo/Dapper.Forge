@@ -107,17 +107,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 sqlBuffer.Append("    ");
                 sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
                 sqlBuffer.Append(" = ");
-
-                if (parameterValue is null)
-                {
-                    sqlBuffer.Append(SqlDialectStrategy.NullValue);
-                }
-                else
-                {
-                    sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
-                    parameters.Add(parameterName, parameterValue);
-                }
-
+                sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
                 sqlBuffer.AppendSeparator(i, propertyInfos.Count, false);
             }
 
@@ -198,7 +188,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         protected virtual DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
-            sqlBuffer.AppendWhereClause("        ", clause);
+            sqlBuffer.AppendWhereClause("            ", clause);
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.ExistsSql.Render(sqlBuffer);
             return new(sql, parameters);
@@ -209,7 +199,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
-            string column = propertyName is not null ? SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyName]) : "*";
+            string column = propertyName is null ? "*" : SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyName]);
 
             sqlBuffer.AppendWhereClause(string.Empty, clause);
 
