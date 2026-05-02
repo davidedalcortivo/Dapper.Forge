@@ -15,158 +15,158 @@ namespace Dapper.Forge.PostgreSql.Extensions
     {
         public static IReadOnlyList<TEntity> GetAll<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetAll<TEntity>(connection, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetAllImplAsync<TEntity>(connection, true, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static IReadOnlyList<TEntity> GetAll<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetAll(connection, predicate, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetAllImplAsync(connection, true, predicate, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static IReadOnlyList<TEntity> GetAll<TEntity>(this SqlConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetAll<TEntity>(connection, filterNode, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetAllImplAsync<TEntity>(connection, true, filterNode, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity GetFirst<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetFirst<TEntity>(connection, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetFirstImplAsync<TEntity>(connection, true, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity GetFirst<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetFirst(connection, predicate, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetFirstImplAsync(connection, true, predicate, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity GetFirst<TEntity>(this SqlConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetFirst<TEntity>(connection, filterNode, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetFirstImplAsync<TEntity>(connection, true, filterNode, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity? GetFirstOrDefault<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetFirstOrDefault<TEntity>(connection, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync<TEntity>(connection, true, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity? GetFirstOrDefault<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetFirstOrDefault(connection, predicate, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync(connection, true, predicate, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity? GetFirstOrDefault<TEntity>(this SqlConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetFirstOrDefault<TEntity>(connection, filterNode, sortDescriptors, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync<TEntity>(connection, true, filterNode, sortDescriptors, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity GetSingle<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetSingle<TEntity>(connection, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetSingleImplAsync<TEntity>(connection, true, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity GetSingle<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetSingle(connection, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetSingleImplAsync(connection, true, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity GetSingle<TEntity>(this SqlConnection connection, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetSingle<TEntity>(connection, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetSingleImplAsync<TEntity>(connection, true, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity? GetSingleOrDefault<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetSingleOrDefault<TEntity>(connection, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync<TEntity>(connection, true, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity? GetSingleOrDefault<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetSingleOrDefault(connection, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync(connection, true, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity? GetSingleOrDefault<TEntity>(this SqlConnection connection, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetSingleOrDefault<TEntity>(connection, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync<TEntity>(connection, true, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static TEntity? GetById<TEntity>(this SqlConnection connection, object id, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetById<TEntity>(connection, id, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetByIdImplAsync<TEntity>(connection, true, id, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static IReadOnlyList<TEntity> GetPage<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetPage<TEntity>(connection, (IFilterNode?)null, sortDescriptors, skip, take, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetPageImplAsync<TEntity>(connection, true, (IFilterNode?)null, sortDescriptors, skip, take, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static IReadOnlyList<TEntity> GetPage<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetPage(connection, predicate, sortDescriptors, skip, take, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetPageImplAsync(connection, true, predicate, sortDescriptors, skip, take, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static IReadOnlyList<TEntity> GetPage<TEntity>(this SqlConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.GetPage<TEntity>(connection, filterNode, sortDescriptors, skip, take, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetPageImplAsync<TEntity>(connection, true, filterNode, sortDescriptors, skip, take, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Update<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Update(connection, entity, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, entity, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Update<TEntity>(this SqlConnection connection, object param, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Update<TEntity>(connection, param, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.UpdateImplAsync<TEntity>(connection, true, param, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Update<TEntity>(this SqlConnection connection, object param, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Update(connection, param, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, param, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Update<TEntity>(this SqlConnection connection, object param, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Update<TEntity>(connection, param, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.UpdateImplAsync<TEntity>(connection, true, param, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Insert<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Insert(connection, entity, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.InsertImplAsync(connection, true, entity, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Delete<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Delete(connection, entity, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.DeleteImplAsync(connection, true, entity, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Delete<TEntity>(this SqlConnection connection, object id, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Delete<TEntity>(connection, id, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.DeleteImplAsync<TEntity>(connection, true, id, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Delete<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Delete<TEntity>(connection, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.DeleteImplAsync<TEntity>(connection, true, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Delete<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Delete(connection, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.DeleteImplAsync(connection, true, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Delete<TEntity>(this SqlConnection connection, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Delete<TEntity>(connection, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.DeleteImplAsync<TEntity>(connection, true, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Upsert<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Upsert(connection, entity, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.UpsertImplAsync(connection, true, entity, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static IReadOnlyList<TEntity?> GetByIdRange<TEntity>(this SqlConnection connection, IEnumerable ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount);
-            return DbExecutionStrategy.Instance.GetByIdRange<TEntity>(connection, ids, preserveDuplicates, preserveNulls, batchSize, 0, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.GetByIdRangeImplAsync<TEntity>(connection, true, ids, preserveDuplicates, preserveNulls, batchSize, 0, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int UpdateRange<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
@@ -174,7 +174,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             int chunkSize = SqlDialectStrategy.Instance.MaxParameterCount / propertyInfos.Length;
 
-            return DbExecutionStrategy.Instance.UpdateRange(connection, entities, batchSize, chunkSize, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.UpdateRangeImplAsync(connection, true, entities, batchSize, chunkSize, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int InsertRange<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
@@ -182,17 +182,17 @@ namespace Dapper.Forge.PostgreSql.Extensions
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             int chunkSize = Math.Min(SqlDialectStrategy.Instance.MaxParameterCount / propertyInfos.Length, SqlDialectStrategy.Instance.MaxInsertRowCount);
 
-            return DbExecutionStrategy.Instance.InsertRange(connection, entities, batchSize, chunkSize, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.InsertRangeImplAsync(connection, true, entities, batchSize, chunkSize, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int DeleteRange<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.DeleteRange(connection, entities, batchSize, SqlDialectStrategy.Instance.MaxParameterCount, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.DeleteRangeImplAsync(connection, true, entities, batchSize, SqlDialectStrategy.Instance.MaxParameterCount, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int DeleteRange<TEntity>(this SqlConnection connection, IEnumerable ids, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.DeleteRange<TEntity>(connection, ids, batchSize, SqlDialectStrategy.Instance.MaxParameterCount, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.DeleteRangeImplAsync<TEntity>(connection, true, ids, batchSize, SqlDialectStrategy.Instance.MaxParameterCount, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int UpsertRange<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
@@ -200,187 +200,187 @@ namespace Dapper.Forge.PostgreSql.Extensions
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             int chunkSize = SqlDialectStrategy.Instance.MaxParameterCount / propertyInfos.Length;
 
-            return DbExecutionStrategy.Instance.UpsertRange(connection, entities, batchSize, chunkSize, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.UpsertRangeImplAsync(connection, true, entities, batchSize, chunkSize, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static bool Exists<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Exists<TEntity>(connection, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.ExistsImplAsync<TEntity>(connection, true, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static bool Exists<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Exists(connection, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.ExistsImplAsync(connection, true, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static bool Exists<TEntity>(this SqlConnection connection, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Exists<TEntity>(connection, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.ExistsImplAsync<TEntity>(connection, true, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count<TEntity>(connection, (string?)null, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, true, (string?)null, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count(connection, (string?)null, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync(connection, true, (string?)null, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count<TEntity>(connection, (string?)null, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, true, (string?)null, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, Expression<Func<TEntity, object?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count(connection, selector, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync(connection, true, selector, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count(connection, selector, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync(connection, true, selector, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count(connection, selector, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync(connection, true, selector, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count<TEntity>(connection, propertyName, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count(connection, propertyName, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Count<TEntity>(this SqlConnection connection, string propertyName, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Count<TEntity>(connection, propertyName, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Avg<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Avg(connection, selector, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.AvgImplAsync(connection, true, selector, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Avg<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Avg(connection, selector, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.AvgImplAsync(connection, true, selector, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Avg<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Avg(connection, selector, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.AvgImplAsync(connection, true, selector, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Avg<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Avg<TEntity>(connection, propertyName, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.AvgImplAsync<TEntity>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Avg<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Avg(connection, propertyName, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.AvgImplAsync(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Avg<TEntity>(this SqlConnection connection, string propertyName, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Avg<TEntity>(connection, propertyName, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.AvgImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Sum<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Sum(connection, selector, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.SumImplAsync(connection, true, selector, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Sum<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Sum(connection, selector, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.SumImplAsync(connection, true, selector, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Sum<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Sum(connection, selector, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.SumImplAsync(connection, true, selector, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Sum<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Sum<TEntity>(connection, propertyName, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.SumImplAsync<TEntity>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Sum<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Sum(connection, propertyName, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.SumImplAsync(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Sum<TEntity>(this SqlConnection connection, string propertyName, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Sum<TEntity>(connection, propertyName, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.SumImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Min<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Min(connection, selector, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MinImplAsync(connection, true, selector, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Min<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Min(connection, selector, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MinImplAsync(connection, true, selector, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Min<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Min(connection, selector, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MinImplAsync(connection, true, selector, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Min<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Min<TEntity>(connection, propertyName, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MinImplAsync<TEntity>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Min<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Min(connection, propertyName, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MinImplAsync(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Min<TEntity>(this SqlConnection connection, string propertyName, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Min<TEntity>(connection, propertyName, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MinImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Max<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Max(connection, selector, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MaxImplAsync(connection, true, selector, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Max<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Max(connection, selector, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MaxImplAsync(connection, true, selector, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Max<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Max(connection, selector, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MaxImplAsync(connection, true, selector, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Max<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Max<TEntity>(connection, propertyName, (IFilterNode?)null, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MaxImplAsync<TEntity>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Max<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Max(connection, propertyName, predicate, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MaxImplAsync(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static decimal? Max<TEntity>(this SqlConnection connection, string propertyName, IFilterNode filterNode, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
-            return DbExecutionStrategy.Instance.Max<TEntity>(connection, propertyName, filterNode, transaction, commandTimeout);
+            return DbExecutionStrategy.Instance.MaxImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
     }
 }
