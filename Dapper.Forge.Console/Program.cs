@@ -1,4 +1,5 @@
-﻿using Dapper.Forge.Console;
+﻿using Dapper;
+using Dapper.Forge.Console;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.PostgreSql.Extensions;
@@ -15,19 +16,6 @@ sorts.Add(new("StringValue", SortDirection.Descending));
 sorts.Add(new("GuidValue", "descending"));
 sorts.Add(SortDescriptor.For<TestTable>(x => x.GuidValue, "descending"));
 
-
-PropertyInfo[] propertyInfos = ParamPropertyCache.GetProperties(new { Id = 3, stringa = "ciao" });
-propertyInfos = ParamPropertyCache.GetProperties(new { Id = 3, stringa = "ciao" });
-propertyInfos = ParamPropertyCache.GetProperties(new {});
-propertyInfos = ParamPropertyCache.GetProperties(new { Id = 3, stringa = "hola" });
-propertyInfos = ParamPropertyCache.GetProperties(new { Id = 4 });
-
-ImmutableDictionary<string, Func<object, object?>> paramGetterCache = ParamGetterCache.GetPropertyGetters(new { Id = 3, stringa = "ciao" });
-paramGetterCache = ParamGetterCache.GetPropertyGetters(new { Id = 3, stringa = "ciao" });
-paramGetterCache = ParamGetterCache.GetPropertyGetters(new { });
-paramGetterCache = ParamGetterCache.GetPropertyGetters(new { Id = 3, stringa = "hola" });
-
-
 List<FilterDescriptor> filters = [];
 filters.Add(new("StringValue", "ciao", ComparisonOperator.Equal));
 
@@ -35,7 +23,7 @@ FilterGroup group = new(filters, LogicalOperator.AndAlso);
 
 TestTable testTable = new()
 {
-    Id = new("b0ce8453-f109-452a-850d-717a33947e10"),
+    Id = new("c0ce8453-f109-452a-850d-717a33947e10"),
     IntValue = 1,
     DecimalValue = (decimal?)3.4,
     StringValue = "ciao",
@@ -58,13 +46,16 @@ TestTableIdentity testTableIdentity = new()
     GuidValue = Guid.NewGuid()
 };
 
-List<TestTable> lista = [];
-lista.Add(testTable);
-lista.Add(testTable);
+var aa = await connection.GetAllAsync<TestTable>();
+
+foreach (var a in aa)
+    a.TimestamptzValue = DateTime.Now;
+
+var lista = connection.Update<TestTable>(new { BoolValue  = (bool?)null });
+var lista2 = await connection.UpdateRangeAsync<TestTable>(aa);
 
 
-var a = connection.GetByIdRange<TestTable>(lista.Select(x => x.Id));
-var b = connection.GetByIdRange<TestTable>(lista.Select(x => x.Id));
-var result = connection.Upsert(testTableIdentity);
+var result = connection.MaxCommand<TestTable>("IntValue");
+var result2 = connection.MaxCommand<TestTable>(x => x.IntValue);
 
 Console.WriteLine("");

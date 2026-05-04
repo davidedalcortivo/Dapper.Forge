@@ -51,7 +51,9 @@ namespace Dapper.Forge.MySql.Strategies
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             SqlTemplate updateRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql;
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
+
+            if (batchSize <= 0)
+                batchSize = entityArray.Length;
 
             for (int i = 0; i < entityArray.Length; i += batchSize)
             {
@@ -107,7 +109,9 @@ namespace Dapper.Forge.MySql.Strategies
             ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             SqlTemplate upsertRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql;
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
+
+            if (batchSize <= 0)
+                batchSize = entityArray.Length;
 
             for (int i = 0; i < entityArray.Length; i += batchSize)
             {

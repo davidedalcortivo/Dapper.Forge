@@ -60,7 +60,9 @@ namespace Dapper.Forge.Oracle.Strategies
             ImmutableArray <PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
+
+            if (batchSize <= 0)
+                batchSize = entityArray.Length;
 
             StringBuilder prefixBuffer = new();
             prefixBuffer.Append("    INTO ");

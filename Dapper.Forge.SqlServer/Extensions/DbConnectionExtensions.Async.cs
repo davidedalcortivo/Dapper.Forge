@@ -179,8 +179,8 @@ namespace Dapper.Forge.PostgreSql.Extensions
 
         public static async Task<int> InsertRangeAsync<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
-            int chunkSize = Math.Min(SqlDialectStrategy.Instance.MaxParameterCount / propertyInfos.Length, SqlDialectStrategy.Instance.MaxInsertRowCount);
+            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            int chunkSize = Math.Min(SqlDialectStrategy.Instance.MaxParameterCount / insertPropertyInfos.Length, SqlDialectStrategy.Instance.MaxInsertRowCount);
 
             return await DbExecutionStrategy.Instance.InsertRangeImplAsync(connection, false, entities, batchSize, chunkSize, transaction, commandTimeout, cancellationToken);
         }

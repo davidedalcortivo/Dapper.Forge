@@ -130,7 +130,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             WarmUpCache<TEntity>();
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
+            ImmutableArray<PropertyInfo> updatePropertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
@@ -140,47 +140,47 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName]) + " = " + SqlDialectStrategy.RenderParameter(idParameterName);
             parameters.Add(idParameterName, propertyGettersByPropertyName[idParameterName](entity));
 
-            return BuildUpdateCommand<TEntity>(propertyInfos, x => propertyGettersByPropertyName[x](entity), clause, parameters);
+            return BuildUpdateCommand<TEntity>(updatePropertyInfos, x => propertyGettersByPropertyName[x](entity), clause, parameters);
         }
 
         public virtual DbCommandInfo UpdateCommand<TEntity>(object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             WarmUpCache<TEntity>();
-            PropertyInfo[] propertyInfos = ParamPropertyCache.GetProperties(param);
-            ImmutableDictionary<string, Func<object, object?>> propertyGetters = ParamGetterCache.GetPropertyGetters(param);
+            PropertyInfo[] paramPropertyInfos = ParamPropertyCache.GetProperties(param);
+            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.GetPropertyGetters(param);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildUpdateCommand<TEntity>(propertyInfos, x => propertyGetters[x](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(paramPropertyInfos, x => paramPropertyGetters[x](param), clause, parameters);
         }
 
         public virtual DbCommandInfo UpdateCommand<TEntity>(object param, IFilterNode? filterNode) where TEntity : class
         {
             WarmUpCache<TEntity>();
-            PropertyInfo[] propertyInfos = ParamPropertyCache.GetProperties(param);
-            ImmutableDictionary<string, Func<object, object?>> propertyGetters = ParamGetterCache.GetPropertyGetters(param);
+            PropertyInfo[] paramPropertyInfos = ParamPropertyCache.GetProperties(param);
+            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.GetPropertyGetters(param);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildUpdateCommand<TEntity>(propertyInfos, x => propertyGetters[x](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(paramPropertyInfos, x => paramPropertyGetters[x](param), clause, parameters);
         }
 
         public virtual DbCommandInfo InsertCommand<TEntity>(TEntity entity) where TEntity : class
         {
             WarmUpCache<TEntity>();
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             StringBuilder sqlBuffer = new();
             DynamicParameters parameters = new();
 
-            for (int i = 0; i < propertyInfos.Length; i++)
+            for (int i = 0; i < insertPropertyInfos.Length; i++)
             {
-                string parameterName = propertyInfos[i].Name;
+                string parameterName = insertPropertyInfos[i].Name;
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 sqlBuffer.Append("    ");
                 sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
-                sqlBuffer.AppendSeparator(i, propertyInfos.Length, false);
+                sqlBuffer.AppendSeparator(i, insertPropertyInfos.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.InsertSql.Render(sqlBuffer);
@@ -240,24 +240,12 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             WarmUpCache<TEntity>();
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            List<object> idList;
+            List<object> idList = [];
 
-            if (ids is List<object?> list)
+            foreach (object? id in ids)
             {
-                foreach (object? id in list)
-                    EnsureIdType<TEntity>(idPropertyInfo, id);
-
-                idList = list!;
-            }
-            else
-            {
-                idList = [];
-
-                foreach (object? id in ids)
-                {
-                    EnsureIdType<TEntity>(idPropertyInfo, id);
-                    idList.Add(id);
-                }
+                EnsureIdType<TEntity>(idPropertyInfo, id);
+                idList.Add(id);
             }
 
             return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.GetByIdRangeSql, idList, batchSize, chunkSize, idPropertyInfo, true);
@@ -274,10 +262,12 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             if (entityArray.Length == 0)
                 return commands;
 
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             SqlTemplate insertRangeSql = SqlBuilderCache<TEntity, TStrategy>.InsertRangeSql;
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
+
+            if (batchSize <= 0)
+                batchSize = entityArray.Length;
 
             StringBuilder batchBuffer = new();
             DynamicParameters parameters = new();
@@ -296,13 +286,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 {
                     sqlBuffer.Append("    (");
 
-                    for (int k = 0; k < propertyInfos.Length; k++)
+                    for (int k = 0; k < insertPropertyInfos.Length; k++)
                     {
-                        string parameterName = propertyInfos[k].Name;
+                        string parameterName = insertPropertyInfos[k].Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
+                        sqlBuffer.AppendSeparator(k, insertPropertyInfos.Length, true);
                     }
 
                     sqlBuffer.Append(')');
@@ -330,8 +320,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             WarmUpCache<TEntity>();
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
             Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idPropertyInfo.Name];
-
             List<object> idList = [.. entities.Select(x => propertyGetter(x)!)];
+
             return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idPropertyInfo, false);
         }
 

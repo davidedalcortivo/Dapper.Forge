@@ -1,4 +1,5 @@
 ﻿using Dapper.Forge.Core.Models;
+using System.Data;
 using System.Data.Common;
 
 
@@ -61,12 +62,21 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             if (commands.Count == 0)
                 return result;
 
+            bool ownsConnection = connection.State == ConnectionState.Closed;
             bool ownsTransaction = transaction is null;
             DbTransaction? _transaction = transaction;
 
             try
             {
                 DbTransaction? tempTransaction = null;
+
+                if (ownsConnection)
+                {
+                    if (sync)
+                        connection.Open();
+                    else
+                        await connection.OpenAsync(cancellationToken);
+                }
 
                 if (ownsTransaction)
                 {
@@ -108,6 +118,16 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 }
 
                 throw;
+            }
+            finally
+            {
+                if (ownsConnection)
+                {
+                    if (sync)
+                        connection.Close();
+                    else
+                        await connection.CloseAsync();
+                }
             }
 
             return result;

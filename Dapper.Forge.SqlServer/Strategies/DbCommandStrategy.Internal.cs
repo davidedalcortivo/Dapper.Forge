@@ -36,7 +36,9 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
+
+            if (batchSize <= 0)
+                batchSize = entityArray.Length;
 
             StringBuilder batchBuffer = new();
             DynamicParameters parameters = new();

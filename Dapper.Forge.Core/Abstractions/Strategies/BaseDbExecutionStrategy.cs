@@ -156,16 +156,18 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         public virtual async Task<IReadOnlyList<TEntity?>> GetByIdRangeImplAsync<TEntity>(DbConnection connection, bool sync, IEnumerable ids, bool preserveDuplicates, bool preserveNulls, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             List<object?> idList = [];
+            HashSet<object?> idSet = [];
 
             if (preserveDuplicates)
             {
                 foreach (object? id in ids)
+                {
                     idList.Add(id);
+                    idSet.Add(id);
+                }
             }
             else
             {
-                HashSet<object?> idSet = [];
-
                 foreach (object? id in ids)
                 {
                     if (idSet.Add(id))
@@ -173,7 +175,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 }
             }
 
-            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.GetByIdRangeCommands<TEntity>(idList, batchSize, chunkSize);
+            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.GetByIdRangeCommands<TEntity>(idSet, batchSize, chunkSize);
             List<TEntity> entityList = [];
 
             if (commands.Count == 0)
@@ -181,7 +183,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
             Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idPropertyInfo.Name];
-            Dictionary<object, List<int>> indexesById = new(idList.Count);
+            Dictionary<object, List<int>> indexesById = new(idSet.Count);
             TEntity?[] entityArray = new TEntity?[idList.Count];
 
             for (int i = 0; i < idList.Count; i++)

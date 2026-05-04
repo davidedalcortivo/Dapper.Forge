@@ -22,7 +22,9 @@ namespace Dapper.Forge.Oracle.Strategies
             ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
-            batchSize = batchSize <= 0 ? entityArray.Length : batchSize;
+
+            if (batchSize <= 0)
+                batchSize = entityArray.Length;
 
             for (int i = 0; i < entityArray.Length; i += batchSize)
             {

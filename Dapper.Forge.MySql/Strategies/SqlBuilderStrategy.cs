@@ -77,7 +77,7 @@ namespace Dapper.Forge.MySql.Strategies
         {
             StringBuilder sqlBuffer = new();
 
-            sqlBuffer.AppendLine("SELECT EXISTS(");
+            sqlBuffer.AppendLine("SELECT EXISTS (");
             sqlBuffer.AppendLine("    SELECT");
             sqlBuffer.Append("        1");
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "    ", null);

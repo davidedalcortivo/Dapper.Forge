@@ -49,8 +49,8 @@ namespace Dapper.Forge.PostgreSql.Strategies
         public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
             WarmUpCache<TEntity>();
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
-            return BuildUpsertRangeCommands(propertyInfos, entities, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql, "    ");
+            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            return BuildUpsertRangeCommands(insertPropertyInfos, entities, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql, "    ");
         }
     }
 }

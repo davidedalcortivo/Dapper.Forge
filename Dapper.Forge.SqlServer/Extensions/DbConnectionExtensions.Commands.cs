@@ -179,8 +179,8 @@ namespace Dapper.Forge.PostgreSql.Extensions
 
         public static IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(this SqlConnection _, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
-            int chunkSize = Math.Min(SqlDialectStrategy.Instance.MaxParameterCount / propertyInfos.Length, SqlDialectStrategy.Instance.MaxInsertRowCount);
+            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            int chunkSize = Math.Min(SqlDialectStrategy.Instance.MaxParameterCount / insertPropertyInfos.Length, SqlDialectStrategy.Instance.MaxInsertRowCount);
 
             return DbCommandStrategy.Instance.InsertRangeCommands(entities, batchSize, chunkSize);
         }

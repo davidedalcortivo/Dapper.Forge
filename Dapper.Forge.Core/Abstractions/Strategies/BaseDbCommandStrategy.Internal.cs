@@ -138,12 +138,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             for (int i = 0; i < idArray.Length; i++)
                 idArray[i] = (TKey)idList[i];
 
-            batchSize = batchSize <= 0 ? idArray.Length : batchSize;
-            int j = 0;
+            if (batchSize <= 0)
+                batchSize = idArray.Length;
 
             StringBuilder batchBuffer = new();
             DynamicParameters parameters = new();
             int _batchSize = batchSize;
+            int j = 0;
             int s = 0;
 
             for (int i = 0; i < idArray.Length; i += _batchSize)

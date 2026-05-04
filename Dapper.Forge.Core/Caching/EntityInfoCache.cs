@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 using System.Reflection;
 
 
@@ -64,8 +63,8 @@ namespace Dapper.Forge.Core.Caching
             TableName = entityType.GetCustomAttribute<TableAttribute>()?.Name ?? $"{entityType.Name}s";
 
             PropertyInfos = [.. stack];
-            UpdatePropertyInfos = [.. PropertyInfos.Where(x => !(x == IdPropertyInfo || x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption != DatabaseGeneratedOption.None))];
-            InsertPropertyInfos = [.. PropertyInfos.Where(x => !(x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption != DatabaseGeneratedOption.None))];
+            UpdatePropertyInfos = [.. PropertyInfos.Where(x => !(x == IdPropertyInfo || x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
+            InsertPropertyInfos = [.. PropertyInfos.Where(x => !(x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
 
             ImmutableDictionary<string, string>.Builder columnNamesBuilder = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
             ImmutableDictionary<string, PropertyInfo>.Builder PropertyInfosBuilder = ImmutableDictionary.CreateBuilder<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);

@@ -20,8 +20,8 @@ namespace Dapper.Forge.Oracle.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]);
-            string sourceTable = SqlDialectStrategy.RenderIdentifier("source");
-            string targetTable = SqlDialectStrategy.RenderIdentifier("target");
+            string sourceTable = SqlDialectStrategy.RenderIdentifier("SOURCE");
+            string targetTable = SqlDialectStrategy.RenderIdentifier("TARGET");
             string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
 
             StringBuilder sqlBuffer = new();

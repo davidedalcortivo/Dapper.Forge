@@ -34,7 +34,7 @@ namespace Dapper.Forge.SqlServer.Strategies
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
             PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
@@ -62,7 +62,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append("    INSERT INTO ");
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", propertyInfos, null, false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, null, false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("    )");
             sqlBuffer.AppendLine("    VALUES (");
@@ -80,8 +80,8 @@ namespace Dapper.Forge.SqlServer.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]);
-            string sourceTable = SqlDialectStrategy.RenderIdentifier("source");
-            string targetTable = SqlDialectStrategy.RenderIdentifier("target");
+            string sourceTable = SqlDialectStrategy.RenderIdentifier("Source");
+            string targetTable = SqlDialectStrategy.RenderIdentifier("Target");
 
             StringBuilder sqlBuffer = new();
             string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
@@ -100,8 +100,8 @@ namespace Dapper.Forge.SqlServer.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]);
-            string sourceTable = SqlDialectStrategy.RenderIdentifier("source");
-            string targetTable = SqlDialectStrategy.RenderIdentifier("target");
+            string sourceTable = SqlDialectStrategy.RenderIdentifier("Source");
+            string targetTable = SqlDialectStrategy.RenderIdentifier("Target");
 
             StringBuilder sqlBuffer = new();
             string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
