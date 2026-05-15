@@ -1,10 +1,12 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
+using MySqlConnector;
+using System.Data.Common;
 using System.Text;
 
 
 namespace Dapper.Forge.MySql.Strategies
 {
-    internal class SqlDialectStrategy : BaseSqlDialectStrategy
+    internal partial class SqlDialectStrategy : BaseSqlDialectStrategy
     {
         public static SqlDialectStrategy Instance { get; } = new();
 
@@ -31,6 +33,12 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.Append(skipParameter);
 
             return sqlBuffer.ToString();
+        }
+
+        public override string GetConnectionId(DbConnection connection)
+        {
+            MySqlConnectionStringBuilder builder = new(connection.ConnectionString);
+            return "mysql://" + builder.Server + ":" + builder.Port + "/" + builder.Database;
         }
     }
 }

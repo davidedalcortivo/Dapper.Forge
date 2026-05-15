@@ -23,9 +23,9 @@ namespace Dapper.Forge.Core.Utilities
             return sqlBuffer;
         }
 
-        public static StringBuilder AppendColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, string indentation, ImmutableArray<PropertyInfo> propertyInfos, string? table, bool useAlias, bool inLine) where TEntity : class
+        public static StringBuilder AppendColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, string indentation, IReadOnlyList<PropertyInfo> properties, string? table, bool useAlias, bool inLine) where TEntity : class
         {
-            if (propertyInfos.Length == 0)
+            if (properties.Count == 0)
                 return sqlBuffer;
 
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
@@ -33,10 +33,10 @@ namespace Dapper.Forge.Core.Utilities
             if (!inLine)
                 sqlBuffer.AppendLine();
 
-            for (int i = 0; i < propertyInfos.Length; i++)
+            for (int i = 0; i < properties.Count; i++)
             {
-                PropertyInfo propertyInfo = propertyInfos[i];
-                string columnName = columnNamesByPropertyName[propertyInfo.Name];
+                PropertyInfo property = properties[i];
+                string columnName = columnNamesByPropertyName[property.Name];
 
                 sqlBuffer.Append(indentation);
 
@@ -48,30 +48,30 @@ namespace Dapper.Forge.Core.Utilities
 
                 sqlBuffer.Append(strategy.RenderIdentifier(columnName));
 
-                if (useAlias && columnName != propertyInfo.Name)
+                if (useAlias && columnName != property.Name)
                 {
                     sqlBuffer.Append(" AS ");
-                    sqlBuffer.Append(strategy.RenderIdentifier(propertyInfo.Name));
+                    sqlBuffer.Append(strategy.RenderIdentifier(property.Name));
                 }
 
-                sqlBuffer.AppendSeparator(i, propertyInfos.Length, inLine);
+                sqlBuffer.AppendSeparator(i, properties.Count, inLine);
             }
 
             return sqlBuffer;
         }
 
-        public static StringBuilder AppendSetColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, string indentation, ImmutableArray<PropertyInfo> propertyInfos, string? sourceTable, string? targetTable) where TEntity : class
+        public static StringBuilder AppendSetColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, string indentation, IReadOnlyList<PropertyInfo> properties, string? sourceTable, string? targetTable) where TEntity : class
         {
-            if (propertyInfos.Length == 0)
+            if (properties.Count == 0)
                 return sqlBuffer;
 
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             sqlBuffer.AppendLine();
 
-            for (int i = 0; i < propertyInfos.Length; i++)
+            for (int i = 0; i < properties.Count; i++)
             {
-                string column = strategy.RenderIdentifier(columnNamesByPropertyName[propertyInfos[i].Name]);
+                string column = strategy.RenderIdentifier(columnNamesByPropertyName[properties[i].Name]);
                 sqlBuffer.Append(indentation);
 
                 if (targetTable is not null)
@@ -90,7 +90,7 @@ namespace Dapper.Forge.Core.Utilities
                 }
 
                 sqlBuffer.Append(column);
-                sqlBuffer.AppendSeparator(i, propertyInfos.Length, false);
+                sqlBuffer.AppendSeparator(i, properties.Count, false);
             }
 
             return sqlBuffer;
@@ -151,7 +151,7 @@ namespace Dapper.Forge.Core.Utilities
             List<SortDescriptor> sortDescriptorList = sortDescriptors is null ? [] : sortDescriptors.AsList();
 
             if (forceSorting && sortDescriptorList.Count == 0)
-                sortDescriptorList.Add(new(EntityInfoCache<TEntity>.IdPropertyInfo.Name));
+                sortDescriptorList.Add(new(EntityInfoCache<TEntity>.IdProperty.Name));
 
             if (sortDescriptorList.Count > 0)
             {
@@ -178,17 +178,10 @@ namespace Dapper.Forge.Core.Utilities
             return sqlBuffer;
         }
 
-        public static StringBuilder AppendAndBindParameter(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, DynamicParameters parameters, string parameterName, object? parameterValue)
+        public static StringBuilder AppendAndBindParameter(this StringBuilder sqlBuffer, ISqlDialectStrategy strategy, DynamicParameters parameters, string name, object? value)
         {
-            if (parameterValue is null)
-            {
-                sqlBuffer.Append(strategy.NullValue);
-            }
-            else
-            {
-                sqlBuffer.Append(strategy.RenderParameter(parameterName));
-                parameters.Add(parameterName, parameterValue);
-            }
+            sqlBuffer.Append(strategy.RenderParameter(name));
+            parameters.Add(name, value);
 
             return sqlBuffer;
         }

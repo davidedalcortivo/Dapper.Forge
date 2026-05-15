@@ -10,24 +10,24 @@ namespace Dapper.Forge.Core.Caching
     {
         private static readonly ConcurrentDictionary<Type, ImmutableDictionary<string, Func<object, object?>>> _cache = new();
 
-        public static ImmutableDictionary<string, Func<object, object?>> GetPropertyGetters(object param)
+        public static ImmutableDictionary<string, Func<object, object?>> Get(object param)
         {
             return _cache.GetOrAdd(param.GetType(), Create);
         }
 
         private static ImmutableDictionary<string, Func<object, object?>> Create(Type type)
         {
-            PropertyInfo[] properties = ParamPropertyCache.GetProperties(type);
+            PropertyInfo[] properties = ParamPropertyCache.Get(type);
             ImmutableDictionary<string, Func<object, object?>>.Builder builder = ImmutableDictionary.CreateBuilder<string, Func<object, object?>>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (PropertyInfo propertyInfo in properties)
+            foreach (PropertyInfo property in properties)
             {
-                MethodInfo? getMethod = propertyInfo.GetMethod;
+                MethodInfo? getMethod = property.GetMethod;
 
                 if (getMethod is null)
                     continue;
 
-                builder[propertyInfo.Name] = PropertyHelper.BuildGetterExpression<object>(propertyInfo);
+                builder[property.Name] = PropertyHelper.BuildGetterExpression<object>(property);
             }
 
             return builder.ToImmutable();

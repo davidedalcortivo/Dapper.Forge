@@ -3,6 +3,7 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
+using System.Data.Common;
 using System.Reflection;
 using System.Text;
 
@@ -15,41 +16,38 @@ namespace Dapper.Forge.Oracle.Strategies
 
         private DbCommandStrategy(SqlBuilderStrategy strategy) : base(strategy) { }
 
-        public override DbCommandInfo UpsertCommand<TEntity>(TEntity entity) where TEntity : class
+        public override DbCommandInfo UpsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             StringBuilder sqlBuffer = new();
             DynamicParameters parameters = new();
 
-            for (int i = 0; i < propertyInfos.Length; i++)
+            for (int i = 0; i < properties.Length; i++)
             {
-                string parameterName = propertyInfos[i].Name;
+                string parameterName = properties[i].Name;
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 sqlBuffer.Append("        ");
                 sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
                 sqlBuffer.Append(" AS ");
                 sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
-                sqlBuffer.AppendSeparator(i, propertyInfos.Length, false);
+                sqlBuffer.AppendSeparator(i, properties.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
 
-        public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             return BuildUpsertRangeCommands(entities, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql);
         }
 
-        public override IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public override IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
@@ -57,7 +55,7 @@ namespace Dapper.Forge.Oracle.Strategies
                 return commands;
 
             string tableName = EntityInfoCache<TEntity>.TableName;
-            ImmutableArray <PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            ImmutableArray <PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -69,10 +67,10 @@ namespace Dapper.Forge.Oracle.Strategies
             prefixBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             prefixBuffer.Append(" (");
 
-            for (int i = 0; i < insertPropertyInfos.Length; i++)
+            for (int i = 0; i < insertProperties.Length; i++)
             {
-                prefixBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[insertPropertyInfos[i].Name]));
-                prefixBuffer.AppendSeparator(i, insertPropertyInfos.Length, true);
+                prefixBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[insertProperties[i].Name]));
+                prefixBuffer.AppendSeparator(i, insertProperties.Length, true);
             }
 
             prefixBuffer.Append(") VALUES (");
@@ -88,14 +86,14 @@ namespace Dapper.Forge.Oracle.Strategies
                 {
                     sqlBuffer.Append(prefixBuffer);
 
-                    for (int k = 0; k < insertPropertyInfos.Length; k++)
+                    for (int k = 0; k < insertProperties.Length; k++)
                     {
-                        PropertyInfo propertyInfo = insertPropertyInfos[k];
-                        string parameterName = propertyInfo.Name;
+                        PropertyInfo property = insertProperties[k];
+                        string parameterName = property.Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-                        sqlBuffer.AppendSeparator(k, insertPropertyInfos.Length, true);
+                        sqlBuffer.AppendSeparator(k, insertProperties.Length, true);
                     }
 
                     sqlBuffer.Append(')');
@@ -111,9 +109,8 @@ namespace Dapper.Forge.Oracle.Strategies
             return commands;
         }
 
-        public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             return BuildUpsertRangeCommands(entities, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql);
         }
     }

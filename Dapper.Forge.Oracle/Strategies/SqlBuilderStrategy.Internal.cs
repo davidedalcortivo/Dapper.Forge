@@ -14,12 +14,12 @@ namespace Dapper.Forge.Oracle.Strategies
         private SqlTemplate BuildUpsertSql<TEntity>(bool isRange, bool appendInsert) where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            ImmutableArray<PropertyInfo> updatePropertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
-            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]);
+            string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]);
             string sourceTable = SqlDialectStrategy.RenderIdentifier("SOURCE");
             string targetTable = SqlDialectStrategy.RenderIdentifier("TARGET");
             string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
@@ -50,18 +50,18 @@ namespace Dapper.Forge.Oracle.Strategies
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("WHEN MATCHED THEN");
             sqlBuffer.Append("    UPDATE SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "        ", updatePropertyInfos, sourceTable, targetTable);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "        ", updateProperties, sourceTable, targetTable);
 
             if (appendInsert)
             {
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("WHEN NOT MATCHED THEN");
                 sqlBuffer.Append("    INSERT (");
-                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, null, false, false);
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertProperties, null, false, false);
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("    )");
                 sqlBuffer.Append("    VALUES (");
-                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertPropertyInfos, sourceTable, false, false);
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertProperties, sourceTable, false, false);
                 sqlBuffer.AppendLine();
                 sqlBuffer.Append("    )");
             }

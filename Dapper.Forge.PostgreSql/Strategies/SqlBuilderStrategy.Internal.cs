@@ -14,9 +14,9 @@ namespace Dapper.Forge.PostgreSql.Strategies
         private SqlTemplate BuildUpsertSql<TEntity>(bool isRange) where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            ImmutableArray<PropertyInfo> updatePropertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
-            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
@@ -24,7 +24,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append("INSERT INTO ");
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertPropertyInfos, null, false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.Append("VALUES");
@@ -42,11 +42,11 @@ namespace Dapper.Forge.PostgreSql.Strategies
             }
             
             sqlBuffer.Append("ON CONFLICT (");
-            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]));
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]));
             sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("DO UPDATE");
             sqlBuffer.Append("SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updatePropertyInfos, "EXCLUDED", null);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, "EXCLUDED", null);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }

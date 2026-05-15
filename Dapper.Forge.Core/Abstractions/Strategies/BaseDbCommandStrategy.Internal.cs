@@ -12,13 +12,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 {
     public abstract partial class BaseDbCommandStrategy<TStrategy> : IDbCommandStrategy where TStrategy : ISqlBuilderStrategy
     {
-        protected virtual void EnsureIdType<TEntity>(PropertyInfo idPropertyInfo, object? id) where TEntity : class
+        protected virtual void EnsureIdType<TEntity>(PropertyInfo idProperty, object? id) where TEntity : class
         {
             ArgumentNullException.ThrowIfNull(id, nameof(id));
             Type idType = id.GetType();
 
-            if (idPropertyInfo.PropertyType != idType)
-                throw new ArgumentException("The type of the provided id (" + idType + ") does not match the type of the id property (" + idPropertyInfo.PropertyType + ") for the entity " + typeof(TEntity) + ".");
+            if (idProperty.PropertyType != idType)
+                throw new ArgumentException("The type of the provided id '" + idType + "' does not match the type of the id property '" + idProperty.PropertyType + "' for the entity '" + typeof(TEntity).Name + "'.");
         }
 
         protected virtual (string?, DynamicParameters?) Translate<TEntity>(ISqlDialectStrategy sqlDialectStrategy, Expression<Func<TEntity, bool>>? predicate, DynamicParameters? parameters) where TEntity : class
@@ -92,23 +92,23 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        protected virtual DbCommandInfo BuildUpdateCommand<TEntity>(IReadOnlyList<PropertyInfo> propertyInfos, Func<string, object?> propertyGetter, string? clause, DynamicParameters? parameters) where TEntity : class
+        protected virtual DbCommandInfo BuildUpdateCommand<TEntity>(IReadOnlyList<PropertyInfo> properties, Func<string, object?> propertyGetter, string? clause, DynamicParameters? parameters) where TEntity : class
         {
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
             parameters ??= new();
 
-            for (int i = 0; i < propertyInfos.Count; i++)
+            for (int i = 0; i < properties.Count; i++)
             {
-                string parameterName = propertyInfos[i].Name;
+                string parameterName = properties[i].Name;
                 object? parameterValue = propertyGetter(parameterName);
 
                 sqlBuffer.Append("    ");
                 sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
                 sqlBuffer.Append(" = ");
                 sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
-                sqlBuffer.AppendSeparator(i, propertyInfos.Count, false);
+                sqlBuffer.AppendSeparator(i, properties.Count, false);
             }
 
             sqlBuffer.AppendWhereClause(string.Empty, clause);
@@ -126,17 +126,17 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        protected virtual List<DbCommandInfo> BuildInRangeCommands<TEntity, TKey>(SqlTemplate sqlTemplate, List<object> idList, int batchSize, int chunkSize, PropertyInfo idPropertyInfo, bool useUnion) where TEntity : class where TKey : notnull
+        protected virtual List<DbCommandInfo> BuildInRangeCommands<TEntity, TPrimaryKey>(SqlTemplate sqlTemplate, IReadOnlyList<object> idList, int batchSize, int chunkSize, PropertyInfo idProperty, bool useUnion) where TEntity : class where TPrimaryKey : notnull
         {
             List<DbCommandInfo> commands = [];
 
             if (idList.Count == 0)
                 return commands;
 
-            TKey[] idArray = new TKey[idList.Count];
+            TPrimaryKey[] idArray = new TPrimaryKey[idList.Count];
 
             for (int i = 0; i < idArray.Length; i++)
-                idArray[i] = (TKey)idList[i];
+                idArray[i] = (TPrimaryKey)idList[i];
 
             if (batchSize <= 0)
                 batchSize = idArray.Length;
@@ -155,7 +155,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 int end = Math.Min(i + _batchSize, idArray.Length);
                 StringBuilder sqlBuffer = new();
 
-                string parameterName = idPropertyInfo.Name + "Array" + j;
+                string parameterName = idProperty.Name + "Array" + j;
                 sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
                 parameters.Add(parameterName, idArray[i..end]);
 

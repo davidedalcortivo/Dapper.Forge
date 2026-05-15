@@ -10,366 +10,438 @@ namespace Dapper.Forge.Oracle.Extensions
 {
     public static partial class DbConnectionExtensions
     {
-        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection _, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetAllCommand<TEntity>((IFilterNode?)null, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetAllCommand<TEntity>(connection, (IFilterNode?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetAllCommand(predicate, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetAllCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection _, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetAllCommand<TEntity>(filterNode, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetAllCommand<TEntity>(connection, filterNode, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection _, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetFirstCommand<TEntity>((IFilterNode?)null, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstCommand<TEntity>(connection, (IFilterNode?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetFirstCommand(predicate, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection _, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetFirstCommand<TEntity>(filterNode, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstCommand<TEntity>(connection, filterNode, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection _, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand<TEntity>((IFilterNode?)null, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand<TEntity>(connection, (IFilterNode?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(predicate, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection _, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand<TEntity>(filterNode, sortDescriptors);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand<TEntity>(connection, filterNode, sortDescriptors);
         }
 
-        public static DbCommandInfo GetSingleCommand<TEntity>(this OracleConnection _) where TEntity : class
+        public static DbCommandInfo GetSingleCommand<TEntity>(this OracleConnection connection) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetSingleCommand<TEntity>((IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleCommand<TEntity>(connection, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo GetSingleCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo GetSingleCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetSingleCommand(predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleCommand(connection, predicate);
         }
 
-        public static DbCommandInfo GetSingleCommand<TEntity>(this OracleConnection _, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo GetSingleCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetSingleCommand<TEntity>(filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleCommand<TEntity>(connection, filterNode);
         }
 
-        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this OracleConnection _) where TEntity : class
+        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this OracleConnection connection) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand<TEntity>((IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand<TEntity>(connection, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand(predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand(connection, predicate);
         }
 
-        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this OracleConnection _, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand<TEntity>(filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand<TEntity>(connection, filterNode);
         }
 
-        public static DbCommandInfo GetByIdCommand<TEntity>(this OracleConnection _, object id) where TEntity : class
+        public static DbCommandInfo GetByIdCommand<TEntity>(this OracleConnection connection, object id) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetByIdCommand<TEntity>(id);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetByIdCommand<TEntity>(connection, id);
         }
 
-        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection _, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetPageCommand<TEntity>((IFilterNode?)null, sortDescriptors, skip, take);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetPageCommand<TEntity>(connection, (IFilterNode?)null, sortDescriptors, skip, take);
         }
 
-        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetPageCommand(predicate, sortDescriptors, skip, take);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetPageCommand(connection, predicate, sortDescriptors, skip, take);
         }
 
-        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection _, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetPageCommand<TEntity>(filterNode, sortDescriptors, skip, take);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetPageCommand<TEntity>(connection, filterNode, sortDescriptors, skip, take);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection _, TEntity entity) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection connection, TEntity entity) where TEntity : class
         {
-            return DbCommandStrategy.Instance.UpdateCommand(entity);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, entity);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection _, object param) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection connection, object param) where TEntity : class
         {
-            return DbCommandStrategy.Instance.UpdateCommand<TEntity>(param, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateCommand<TEntity>(connection, param, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection _, object param, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection connection, object param, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.UpdateCommand(param, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, param, predicate);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection _, object param, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection connection, object param, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.UpdateCommand<TEntity>(param, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateCommand<TEntity>(connection, param, filterNode);
         }
 
-        public static DbCommandInfo InsertCommand<TEntity>(this OracleConnection _, TEntity entity) where TEntity : class
+        public static DbCommandInfo InsertCommand<TEntity>(this OracleConnection connection, TEntity entity) where TEntity : class
         {
-            return DbCommandStrategy.Instance.InsertCommand(entity);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.InsertCommand(connection, entity);
         }
 
-        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection _, TEntity entity) where TEntity : class
+        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection connection, TEntity entity) where TEntity : class
         {
-            return DbCommandStrategy.Instance.DeleteCommand(entity);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand(connection, entity);
         }
 
-        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection _, object id) where TEntity : class
+        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection connection, object id) where TEntity : class
         {
-            return DbCommandStrategy.Instance.DeleteCommand<TEntity>(id);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand<TEntity>(connection, id);
         }
 
-        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection _) where TEntity : class
+        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection connection) where TEntity : class
         {
-            return DbCommandStrategy.Instance.DeleteCommand<TEntity>((IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand<TEntity>(connection, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.DeleteCommand(predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand(connection, predicate);
         }
 
-        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection _, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo DeleteCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.DeleteCommand<TEntity>(filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand<TEntity>(connection, filterNode);
         }
 
-        public static DbCommandInfo UpsertCommand<TEntity>(this OracleConnection _, TEntity entity) where TEntity : class
+        public static DbCommandInfo UpsertCommand<TEntity>(this OracleConnection connection, TEntity entity) where TEntity : class
         {
-            return DbCommandStrategy.Instance.UpsertCommand(entity);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpsertCommand(connection, entity);
         }
 
-        public static IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(this OracleConnection _, IEnumerable ids, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(this OracleConnection connection, IEnumerable ids, int batchSize = 500) where TEntity : class
         {
-            return DbCommandStrategy.Instance.GetByIdRangeCommands<TEntity>(ids, batchSize, SqlDialectStrategy.Instance.MaxInValueCount);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetByIdRangeCommands<TEntity>(connection, ids, batchSize, SqlDialectStrategy.Instance.MaxInValueCount);
         }
 
-        public static IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(this OracleConnection _, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {
-            return DbCommandStrategy.Instance.UpdateRangeCommands(entities, batchSize, 0);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateRangeCommands(connection, entities, batchSize, 0);
         }
 
-        public static IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(this OracleConnection _, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {
-            return DbCommandStrategy.Instance.InsertRangeCommands(entities, batchSize, 0);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.InsertRangeCommands(connection, entities, batchSize, 0);
         }
 
-        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this OracleConnection _, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount);
-            return DbCommandStrategy.Instance.DeleteRangeCommands(entities, batchSize, 0);
+            return DbCommandStrategy.Instance.DeleteRangeCommands(connection, entities, batchSize, 0);
         }
 
-        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this OracleConnection _, IEnumerable ids, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this OracleConnection connection, IEnumerable ids, int batchSize = 500) where TEntity : class
         {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount);
-            return DbCommandStrategy.Instance.DeleteRangeCommands<TEntity>(ids, batchSize, 0);
+            return DbCommandStrategy.Instance.DeleteRangeCommands<TEntity>(connection, ids, batchSize, 0);
         }
 
-        public static IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(this OracleConnection _, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
+        public static IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {
-            return DbCommandStrategy.Instance.UpsertRangeCommands(entities, batchSize, 0);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpsertRangeCommands(connection, entities, batchSize, 0);
         }
 
-        public static DbCommandInfo ExistsCommand<TEntity>(this OracleConnection _) where TEntity : class
+        public static DbCommandInfo ExistsCommand<TEntity>(this OracleConnection connection) where TEntity : class
         {
-            return DbCommandStrategy.Instance.ExistsCommand<TEntity>((IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.ExistsCommand<TEntity>(connection, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo ExistsCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo ExistsCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.ExistsCommand(predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.ExistsCommand(connection, predicate);
         }
 
-        public static DbCommandInfo ExistsCommand<TEntity>(this OracleConnection _, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo ExistsCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.ExistsCommand<TEntity>(filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.ExistsCommand<TEntity>(connection, filterNode);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand<TEntity>((string?)null, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand<TEntity>(connection, (string?)null, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand((string?)null, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, (string?)null, predicate);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand<TEntity>((string?)null, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand<TEntity>(connection, (string?)null, filterNode);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, object?>> selector) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand(selector, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, selector, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand(selector, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand(selector, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, selector, filterNode);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _, string propertyName) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection, string propertyName) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand<TEntity>(propertyName, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand<TEntity>(connection, propertyName, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand(propertyName, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection _, string propertyName, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.CountCommand<TEntity>(propertyName, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand<TEntity>(connection, propertyName, filterNode);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
         {
-            return DbCommandStrategy.Instance.AvgCommand(selector, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, selector, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.AvgCommand(selector, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.AvgCommand(selector, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, selector, filterNode);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection _, string propertyName) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection connection, string propertyName) where TEntity : class
         {
-            return DbCommandStrategy.Instance.AvgCommand<TEntity>(propertyName, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand<TEntity>(connection, propertyName, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection _, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.AvgCommand(propertyName, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection _, string propertyName, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.AvgCommand<TEntity>(propertyName, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand<TEntity>(connection, propertyName, filterNode);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
         {
-            return DbCommandStrategy.Instance.SumCommand(selector, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, selector, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.SumCommand(selector, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.SumCommand(selector, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, selector, filterNode);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection _, string propertyName) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection connection, string propertyName) where TEntity : class
         {
-            return DbCommandStrategy.Instance.SumCommand<TEntity>(propertyName, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand<TEntity>(connection, propertyName, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection _, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.SumCommand(propertyName, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection _, string propertyName, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.SumCommand<TEntity>(propertyName, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand<TEntity>(connection, propertyName, filterNode);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MinCommand(selector, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand(connection, selector, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MinCommand(selector, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MinCommand(selector, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand(connection, selector, filterNode);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection _, string propertyName) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, string propertyName) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MinCommand<TEntity>(propertyName, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand<TEntity>(connection, propertyName, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection _, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MinCommand(propertyName, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection _, string propertyName, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MinCommand<TEntity>(propertyName, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand<TEntity>(connection, propertyName, filterNode);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MaxCommand(selector, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand(connection, selector, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MaxCommand(selector, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection _, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MaxCommand(selector, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand(connection, selector, filterNode);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection _, string propertyName) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, string propertyName) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MaxCommand<TEntity>(propertyName, (IFilterNode?)null);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand<TEntity>(connection, propertyName, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection _, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MaxCommand(propertyName, predicate);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection _, string propertyName, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode) where TEntity : class
         {
-            return DbCommandStrategy.Instance.MaxCommand<TEntity>(propertyName, filterNode);
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand<TEntity>(connection, propertyName, filterNode);
         }
     }
 }

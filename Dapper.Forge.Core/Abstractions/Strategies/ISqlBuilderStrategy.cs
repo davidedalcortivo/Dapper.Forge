@@ -25,5 +25,6 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         SqlTemplate SumSqlBuilder<TEntity>() where TEntity : class;
         SqlTemplate MinSqlBuilder<TEntity>() where TEntity : class;
         SqlTemplate MaxSqlBuilder<TEntity>() where TEntity : class;
+        SqlTemplate GetColumnsSqlBuilder<TEntity>() where TEntity : class;
     }
 }

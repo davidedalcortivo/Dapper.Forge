@@ -17,12 +17,12 @@ namespace Dapper.Forge.MySql.Strategies
 
         public override SqlTemplate GetFirstSqlBuilder<TEntity>() where TEntity : class
         {
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
 
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", propertyInfos, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.AppendLine("{}");
             sqlBuffer.AppendLine("LIMIT");
@@ -40,11 +40,11 @@ namespace Dapper.Forge.MySql.Strategies
         public override SqlTemplate UpdateRangeSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            ImmutableArray<PropertyInfo> updatePropertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idPropertyInfo.Name]);
+            string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]);
             string sourceTable = SqlDialectStrategy.RenderIdentifier("source");
             string targetTable = SqlDialectStrategy.RenderIdentifier("target");
             string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
@@ -62,7 +62,7 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.AppendOnClause(string.Empty, clause);
             sqlBuffer.AppendLine();
             sqlBuffer.Append("SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updatePropertyInfos, sourceTable, targetTable);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, sourceTable, targetTable);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
@@ -86,6 +86,39 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+        }
+
+        public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
+        {
+            string columnsTable = SqlDialectStrategy.RenderIdentifier("information_schema") + "." + SqlDialectStrategy.RenderIdentifier("columns");
+            string columnNameColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("COLUMN_NAME");
+            string ordinalPositionColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("ORDINAL_POSITION");
+            string tableNameColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("TABLE_NAME");
+            string tableSchemaColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("TABLE_SCHEMA");
+
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(columnNameColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.Name)));
+            sqlBuffer.AppendLine(",");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(ordinalPositionColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
+            sqlBuffer.AppendLine("FROM");
+            sqlBuffer.Append("    ");
+            sqlBuffer.AppendLine(columnsTable);
+            sqlBuffer.AppendWhereClause(string.Empty, tableSchemaColumn + " = {} AND " + tableNameColumn + " = {}");
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("ORDER BY");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(ordinalPositionColumn);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+
+            return new SqlTemplate(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
     }
 }

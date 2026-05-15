@@ -9,24 +9,25 @@ namespace Dapper.Forge.Core.Caching
         private static bool _isInitialized = false;
         private static readonly object _lock = new();
 
-        public static SqlTemplate GetAllSql { get; private set; } = new();
-        public static SqlTemplate GetFirstSql { get; private set; } = new();
-        public static SqlTemplate GetByIdSql { get; private set; } = new();
-        public static SqlTemplate UpdateSql { get; private set; } = new();
-        public static SqlTemplate InsertSql { get; private set; } = new();
-        public static SqlTemplate DeleteSql { get; private set; } = new();
-        public static SqlTemplate UpsertSql { get; private set; } = new();
-        public static SqlTemplate GetByIdRangeSql { get; private set; } = new();
-        public static SqlTemplate UpdateRangeSql { get; private set; } = new();
-        public static SqlTemplate InsertRangeSql { get; private set; } = new();
-        public static SqlTemplate DeleteRangeSql { get; private set; } = new();
-        public static SqlTemplate UpsertRangeSql { get; private set; } = new();
-        public static SqlTemplate ExistsSql { get; private set; } = new();
-        public static SqlTemplate CountSql { get; private set; } = new();
-        public static SqlTemplate AvgSql { get; private set; } = new();
-        public static SqlTemplate SumSql { get; private set; } = new();
-        public static SqlTemplate MinSql { get; private set; } = new();
-        public static SqlTemplate MaxSql { get; private set; } = new();
+        public static SqlTemplate GetAllSql { get; private set; } = null!;
+        public static SqlTemplate GetFirstSql { get; private set; } = null!;
+        public static SqlTemplate GetByIdSql { get; private set; } = null!;
+        public static SqlTemplate UpdateSql { get; private set; } = null!;
+        public static SqlTemplate InsertSql { get; private set; } = null!;
+        public static SqlTemplate DeleteSql { get; private set; } = null!;
+        public static SqlTemplate UpsertSql { get; private set; } = null!;
+        public static SqlTemplate GetByIdRangeSql { get; private set; } = null!;
+        public static SqlTemplate UpdateRangeSql { get; private set; } = null!;
+        public static SqlTemplate InsertRangeSql { get; private set; } = null!;
+        public static SqlTemplate DeleteRangeSql { get; private set; } = null!;
+        public static SqlTemplate UpsertRangeSql { get; private set; } = null!;
+        public static SqlTemplate ExistsSql { get; private set; } = null!;
+        public static SqlTemplate CountSql { get; private set; } = null!;
+        public static SqlTemplate AvgSql { get; private set; } = null!;
+        public static SqlTemplate SumSql { get; private set; } = null!;
+        public static SqlTemplate MinSql { get; private set; } = null!;
+        public static SqlTemplate MaxSql { get; private set; } = null!;
+        public static SqlTemplate GetColumnsSql { get; private set; } = null!;
 
         public static void Initialize(TStrategy strategy)
         {
@@ -54,6 +55,7 @@ namespace Dapper.Forge.Core.Caching
                         SumSql = strategy.SumSqlBuilder<TEntity>();
                         MinSql = strategy.MinSqlBuilder<TEntity>();
                         MaxSql = strategy.MaxSqlBuilder<TEntity>();
+                        GetColumnsSql = strategy.GetColumnsSqlBuilder<TEntity>();
 
                         _isInitialized = true;
                     }

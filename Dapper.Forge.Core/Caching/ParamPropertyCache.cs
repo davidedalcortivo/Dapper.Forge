@@ -8,14 +8,14 @@ namespace Dapper.Forge.Core.Caching
     {
         private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _cache = new();
 
-        public static PropertyInfo[] GetProperties(Type type)
+        public static PropertyInfo[] Get(Type type)
         {
             return _cache.GetOrAdd(type, static x => x.GetProperties());
         }
 
-        public static PropertyInfo[] GetProperties(object param)
+        public static PropertyInfo[] Get(object param)
         {
-            return GetProperties(param.GetType());
+            return Get(param.GetType());
         }
     }
 }

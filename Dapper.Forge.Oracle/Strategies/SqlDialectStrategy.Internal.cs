@@ -1,0 +1,15 @@
+﻿using Oracle.ManagedDataAccess.Client;
+using System.Data.Common;
+
+
+namespace Dapper.Forge.Oracle.Strategies
+{
+    internal partial class SqlDialectStrategy
+    {
+        protected override void InitializeImpl(DbConnection connection)
+        {
+            OracleConnectionStringBuilder builder = new(connection.ConnectionString);
+            DefaultSchemaName = builder.UserID;
+        }
+    }
+}

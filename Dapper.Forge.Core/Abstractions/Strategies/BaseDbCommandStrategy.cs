@@ -4,6 +4,7 @@ using Dapper.Forge.Core.Models;
 using Dapper.Forge.Core.Utilities;
 using System.Collections;
 using System.Collections.Immutable;
+using System.Data.Common;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -23,179 +24,162 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             SqlDialectStrategy = this.sqlBuilderStrategy.SqlDialectStrategy;
         }
 
-        public void WarmUpCache<TEntity>() where TEntity : class
+        public virtual void LoadRuntimeCache<TEntity>(DbConnection connection) where TEntity : class
         {
+            SqlDialectStrategy.Initialize(connection);
             SqlBuilderCache<TEntity, TStrategy>.Initialize(sqlBuilderStrategy);
         }
 
-        public virtual DbCommandInfo GetAllCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, null, null);
         }
 
-        public virtual DbCommandInfo GetAllCommand<TEntity>(IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, null, null);
         }
 
-        public virtual DbCommandInfo GetFirstCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetFirstCommand<TEntity>(IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetSingleCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo GetSingleCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, null, null, null);
         }
 
-        public virtual DbCommandInfo GetSingleCommand<TEntity>(IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo GetSingleCommand<TEntity>(DbConnection connection, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, null, null, null);
         }
 
-        public virtual DbCommandInfo GetSingleOrDefaultCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo GetSingleOrDefaultCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, null, null, null);
         }
 
-        public virtual DbCommandInfo GetSingleOrDefaultCommand<TEntity>(IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo GetSingleOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, null, null, null);
         }
 
-        public virtual DbCommandInfo GetByIdCommand<TEntity>(object id) where TEntity : class
+        public virtual DbCommandInfo GetByIdCommand<TEntity>(DbConnection connection, object id) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            EnsureIdType<TEntity>(idPropertyInfo, id);
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            EnsureIdType<TEntity>(idProperty, id);
 
             DynamicParameters parameters = new();
-            string idParameterName = idPropertyInfo.Name;
+            string idParameterName = idProperty.Name;
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.GetByIdSql.Render(SqlDialectStrategy.RenderParameter(idParameterName));
             parameters.Add(idParameterName, id);
             return new(sql, parameters);
         }
 
-        public virtual DbCommandInfo GetPageCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
+        public virtual DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, skip, take);
         }
 
-        public virtual DbCommandInfo GetPageCommand<TEntity>(IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
+        public virtual DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, skip, take);
         }
 
-        public virtual DbCommandInfo UpdateCommand<TEntity>(TEntity entity) where TEntity : class
+        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            ImmutableArray<PropertyInfo> updatePropertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             DynamicParameters parameters = new();
-            string idParameterName = idPropertyInfo.Name;
+            string idParameterName = idProperty.Name;
 
             string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName]) + " = " + SqlDialectStrategy.RenderParameter(idParameterName);
             parameters.Add(idParameterName, propertyGettersByPropertyName[idParameterName](entity));
 
-            return BuildUpdateCommand<TEntity>(updatePropertyInfos, x => propertyGettersByPropertyName[x](entity), clause, parameters);
+            return BuildUpdateCommand<TEntity>(updateProperties, x => propertyGettersByPropertyName[x](entity), clause, parameters);
         }
 
-        public virtual DbCommandInfo UpdateCommand<TEntity>(object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo[] paramPropertyInfos = ParamPropertyCache.GetProperties(param);
-            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.GetPropertyGetters(param);
+            PropertyInfo[] paramProperties = ParamPropertyCache.Get(param);
+            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.Get(param);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildUpdateCommand<TEntity>(paramPropertyInfos, x => paramPropertyGetters[x](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(paramProperties, x => paramPropertyGetters[x](param), clause, parameters);
         }
 
-        public virtual DbCommandInfo UpdateCommand<TEntity>(object param, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo[] paramPropertyInfos = ParamPropertyCache.GetProperties(param);
-            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.GetPropertyGetters(param);
+            PropertyInfo[] paramProperties = ParamPropertyCache.Get(param);
+            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.Get(param);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildUpdateCommand<TEntity>(paramPropertyInfos, x => paramPropertyGetters[x](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(paramProperties, x => paramPropertyGetters[x](param), clause, parameters);
         }
 
-        public virtual DbCommandInfo InsertCommand<TEntity>(TEntity entity) where TEntity : class
+        public virtual DbCommandInfo InsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             StringBuilder sqlBuffer = new();
             DynamicParameters parameters = new();
 
-            for (int i = 0; i < insertPropertyInfos.Length; i++)
+            for (int i = 0; i < insertProperties.Length; i++)
             {
-                string parameterName = insertPropertyInfos[i].Name;
+                string parameterName = insertProperties[i].Name;
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 sqlBuffer.Append("    ");
                 sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
-                sqlBuffer.AppendSeparator(i, insertPropertyInfos.Length, false);
+                sqlBuffer.AppendSeparator(i, insertProperties.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.InsertSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
 
-        public virtual DbCommandInfo DeleteCommand<TEntity>(TEntity entity) where TEntity : class
+        public virtual DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             DynamicParameters parameters = new();
-            string idParameterName = idPropertyInfo.Name;
+            string idParameterName = idProperty.Name;
 
             string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName]) + " = " + SqlDialectStrategy.RenderParameter(idParameterName);
             parameters.Add(idParameterName, propertyGettersByPropertyName[idParameterName](entity));
@@ -203,16 +187,15 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildDeleteCommand<TEntity>(clause, parameters);
         }
 
-        public virtual DbCommandInfo DeleteCommand<TEntity>(object id) where TEntity : class
+        public virtual DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, object id) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            EnsureIdType<TEntity>(idPropertyInfo, id);
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            EnsureIdType<TEntity>(idProperty, id);
 
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             DynamicParameters parameters = new();
-            string idParameterName = idPropertyInfo.Name;
+            string idParameterName = idProperty.Name;
 
             string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName]) + " = " + SqlDialectStrategy.RenderParameter(idParameterName);
             parameters.Add(idParameterName, id);
@@ -220,49 +203,45 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildDeleteCommand<TEntity>(clause, parameters);
         }
 
-        public virtual DbCommandInfo DeleteCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildDeleteCommand<TEntity>(clause, parameters);
         }
 
-        public virtual DbCommandInfo DeleteCommand<TEntity>(IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildDeleteCommand<TEntity>(clause, parameters);
         }
 
-        public abstract DbCommandInfo UpsertCommand<TEntity>(TEntity entity) where TEntity : class;
+        public abstract DbCommandInfo UpsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class;
 
-        public virtual IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
+        public virtual IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(DbConnection connection, IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             List<object> idList = [];
 
             foreach (object? id in ids)
             {
-                EnsureIdType<TEntity>(idPropertyInfo, id);
+                EnsureIdType<TEntity>(idProperty, id);
                 idList.Add(id);
             }
 
-            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.GetByIdRangeSql, idList, batchSize, chunkSize, idPropertyInfo, true);
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.GetByIdRangeSql, idList, batchSize, chunkSize, idProperty, true);
         }
 
-        public abstract IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
+        public abstract IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
 
-        public virtual IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public virtual IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
             if (entityArray.Length == 0)
                 return commands;
 
-            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             SqlTemplate insertRangeSql = SqlBuilderCache<TEntity, TStrategy>.InsertRangeSql;
 
@@ -286,13 +265,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 {
                     sqlBuffer.Append("    (");
 
-                    for (int k = 0; k < insertPropertyInfos.Length; k++)
+                    for (int k = 0; k < insertProperties.Length; k++)
                     {
-                        string parameterName = insertPropertyInfos[k].Name;
+                        string parameterName = insertProperties[k].Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-                        sqlBuffer.AppendSeparator(k, insertPropertyInfos.Length, true);
+                        sqlBuffer.AppendSeparator(k, insertProperties.Length, true);
                     }
 
                     sqlBuffer.Append(')');
@@ -315,185 +294,177 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return commands;
         }
 
-        public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idPropertyInfo.Name];
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idProperty.Name];
             List<object> idList = [.. entities.Select(x => propertyGetter(x)!)];
 
-            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idPropertyInfo, false);
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idProperty, false);
         }
 
-        public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
+        public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(DbConnection connection, IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             List<object> idList = [];
 
             foreach (object? id in ids)
             {
-                EnsureIdType<TEntity>(idPropertyInfo, id);
+                EnsureIdType<TEntity>(idProperty, id);
                 idList.Add(id);
             }
 
-            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idPropertyInfo, false);
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idProperty, false);
         }
 
-        public abstract IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
+        public abstract IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
 
-        public virtual DbCommandInfo ExistsCommand<TEntity>(Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo ExistsCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildExistsCommand<TEntity>(clause, parameters);
         }
 
-        public virtual DbCommandInfo ExistsCommand<TEntity>(IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo ExistsCommand<TEntity>(DbConnection connection, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildExistsCommand<TEntity>(clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(Expression<Func<TEntity, object?>>? selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>>? selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.CountSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(Expression<Func<TEntity, object?>>? selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>>? selector, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.CountSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(string? propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, string? propertyName, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo AvgCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.AvgSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo AvgCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.AvgSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo AvgCommand<TEntity>(string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo AvgCommand<TEntity>(string propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo SumCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.SumSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo SumCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.SumSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo SumCommand<TEntity>(string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo SumCommand<TEntity>(string propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo MinCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MinSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo MinCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MinSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo MinCommand<TEntity>(string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo MinCommand<TEntity>(string propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo MaxCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MaxSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo MaxCommand<TEntity>(Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MaxSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo MaxCommand<TEntity>(string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo MaxCommand<TEntity>(string propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, propertyName, clause, parameters);
+        }
+
+        public virtual DbCommandInfo GetColumnsCommand<TEntity>(DbConnection connection) where TEntity : class
+        {
+            string table = EntityInfoCache<TEntity>.TableName;
+            string schema = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
+
+            DynamicParameters parameters = new();
+
+            string schemaName = nameof(schema);
+            string tableName = nameof(table);
+            parameters.Add(schemaName, schema);
+            parameters.Add(tableName, table);
+
+            string sql = SqlBuilderCache<TEntity, TStrategy>.GetColumnsSql.Render(SqlDialectStrategy.RenderParameter(schemaName), SqlDialectStrategy.RenderParameter(tableName));
+            return new(sql, parameters);
         }
     }
 }

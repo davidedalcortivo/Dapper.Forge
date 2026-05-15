@@ -1,10 +1,12 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
+using Npgsql;
+using System.Data.Common;
 using System.Text;
 
 
 namespace Dapper.Forge.PostgreSql.Strategies
 {
-    internal class SqlDialectStrategy : BaseSqlDialectStrategy
+    internal partial class SqlDialectStrategy : BaseSqlDialectStrategy
     {
         public static SqlDialectStrategy Instance { get; } = new();
 
@@ -31,6 +33,12 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append(skipParameter);
 
             return sqlBuffer.ToString();
+        }
+
+        public override string GetConnectionId(DbConnection connection)
+        {
+            NpgsqlConnectionStringBuilder builder = new(connection.ConnectionString);
+            return "postgresql://" + builder.Host + ":" + builder.Port + "/" + builder.Database;
         }
     }
 }

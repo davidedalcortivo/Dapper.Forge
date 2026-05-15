@@ -1,10 +1,16 @@
-﻿using System.Text;
+﻿using System.Data.Common;
+using System.Text;
 
 
 namespace Dapper.Forge.Core.Abstractions.Strategies
 {
-    public abstract class BaseSqlDialectStrategy : ISqlDialectStrategy
+    public abstract partial class BaseSqlDialectStrategy : ISqlDialectStrategy
     {
+        private bool _isInitialized = false;
+        private readonly object _lock = new();
+
+        public string DefaultSchemaName { get; protected set; } = null!;
+
         public virtual string NullValue { get; } = "NULL";
 
         public virtual string Terminator { get; } = ";" + Environment.NewLine;
@@ -103,6 +109,23 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sb.Append(" ROWS ONLY");
 
             return sb.ToString();
+        }
+
+        public abstract string GetConnectionId(DbConnection connection);
+
+        public void Initialize(DbConnection connection)
+        {
+            if (!_isInitialized)
+            {
+                lock (_lock)
+                {
+                    if (!_isInitialized)
+                    {
+                        InitializeImpl(connection);
+                        _isInitialized = true;
+                    }
+                }
+            }
         }
     }
 }

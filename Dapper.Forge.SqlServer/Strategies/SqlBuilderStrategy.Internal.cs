@@ -12,13 +12,13 @@ namespace Dapper.Forge.SqlServer.Strategies
     {
         private void AppendUpdateRange<TEntity>(StringBuilder sqlBuffer, string[] sqlLocks, string sourceTable, string targetTable, string clause) where TEntity : class
         {
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
-            ImmutableArray<PropertyInfo> updatePropertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
+            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
 
             sqlBuffer.Append("UPDATE ");
             sqlBuffer.AppendLine(targetTable);
             sqlBuffer.Append("SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updatePropertyInfos, sourceTable, null);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, sourceTable, null);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, targetTable);
             sqlBuffer.AppendLine();
 
@@ -42,7 +42,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(sourceTable);
 
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, propertyInfos, null, false, true);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, properties, null, false, true);
             sqlBuffer.Append(')');
             sqlBuffer.AppendOnClause(string.Empty, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);

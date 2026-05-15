@@ -3,7 +3,7 @@
 
 namespace Dapper.Forge.Console
 {
-    [Table("test_table")]
+    [Table("test_table", Schema = "public")]
     public class TestTable
     {
         [Column("id")]

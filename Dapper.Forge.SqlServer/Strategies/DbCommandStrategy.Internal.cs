@@ -34,7 +34,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             if (entityArray.Length == 0)
                 return commands;
 
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             if (batchSize <= 0)
@@ -57,13 +57,13 @@ namespace Dapper.Forge.SqlServer.Strategies
                 {
                     sqlBuffer.Append("        (");
 
-                    for (int k = 0; k < propertyInfos.Length; k++)
+                    for (int k = 0; k < properties.Length; k++)
                     {
-                        string parameterName = propertyInfos[k].Name;
+                        string parameterName = properties[k].Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
+                        sqlBuffer.AppendSeparator(k, properties.Length, true);
                     }
 
                     sqlBuffer.Append(')');

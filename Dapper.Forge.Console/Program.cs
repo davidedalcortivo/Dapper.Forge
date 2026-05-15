@@ -51,7 +51,7 @@ var aa = await connection.GetAllAsync<TestTable>();
 foreach (var a in aa)
     a.TimestamptzValue = DateTime.Now;
 
-var lista = connection.Update<TestTable>(new { BoolValue  = (bool?)null });
+
 var lista2 = await connection.UpdateRangeAsync<TestTable>(aa);
 
 

@@ -3,6 +3,7 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
+using System.Data.Common;
 using System.Reflection;
 using System.Text;
 
@@ -15,39 +16,37 @@ namespace Dapper.Forge.MySql.Strategies
 
         private DbCommandStrategy(SqlBuilderStrategy strategy) : base(strategy) { }
 
-        public override DbCommandInfo UpsertCommand<TEntity>(TEntity entity) where TEntity : class
+        public override DbCommandInfo UpsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             StringBuilder sqlBuffer = new();
             DynamicParameters parameters = new();
 
-            for (int i = 0; i < insertPropertyInfos.Length; i++)
+            for (int i = 0; i < insertProperties.Length; i++)
             {
-                string parameterName = insertPropertyInfos[i].Name;
+                string parameterName = insertProperties[i].Name;
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 sqlBuffer.Append("    ");
                 sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
-                sqlBuffer.AppendSeparator(i, insertPropertyInfos.Length, false);
+                sqlBuffer.AppendSeparator(i, insertProperties.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(sqlBuffer);
             return new(sql, parameters);
         }
 
-        public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
             if (entityArray.Length == 0)
                 return commands;
             
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             SqlTemplate updateRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql;
@@ -66,10 +65,10 @@ namespace Dapper.Forge.MySql.Strategies
                 {
                     sqlBuffer.Append("    SELECT ");
 
-                    for (int k = 0; k < propertyInfos.Length; k++)
+                    for (int k = 0; k < properties.Length; k++)
                     {
-                        PropertyInfo propertyInfo = propertyInfos[k];
-                        string parameterName = propertyInfo.Name;
+                        PropertyInfo property = properties[k];
+                        string parameterName = property.Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
@@ -77,10 +76,10 @@ namespace Dapper.Forge.MySql.Strategies
                         if (j == i)
                         {
                             sqlBuffer.Append(" AS ");
-                            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyInfo.Name]));
+                            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[property.Name]));
                         }
 
-                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
+                        sqlBuffer.AppendSeparator(k, properties.Length, true);
                     }
 
                     if (j < end - 1)
@@ -97,16 +96,15 @@ namespace Dapper.Forge.MySql.Strategies
             return commands;
         }
 
-        public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
             if (entityArray.Length == 0)
                 return commands;
 
-            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             SqlTemplate upsertRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql;
 
@@ -124,13 +122,13 @@ namespace Dapper.Forge.MySql.Strategies
                 {
                     sqlBuffer.Append("    (");
 
-                    for (int k = 0; k < insertPropertyInfos.Length; k++)
+                    for (int k = 0; k < insertProperties.Length; k++)
                     {
-                        string parameterName = insertPropertyInfos[k].Name;
+                        string parameterName = insertProperties[k].Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-                        sqlBuffer.AppendSeparator(k, insertPropertyInfos.Length, true);
+                        sqlBuffer.AppendSeparator(k, insertProperties.Length, true);
                     }
 
                     sqlBuffer.Append(')');

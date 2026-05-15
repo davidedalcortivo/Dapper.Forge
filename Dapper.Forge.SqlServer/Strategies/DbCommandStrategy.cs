@@ -3,6 +3,7 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
+using System.Data.Common;
 using System.Reflection;
 using System.Text;
 
@@ -15,58 +16,55 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         private DbCommandStrategy(SqlBuilderStrategy strategy) : base(strategy) { }
 
-        public override DbCommandInfo UpsertCommand<TEntity>(TEntity entity) where TEntity : class
+        public override DbCommandInfo UpsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
-            WarmUpCache<TEntity>();
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            ImmutableArray<PropertyInfo> updatePropertyInfos = EntityInfoCache<TEntity>.UpdatePropertyInfos;
-            ImmutableArray<PropertyInfo> insertPropertyInfos = EntityInfoCache<TEntity>.InsertPropertyInfos;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             StringBuilder updateBuffer = new();
             StringBuilder insertBuffer = new();
             DynamicParameters parameters = new();
-            string idParameterName = idPropertyInfo.Name;
+            string idParameterName = idProperty.Name;
             string idParameter = SqlDialectStrategy.RenderParameter(idParameterName);
 
             parameters.Add(idParameterName, propertyGettersByPropertyName[idParameterName](entity));
 
-            for (int i = 0; i < updatePropertyInfos.Length; i++)
+            for (int i = 0; i < updateProperties.Length; i++)
             {
-                string parameterName = updatePropertyInfos[i].Name;
+                string parameterName = updateProperties[i].Name;
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 updateBuffer.Append("        ");
                 updateBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
                 updateBuffer.Append(" = ");
                 updateBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
-                updateBuffer.AppendSeparator(i, updatePropertyInfos.Length, false);
+                updateBuffer.AppendSeparator(i, updateProperties.Length, false);
             }
 
-            for (int i = 0; i < insertPropertyInfos.Length; i++)
+            for (int i = 0; i < insertProperties.Length; i++)
             {
-                string parameterName = insertPropertyInfos[i].Name;
+                string parameterName = insertProperties[i].Name;
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
                 insertBuffer.Append("        ");
                 insertBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
-                insertBuffer.AppendSeparator(i, insertPropertyInfos.Length, false);
+                insertBuffer.AppendSeparator(i, insertProperties.Length, false);
             }
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(idParameter, updateBuffer, idParameter, insertBuffer);
             return new(sql, parameters);
         }
 
-        public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             return BuildUpsertRangeCommands(entities, batchSize, chunkSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql, true);
         }
 
-        public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
+        public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            WarmUpCache<TEntity>();
             return BuildUpsertRangeCommands(entities, batchSize, chunkSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql, false);
         }
     }

@@ -19,16 +19,16 @@ namespace Dapper.Forge.Core.Utilities
             return memberExpression.Member.Name;
         }
 
-        public static Func<T, object?> BuildGetterExpression<T>(PropertyInfo propertyInfo) where T : class
+        public static Func<T, object?> BuildGetterExpression<T>(PropertyInfo property) where T : class
         {
             Type type = typeof(T);
             ParameterExpression instanceParam = Expression.Parameter(type, "instance");
             Expression instanceCast = instanceParam;
 
-            if (propertyInfo.DeclaringType is not null && propertyInfo.DeclaringType != type)
-                instanceCast = Expression.Convert(instanceParam, propertyInfo.DeclaringType);
+            if (property.DeclaringType is not null && property.DeclaringType != type)
+                instanceCast = Expression.Convert(instanceParam, property.DeclaringType);
 
-            Expression propertyAccess = Expression.Property(instanceCast, propertyInfo);
+            Expression propertyAccess = Expression.Property(instanceCast, property);
             UnaryExpression convertResult = Expression.Convert(propertyAccess, typeof(object));
 
             return Expression.Lambda<Func<T, object?>>(convertResult, instanceParam).Compile();

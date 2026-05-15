@@ -1,5 +1,6 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Text;
 
 
@@ -39,6 +40,39 @@ namespace Dapper.Forge.Oracle.Strategies
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
         {
             return BuildUpsertSql<TEntity>(true, true);
+        }
+
+        public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
+        {
+            string allTabColumnsTable = SqlDialectStrategy.RenderIdentifier("ALL_TAB_COLUMNS");
+            string columnNameColumn = allTabColumnsTable + "." + SqlDialectStrategy.RenderIdentifier("COLUMN_NAME");
+            string columnIdColumn = allTabColumnsTable + "." + SqlDialectStrategy.RenderIdentifier("COLUMN_ID");
+            string tableNameColumn = allTabColumnsTable + "." + SqlDialectStrategy.RenderIdentifier("TABLE_NAME");
+            string ownerColumn = allTabColumnsTable + "." + SqlDialectStrategy.RenderIdentifier("OWNER");
+
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(columnNameColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.Name)));
+            sqlBuffer.AppendLine(",");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(columnIdColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
+            sqlBuffer.AppendLine("FROM");
+            sqlBuffer.Append("    ");
+            sqlBuffer.AppendLine(allTabColumnsTable);
+            sqlBuffer.AppendWhereClause(string.Empty, ownerColumn + " = {} AND " + tableNameColumn + " = {}");
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("ORDER BY");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(columnIdColumn);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+
+            return new SqlTemplate(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
         }
     }
 }

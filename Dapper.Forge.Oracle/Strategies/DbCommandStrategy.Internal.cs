@@ -19,7 +19,7 @@ namespace Dapper.Forge.Oracle.Strategies
             if (entityArray.Length == 0)
                 return commands;
 
-            ImmutableArray<PropertyInfo> propertyInfos = EntityInfoCache<TEntity>.PropertyInfos;
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -37,14 +37,14 @@ namespace Dapper.Forge.Oracle.Strategies
                 {
                     sqlBuffer.Append("    SELECT ");
 
-                    for (int k = 0; k < propertyInfos.Length; k++)
+                    for (int k = 0; k < properties.Length; k++)
                     {
-                        PropertyInfo propertyInfo = propertyInfos[k];
-                        string parameterName = propertyInfo.Name;
+                        PropertyInfo property = properties[k];
+                        string parameterName = property.Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-                        sqlBuffer.AppendSeparator(k, propertyInfos.Length, true);
+                        sqlBuffer.AppendSeparator(k, properties.Length, true);
                     }
 
                     sqlBuffer.Append(" FROM dual");

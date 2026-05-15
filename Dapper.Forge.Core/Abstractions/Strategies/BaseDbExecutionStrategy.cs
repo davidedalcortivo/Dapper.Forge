@@ -21,135 +21,140 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             SqlDialectStrategy = this.dbCommandStrategy.SqlDialectStrategy;
         }
 
+        public virtual async Task LoadDbCacheImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            _ = await GetColumnsImplAsync<TEntity>(connection, sync, commandTimeout, cancellationToken);
+        }
+
         public virtual async Task<IReadOnlyList<TEntity>> GetAllImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetAllCommand(predicate, sortDescriptors);
+            DbCommandInfo command = dbCommandStrategy.GetAllCommand(connection, predicate, sortDescriptors);
             return await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<IReadOnlyList<TEntity>> GetAllImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetAllCommand<TEntity>(filterNode, sortDescriptors);
+            DbCommandInfo command = dbCommandStrategy.GetAllCommand<TEntity>(connection, filterNode, sortDescriptors);
             return await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity> GetFirstImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetFirstCommand(predicate, sortDescriptors);
+            DbCommandInfo command = dbCommandStrategy.GetFirstCommand(connection, predicate, sortDescriptors);
             return await QueryFirstImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity> GetFirstImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetFirstCommand<TEntity>(filterNode, sortDescriptors);
+            DbCommandInfo command = dbCommandStrategy.GetFirstCommand<TEntity>(connection, filterNode, sortDescriptors);
             return await QueryFirstImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity?> GetFirstOrDefaultImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetFirstOrDefaultCommand(predicate, sortDescriptors);
+            DbCommandInfo command = dbCommandStrategy.GetFirstOrDefaultCommand(connection, predicate, sortDescriptors);
             return await QueryFirstOrDefaultImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity?> GetFirstOrDefaultImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetFirstOrDefaultCommand<TEntity>(filterNode, sortDescriptors);
+            DbCommandInfo command = dbCommandStrategy.GetFirstOrDefaultCommand<TEntity>(connection, filterNode, sortDescriptors);
             return await QueryFirstOrDefaultImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity> GetSingleImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetSingleCommand(predicate);
+            DbCommandInfo command = dbCommandStrategy.GetSingleCommand(connection, predicate);
             return await QuerySingleImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity> GetSingleImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetSingleCommand<TEntity>(filterNode);
+            DbCommandInfo command = dbCommandStrategy.GetSingleCommand<TEntity>(connection, filterNode);
             return await QuerySingleImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity?> GetSingleOrDefaultImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetSingleOrDefaultCommand(predicate);
+            DbCommandInfo command = dbCommandStrategy.GetSingleOrDefaultCommand(connection, predicate);
             return await QuerySingleOrDefaultImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity?> GetSingleOrDefaultImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetSingleOrDefaultCommand<TEntity>(filterNode);
+            DbCommandInfo command = dbCommandStrategy.GetSingleOrDefaultCommand<TEntity>(connection, filterNode);
             return await QuerySingleOrDefaultImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity?> GetByIdImplAsync<TEntity>(DbConnection connection, bool sync, object id, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetByIdCommand<TEntity>(id);
+            DbCommandInfo command = dbCommandStrategy.GetByIdCommand<TEntity>(connection, id);
             return await QueryFirstOrDefaultImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<IReadOnlyList<TEntity>> GetPageImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetPageCommand(predicate, sortDescriptors, skip, take);
+            DbCommandInfo command = dbCommandStrategy.GetPageCommand(connection, predicate, sortDescriptors, skip, take);
             return await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<IReadOnlyList<TEntity>> GetPageImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.GetPageCommand<TEntity>(filterNode, sortDescriptors, skip, take);
+            DbCommandInfo command = dbCommandStrategy.GetPageCommand<TEntity>(connection, filterNode, sortDescriptors, skip, take);
             return await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> UpdateImplAsync<TEntity>(DbConnection connection, bool sync, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.UpdateCommand(entity);
+            DbCommandInfo command = dbCommandStrategy.UpdateCommand(connection, entity);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> UpdateImplAsync<TEntity>(DbConnection connection, bool sync, object param, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.UpdateCommand(param, predicate);
+            DbCommandInfo command = dbCommandStrategy.UpdateCommand(connection, param, predicate);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> UpdateImplAsync<TEntity>(DbConnection connection, bool sync, object param, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.UpdateCommand<TEntity>(param, filterNode);
+            DbCommandInfo command = dbCommandStrategy.UpdateCommand<TEntity>(connection, param, filterNode);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> InsertImplAsync<TEntity>(DbConnection connection, bool sync, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.InsertCommand(entity);
+            DbCommandInfo command = dbCommandStrategy.InsertCommand(connection, entity);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> DeleteImplAsync<TEntity>(DbConnection connection, bool sync, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.DeleteCommand(entity);
+            DbCommandInfo command = dbCommandStrategy.DeleteCommand(connection, entity);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> DeleteImplAsync<TEntity>(DbConnection connection, bool sync, object id, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.DeleteCommand<TEntity>(id);
+            DbCommandInfo command = dbCommandStrategy.DeleteCommand<TEntity>(connection, id);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> DeleteImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.DeleteCommand(predicate);
+            DbCommandInfo command = dbCommandStrategy.DeleteCommand(connection, predicate);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> DeleteImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.DeleteCommand<TEntity>(filterNode);
+            DbCommandInfo command = dbCommandStrategy.DeleteCommand<TEntity>(connection, filterNode);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> UpsertImplAsync<TEntity>(DbConnection connection, bool sync, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.UpsertCommand(entity);
+            DbCommandInfo command = dbCommandStrategy.UpsertCommand(connection, entity);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
@@ -175,14 +180,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 }
             }
 
-            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.GetByIdRangeCommands<TEntity>(idSet, batchSize, chunkSize);
+            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.GetByIdRangeCommands<TEntity>(connection, idSet, batchSize, chunkSize);
             List<TEntity> entityList = [];
 
             if (commands.Count == 0)
                 return entityList;
 
-            PropertyInfo idPropertyInfo = EntityInfoCache<TEntity>.IdPropertyInfo;
-            Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idPropertyInfo.Name];
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idProperty.Name];
             Dictionary<object, List<int>> indexesById = new(idSet.Count);
             TEntity?[] entityArray = new TEntity?[idList.Count];
 
@@ -222,164 +227,179 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual async Task<int> UpdateRangeImplAsync<TEntity>(DbConnection connection, bool sync, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.UpdateRangeCommands(entities, batchSize, chunkSize);
+            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.UpdateRangeCommands(connection, entities, batchSize, chunkSize);
             return await ExecuteRangeImplAsync(connection, sync, commands, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> InsertRangeImplAsync<TEntity>(DbConnection connection, bool sync, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.InsertRangeCommands(entities, batchSize, chunkSize);
+            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.InsertRangeCommands(connection, entities, batchSize, chunkSize);
             return await ExecuteRangeImplAsync(connection, sync, commands, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> DeleteRangeImplAsync<TEntity>(DbConnection connection, bool sync, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.DeleteRangeCommands(entities, batchSize, chunkSize);
+            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.DeleteRangeCommands(connection, entities, batchSize, chunkSize);
             return await ExecuteRangeImplAsync(connection, sync, commands, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> DeleteRangeImplAsync<TEntity>(DbConnection connection, bool sync, IEnumerable ids, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.DeleteRangeCommands<TEntity>(ids, batchSize, chunkSize);
+            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.DeleteRangeCommands<TEntity>(connection, ids, batchSize, chunkSize);
             return await ExecuteRangeImplAsync(connection, sync, commands, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> UpsertRangeImplAsync<TEntity>(DbConnection connection, bool sync, IEnumerable<TEntity> entities, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.UpsertRangeCommands(entities, batchSize, chunkSize);
+            IReadOnlyList<DbCommandInfo> commands = dbCommandStrategy.UpsertRangeCommands(connection, entities, batchSize, chunkSize);
             return await ExecuteRangeImplAsync(connection, sync, commands, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<bool> ExistsImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.ExistsCommand(predicate);
+            DbCommandInfo command = dbCommandStrategy.ExistsCommand(connection, predicate);
             return await ExecuteScalarImplAsync<bool>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<bool> ExistsImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.ExistsCommand<TEntity>(filterNode);
+            DbCommandInfo command = dbCommandStrategy.ExistsCommand<TEntity>(connection, filterNode);
             return await ExecuteScalarImplAsync<bool>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> CountImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, object?>>? selector, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.CountCommand(selector, predicate);
+            DbCommandInfo command = dbCommandStrategy.CountCommand(connection, selector, predicate);
             return await ExecuteScalarImplAsync<int>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> CountImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, object?>>? selector, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.CountCommand(selector, filterNode);
+            DbCommandInfo command = dbCommandStrategy.CountCommand(connection, selector, filterNode);
             return await ExecuteScalarImplAsync<int>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> CountImplAsync<TEntity>(DbConnection connection, bool sync, string? propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.CountCommand(propertyName, predicate);
+            DbCommandInfo command = dbCommandStrategy.CountCommand(connection, propertyName, predicate);
             return await ExecuteScalarImplAsync<int>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> CountImplAsync<TEntity>(DbConnection connection, bool sync, string? propertyName, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.CountCommand<TEntity>(propertyName, filterNode);
+            DbCommandInfo command = dbCommandStrategy.CountCommand<TEntity>(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<int>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> AvgImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.AvgCommand(selector, predicate);
+            DbCommandInfo command = dbCommandStrategy.AvgCommand(connection, selector, predicate);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> AvgImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.AvgCommand(selector, filterNode);
+            DbCommandInfo command = dbCommandStrategy.AvgCommand(connection, selector, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> AvgImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.AvgCommand(propertyName, predicate);
+            DbCommandInfo command = dbCommandStrategy.AvgCommand(connection, propertyName, predicate);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> AvgImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.AvgCommand<TEntity>(propertyName, filterNode);
+            DbCommandInfo command = dbCommandStrategy.AvgCommand<TEntity>(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> SumImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.SumCommand(selector, predicate);
+            DbCommandInfo command = dbCommandStrategy.SumCommand(connection, selector, predicate);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> SumImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.SumCommand(selector, filterNode);
+            DbCommandInfo command = dbCommandStrategy.SumCommand(connection, selector, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> SumImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.SumCommand(propertyName, predicate);
+            DbCommandInfo command = dbCommandStrategy.SumCommand(connection, propertyName, predicate);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> SumImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.SumCommand<TEntity>(propertyName, filterNode);
+            DbCommandInfo command = dbCommandStrategy.SumCommand<TEntity>(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> MinImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MinCommand(selector, predicate);
+            DbCommandInfo command = dbCommandStrategy.MinCommand(connection, selector, predicate);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> MinImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MinCommand(selector, filterNode);
+            DbCommandInfo command = dbCommandStrategy.MinCommand(connection, selector, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> MinImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MinCommand(propertyName, predicate);
+            DbCommandInfo command = dbCommandStrategy.MinCommand(connection, propertyName, predicate);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> MinImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MinCommand<TEntity>(propertyName, filterNode);
+            DbCommandInfo command = dbCommandStrategy.MinCommand<TEntity>(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> MaxImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MaxCommand(selector, predicate);
+            DbCommandInfo command = dbCommandStrategy.MaxCommand(connection, selector, predicate);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> MaxImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MaxCommand(selector, filterNode);
+            DbCommandInfo command = dbCommandStrategy.MaxCommand(connection, selector, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> MaxImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MaxCommand(propertyName, predicate);
+            DbCommandInfo command = dbCommandStrategy.MaxCommand(connection, propertyName, predicate);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<decimal?> MaxImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, IFilterNode? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MaxCommand<TEntity>(propertyName, filterNode);
+            DbCommandInfo command = dbCommandStrategy.MaxCommand<TEntity>(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
+        }
+
+        public virtual async Task<IReadOnlyList<DbColumnInfo>> GetColumnsImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            string connectionId = SqlDialectStrategy.GetConnectionId(connection);
+            IReadOnlyList<DbColumnInfo>? columns = DbColumnInfoCache<TEntity>.GetValueOrDefault(connectionId);
+
+            if (columns is not null)
+                return columns;
+
+            DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
+            columns = await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, commandTimeout, cancellationToken);
+
+            _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
+            return columns;
         }
     }
 }

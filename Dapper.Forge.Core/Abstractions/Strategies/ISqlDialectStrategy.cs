@@ -1,7 +1,10 @@
-﻿namespace Dapper.Forge.Core.Abstractions.Strategies
+﻿using System.Data.Common;
+
+namespace Dapper.Forge.Core.Abstractions.Strategies
 {
     public interface ISqlDialectStrategy
     {
+        string DefaultSchemaName { get; }
         string NullValue { get; }
         string Terminator { get; }
 
@@ -16,5 +19,7 @@
         string IsNull(string column);
         string IsNotNull(string column);
         string Pagination(string skipParameter, string takeParameter);
+        string GetConnectionId(DbConnection connection);
+        void Initialize(DbConnection connection);
     }
 }
