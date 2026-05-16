@@ -14,12 +14,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.AppendLine("SELECT");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(aggregateName);
-            sqlBuffer.Append("({})");
+            sqlBuffer.Append('(');
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(')');
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         string DefaultSchemaName { get; }
         string NullValue { get; }
         string Terminator { get; }
+        string Placeholder { get; }
 
         string RenderIdentifier(string name);
         string RenderParameter(string name);

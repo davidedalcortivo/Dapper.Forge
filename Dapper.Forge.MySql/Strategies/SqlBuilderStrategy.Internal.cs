@@ -30,12 +30,12 @@ namespace Dapper.Forge.MySql.Strategies
             if (isRange)
             {
                 sqlBuffer.AppendLine();
-                sqlBuffer.AppendLine("{}");
+                sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             }
             else
             {
                 sqlBuffer.AppendLine(" (");
-                sqlBuffer.AppendLine("{}");
+                sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
                 sqlBuffer.Append(") ");
             }
 
@@ -44,7 +44,7 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, "new", null);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

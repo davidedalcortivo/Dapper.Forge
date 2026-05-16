@@ -27,14 +27,14 @@ namespace Dapper.Forge.Oracle.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.AppendLine("INSERT ALL");
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("SELECT");
             sqlBuffer.AppendLine("    *");
             sqlBuffer.AppendLine("FROM");
             sqlBuffer.Append("    dual");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
@@ -65,14 +65,14 @@ namespace Dapper.Forge.Oracle.Strategies
             sqlBuffer.AppendLine("FROM");
             sqlBuffer.Append("    ");
             sqlBuffer.AppendLine(allTabColumnsTable);
-            sqlBuffer.AppendWhereClause(string.Empty, ownerColumn + " = {} AND " + tableNameColumn + " = {}");
+            sqlBuffer.AppendWhereClause(string.Empty, ownerColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(columnIdColumn);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new SqlTemplate(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

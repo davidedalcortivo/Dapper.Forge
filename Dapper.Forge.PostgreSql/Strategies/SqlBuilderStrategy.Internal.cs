@@ -32,12 +32,12 @@ namespace Dapper.Forge.PostgreSql.Strategies
             if (isRange)
             {
                 sqlBuffer.AppendLine();
-                sqlBuffer.AppendLine("{}");
+                sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             }
             else
             {
                 sqlBuffer.AppendLine(" (");
-                sqlBuffer.AppendLine("{}");
+                sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
                 sqlBuffer.AppendLine(")");
             }
             
@@ -48,7 +48,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append("SET");
             sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, "EXCLUDED", null);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

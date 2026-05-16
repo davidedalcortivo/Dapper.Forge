@@ -22,13 +22,15 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             StringBuilder sqlBuffer = new();
 
-            sqlBuffer.Append("SELECT TOP ({})");
+            sqlBuffer.Append("SELECT TOP (");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(')');
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class
@@ -39,7 +41,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
-            string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]) + " = {}";
+            string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]) + " = " + SqlDialectStrategy.Placeholder;
 
             sqlBuffer.AppendLine("IF EXISTS (");
             sqlBuffer.AppendLine("    SELECT");
@@ -54,7 +56,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append("    UPDATE ");
             sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.AppendLine("    SET");
-            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendWhereClause("    ", clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             sqlBuffer.AppendLine("END");
@@ -67,12 +69,12 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("    )");
             sqlBuffer.AppendLine("    VALUES (");
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append("    )");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             sqlBuffer.AppendLine("END");
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate UpdateRangeSqlBuilder<TEntity>() where TEntity : class
@@ -89,7 +91,7 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             AppendUpdateRange<TEntity>(sqlBuffer, ["UPDLOCK"], sourceTable, targetTable, clause);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
@@ -119,7 +121,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("FROM (");
             sqlBuffer.AppendLine("    VALUES");
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine(") AS ");
             sqlBuffer.Append(sourceTable);
             sqlBuffer.Append(" (");
@@ -136,7 +138,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(')');
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate ExistsSqlBuilder<TEntity>() where TEntity : class
@@ -149,12 +151,12 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.AppendLine("            SELECT");
             sqlBuffer.Append("                1");
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "            ", null);
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("        )");
             sqlBuffer.Append("    AS BIT)");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
@@ -203,7 +205,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(sTable);
             sqlBuffer.AppendOnClause(string.Empty, tTable + "." + schemaIdColumn + " = " + sTable + "." + schemaIdColumn);
-            sqlBuffer.AppendWhereClause(string.Empty, sTable + "." + nameColumn + " = {} AND " + tTable + "." + nameColumn + " = {}");
+            sqlBuffer.AppendWhereClause(string.Empty, sTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + tTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");
@@ -211,7 +213,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

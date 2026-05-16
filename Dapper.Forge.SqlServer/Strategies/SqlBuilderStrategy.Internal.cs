@@ -37,7 +37,7 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             sqlBuffer.AppendLine("JOIN (");
             sqlBuffer.AppendLine("    VALUES");
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine(") AS ");
             sqlBuffer.Append(sourceTable);
 

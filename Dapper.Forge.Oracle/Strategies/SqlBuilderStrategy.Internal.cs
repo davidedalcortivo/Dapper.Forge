@@ -34,12 +34,12 @@ namespace Dapper.Forge.Oracle.Strategies
 
             if (isRange)
             {
-                sqlBuffer.AppendLine("{}");
+                sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             }
             else
             {
                 sqlBuffer.AppendLine("    SELECT");
-                sqlBuffer.AppendLine("{}");
+                sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
                 sqlBuffer.AppendLine("    FROM");
                 sqlBuffer.AppendLine("        dual");
             }
@@ -68,7 +68,7 @@ namespace Dapper.Forge.Oracle.Strategies
 
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

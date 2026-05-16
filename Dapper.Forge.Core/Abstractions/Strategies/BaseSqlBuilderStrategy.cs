@@ -26,10 +26,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.Append("SELECT");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public virtual SqlTemplate GetFirstSqlBuilder<TEntity>() where TEntity : class
@@ -41,12 +41,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.Append("SELECT");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("FETCH FIRST");
-            sqlBuffer.Append("    {} ROWS ONLY");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(" ROWS ONLY");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public virtual SqlTemplate GetByIdSqlBuilder<TEntity>() where TEntity : class
@@ -56,7 +58,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
-            string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]) + " = {}";
+            string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]) + " = " + SqlDialectStrategy.Placeholder;
 
             sqlBuffer.Append("SELECT");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
@@ -64,7 +66,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.AppendWhereClause(string.Empty, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public virtual SqlTemplate UpdateSqlBuilder<TEntity>() where TEntity : class
@@ -76,10 +78,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.Append("UPDATE ");
             sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.AppendLine("SET");
-            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public virtual SqlTemplate InsertSqlBuilder<TEntity>() where TEntity : class
@@ -96,11 +98,11 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("VALUES (");
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(')');
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public virtual SqlTemplate DeleteSqlBuilder<TEntity>() where TEntity : class
@@ -111,10 +113,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             sqlBuffer.Append("DELETE FROM ");
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public abstract SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class;
@@ -127,7 +129,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             StringBuilder sqlBuffer = new();
             (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]));
-            string clause = inPrefix + "{}" + inSuffix;
+            string clause = inPrefix + SqlDialectStrategy.Placeholder + inSuffix;
 
             sqlBuffer.Append("SELECT");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
@@ -135,7 +137,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.AppendWhereClause(string.Empty, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public abstract SqlTemplate UpdateRangeSqlBuilder<TEntity>() where TEntity : class;
@@ -154,10 +156,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("VALUES");
-            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public virtual SqlTemplate DeleteRangeSqlBuilder<TEntity>() where TEntity : class
@@ -168,14 +170,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             StringBuilder sqlBuffer = new();
             (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]));
-            string clause = inPrefix + "{}" + inSuffix;
+            string clause = inPrefix + SqlDialectStrategy.Placeholder + inSuffix;
 
             sqlBuffer.Append("DELETE FROM ");
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.AppendWhereClause(string.Empty, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public abstract SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class;
@@ -190,14 +192,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.AppendLine("            SELECT");
             sqlBuffer.Append("                1");
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "            ", null);
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("        )");
             sqlBuffer.AppendLine("        THEN 1");
             sqlBuffer.AppendLine("        ELSE 0");
             sqlBuffer.Append("    END");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public virtual SqlTemplate CountSqlBuilder<TEntity>() where TEntity : class

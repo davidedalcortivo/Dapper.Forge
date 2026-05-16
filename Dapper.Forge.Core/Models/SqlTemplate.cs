@@ -22,7 +22,7 @@ namespace Dapper.Forge.Core.Models
             }
         }
 
-        public SqlTemplate(string template, string terminator)
+        public SqlTemplate(string template, string terminator, string placeholder)
         {
             List<Segment> segments = [];
             StringBuilder sqlBuffer = new();
@@ -46,17 +46,24 @@ namespace Dapper.Forge.Core.Models
                     continue;
                 }
 
-                if (template[i] == '{' && i + 1 < template.Length && template[i + 1] == '}')
+                j = 0;
+
+                for (; j < placeholder.Length; j++)
+                {
+                    if (i + j >= template.Length || template[i + j] != placeholder[j])
+                        break;
+                }
+
+                if (placeholder.Length > 0 && j >= placeholder.Length)
                 {
                     Flush(sqlBuffer, segments);
-                    segments.Add(new(string.Empty, true, false));
+                    segments.Add(new(placeholder, true, false));
 
-                    i++;
+                    i += j - 1;
+                    continue;
                 }
-                else
-                {
-                    sqlBuffer.Append(template[i]);
-                }
+
+                sqlBuffer.Append(template[i]);
             }
 
             Flush(sqlBuffer, segments);

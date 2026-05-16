@@ -24,12 +24,13 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append("SELECT");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("LIMIT");
-            sqlBuffer.Append("    {}");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class
@@ -67,7 +68,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("    FROM (");
             sqlBuffer.AppendLine("        VALUES");
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append("    ) AS ");
             sqlBuffer.Append(dataTable);
             sqlBuffer.Append(" (");
@@ -76,12 +77,12 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append(") AS ");
             sqlBuffer.Append(sourceTable);
             sqlBuffer.Append(" (");
-            sqlBuffer.Append("{}");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(')');
             sqlBuffer.AppendWhereClause(string.Empty, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
@@ -97,11 +98,11 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.AppendLine("    SELECT");
             sqlBuffer.Append("        1");
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "    ", null);
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(')');
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
@@ -151,14 +152,14 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(nTable);
             sqlBuffer.AppendOnClause(string.Empty, relnamespaceColumn + " = " + nTable + "." + oidColumn);
-            sqlBuffer.AppendWhereClause(string.Empty, nspnameColumn + " = {} AND " + relnameColumn + " = {} AND " + attnumColumn + " > 0 AND NOT " + attisdroppedColumn);
+            sqlBuffer.AppendWhereClause(string.Empty, nspnameColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + relnameColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + attnumColumn + " > 0 AND NOT " + attisdroppedColumn);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(attnumColumn);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new SqlTemplate(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

@@ -10,10 +10,9 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         private readonly object _lock = new();
 
         public string DefaultSchemaName { get; protected set; } = null!;
-
         public virtual string NullValue { get; } = "NULL";
-
         public virtual string Terminator { get; } = ";" + Environment.NewLine;
+        public virtual string Placeholder { get; } = "{}";
 
         public virtual string RenderIdentifier(string name)
         {

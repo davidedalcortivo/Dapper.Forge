@@ -24,12 +24,13 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.Append("SELECT");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("LIMIT");
-            sqlBuffer.Append("    {}");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class
@@ -56,7 +57,7 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.Append(" AS ");
             sqlBuffer.AppendLine(targetTable);
             sqlBuffer.AppendLine("JOIN (");
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(") AS ");
             sqlBuffer.Append(sourceTable);
             sqlBuffer.AppendOnClause(string.Empty, clause);
@@ -65,7 +66,7 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, sourceTable, targetTable);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
@@ -81,11 +82,11 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.AppendLine("    SELECT");
             sqlBuffer.Append("        1");
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "    ", null);
-            sqlBuffer.AppendLine("{}");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(')');
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
@@ -111,14 +112,14 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.AppendLine("FROM");
             sqlBuffer.Append("    ");
             sqlBuffer.AppendLine(columnsTable);
-            sqlBuffer.AppendWhereClause(string.Empty, tableSchemaColumn + " = {} AND " + tableNameColumn + " = {}");
+            sqlBuffer.AppendWhereClause(string.Empty, tableSchemaColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(ordinalPositionColumn);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
-            return new SqlTemplate(sqlBuffer.ToString(), SqlDialectStrategy.Terminator);
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }
