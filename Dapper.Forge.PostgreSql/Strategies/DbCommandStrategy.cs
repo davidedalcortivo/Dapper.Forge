@@ -58,13 +58,20 @@ namespace Dapper.Forge.PostgreSql.Strategies
             IReadOnlyList<DbColumnInfo> columns = DbColumnInfoCache<TEntity>.GetValue(connectionId);
 
             if (properties.Length != columns.Count)
-                throw new InvalidOperationException("The entity '" + typeof(TEntity).Name + "' does not match the database table schema.");
+                throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
 
             PropertyInfo[] sortProperties = new PropertyInfo[properties.Length];
             StringBuilder columnBuffer = new();
 
             for (int i = 0; i < sortProperties.Length; i++)
-                sortProperties[i] = propertiesByColumnName[columns[i].Name];
+            {
+                string columnName = columns[i].Name;
+
+                if (!propertiesByColumnName.TryGetValue(columnName, out PropertyInfo? property))
+                    throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
+
+                sortProperties[i] = property;
+            }
 
             columnBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, sortProperties, null, false, true);
 
