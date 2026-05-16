@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Dapper.Forge.Core.Caching
 {
-    public static class ParamGetterCache
+    internal static class ParamGetterCache
     {
         private static readonly ConcurrentDictionary<Type, ImmutableDictionary<string, Func<object, object?>>> _cache = new();
 

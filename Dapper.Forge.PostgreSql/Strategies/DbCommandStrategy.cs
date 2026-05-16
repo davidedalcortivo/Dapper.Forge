@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Dapper.Forge.PostgreSql.Strategies
 {
-    internal partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
+    internal sealed partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
     {
         public static DbCommandStrategy Instance { get; } = new(SqlBuilderStrategy.Instance);
 

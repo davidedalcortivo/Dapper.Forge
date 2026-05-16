@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Dapper.Forge.SqlServer.Strategies
 {
-    internal partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
+    internal sealed partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
     {
         public static SqlBuilderStrategy Instance { get; } = new(Strategies.SqlDialectStrategy.Instance);
 
@@ -163,7 +163,10 @@ namespace Dapper.Forge.SqlServer.Strategies
             string columnsTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("columns");
             string tablesTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("tables");
             string schemasTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("schemas");
-            string columnIdColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("column_id");
+            string cTable = SqlDialectStrategy.RenderIdentifier("c");
+            string tTable = SqlDialectStrategy.RenderIdentifier("t");
+            string sTable = SqlDialectStrategy.RenderIdentifier("s");
+            string columnIdColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("column_id");
             string nameColumn = SqlDialectStrategy.RenderIdentifier("name");
             string objectIdColumn = SqlDialectStrategy.RenderIdentifier("object_id");
             string schemaIdColumn = SqlDialectStrategy.RenderIdentifier("schema_id");
@@ -172,7 +175,7 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             sqlBuffer.AppendLine("SELECT");
             sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnsTable);
+            sqlBuffer.Append(cTable);
             sqlBuffer.Append('.');
             sqlBuffer.Append(nameColumn);
             sqlBuffer.Append(" AS ");
@@ -184,17 +187,23 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
             sqlBuffer.AppendLine("FROM");
             sqlBuffer.Append("    ");
-            sqlBuffer.AppendLine(columnsTable);
+            sqlBuffer.Append(columnsTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(cTable);
             sqlBuffer.AppendLine("JOIN");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(tablesTable);
-            sqlBuffer.AppendOnClause(string.Empty, columnsTable + "." + objectIdColumn + " = " + tablesTable + "." + objectIdColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(tTable);
+            sqlBuffer.AppendOnClause(string.Empty, cTable + "." + objectIdColumn + " = " + tTable + "." + objectIdColumn);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("JOIN");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(schemasTable);
-            sqlBuffer.AppendOnClause(string.Empty, tablesTable + "." + schemaIdColumn + " = " + schemasTable + "." + schemaIdColumn);
-            sqlBuffer.AppendWhereClause(string.Empty, schemasTable + "." + nameColumn + " = {} AND " + tablesTable + "." + nameColumn + " = {}");
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(sTable);
+            sqlBuffer.AppendOnClause(string.Empty, tTable + "." + schemaIdColumn + " = " + sTable + "." + schemaIdColumn);
+            sqlBuffer.AppendWhereClause(string.Empty, sTable + "." + nameColumn + " = {} AND " + tTable + "." + nameColumn + " = {}");
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");

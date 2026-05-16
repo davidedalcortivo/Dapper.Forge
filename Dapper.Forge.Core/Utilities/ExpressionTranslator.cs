@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace Dapper.Forge.Core.Utilities
 {
-    public class ExpressionTranslator<TEntity> : ExpressionVisitor where TEntity : class
+    internal sealed class ExpressionTranslator<TEntity> : ExpressionVisitor where TEntity : class
     {
         private readonly SqlTranslationContext ctx;
 

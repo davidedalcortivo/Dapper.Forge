@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace Dapper.Forge.Core.Utilities
 {
-    public static class FilterNodeTranslator
+    internal static class FilterNodeTranslator
     {
         public static (string, DynamicParameters?) Translate(ISqlDialectStrategy strategy, IFilterNode node, DynamicParameters? parameters = null)
         {

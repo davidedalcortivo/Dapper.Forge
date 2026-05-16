@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Dapper.Forge.Oracle.Strategies
 {
-    internal partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
+    internal sealed partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
     {
         private SqlTemplate BuildUpsertSql<TEntity>(bool isRange, bool appendInsert) where TEntity : class
         {

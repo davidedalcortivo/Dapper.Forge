@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Dapper.Forge.Core.Abstractions.Strategies
 {
-    public abstract partial class BaseSqlBuilderStrategy<TStrategy> : ISqlBuilderStrategy where TStrategy : ISqlDialectStrategy
+    internal abstract partial class BaseSqlBuilderStrategy<TStrategy> : ISqlBuilderStrategy where TStrategy : ISqlDialectStrategy
     {
         protected virtual SqlTemplate BuildAggregateSql<TEntity>(string aggregateName) where TEntity : class
         {

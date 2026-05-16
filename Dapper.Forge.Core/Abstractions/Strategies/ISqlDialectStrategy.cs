@@ -2,7 +2,7 @@
 
 namespace Dapper.Forge.Core.Abstractions.Strategies
 {
-    public interface ISqlDialectStrategy
+    internal interface ISqlDialectStrategy
     {
         string DefaultSchemaName { get; }
         string NullValue { get; }

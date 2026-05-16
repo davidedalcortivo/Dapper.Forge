@@ -3,7 +3,7 @@
 
 namespace Dapper.Forge.Core.Models
 {
-    public sealed class SqlTemplate
+    internal sealed class SqlTemplate
     {
         private readonly Segment[] _segments;
         private int _literalsLength;

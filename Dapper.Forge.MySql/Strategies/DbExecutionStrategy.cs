@@ -3,7 +3,7 @@
 
 namespace Dapper.Forge.MySql.Strategies
 {
-    internal class DbExecutionStrategy : BaseDbExecutionStrategy<DbCommandStrategy>
+    internal sealed class DbExecutionStrategy : BaseDbExecutionStrategy<DbCommandStrategy>
     {
         public static DbExecutionStrategy Instance { get; } = new(DbCommandStrategy.Instance);
 

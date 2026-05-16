@@ -1,11 +1,7 @@
-﻿using Dapper;
-using Dapper.Forge.Console;
-using Dapper.Forge.Core.Caching;
+﻿using Dapper.Forge.Console;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.PostgreSql.Extensions;
 using Npgsql;
-using System.Collections.Immutable;
-using System.Reflection;
 
 
 NpgsqlConnection connection = new("");

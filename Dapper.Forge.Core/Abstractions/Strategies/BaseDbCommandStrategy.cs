@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Dapper.Forge.Core.Abstractions.Strategies
 {
-    public abstract partial class BaseDbCommandStrategy<TStrategy> : IDbCommandStrategy where TStrategy : ISqlBuilderStrategy
+    internal abstract partial class BaseDbCommandStrategy<TStrategy> : IDbCommandStrategy where TStrategy : ISqlBuilderStrategy
     {
         public ISqlDialectStrategy SqlDialectStrategy { get; }
 

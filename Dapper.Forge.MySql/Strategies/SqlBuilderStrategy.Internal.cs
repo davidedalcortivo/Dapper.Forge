@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Dapper.Forge.MySql.Strategies
 {
-    internal partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
+    internal sealed partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
     {
         private SqlTemplate BuildUpsertSql<TEntity>(bool isRange) where TEntity : class
         {

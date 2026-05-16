@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Dapper.Forge.MySql.Strategies
 {
-    internal partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
+    internal sealed partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
     {
         public static SqlBuilderStrategy Instance { get; } = new(Strategies.SqlDialectStrategy.Instance);
 
@@ -91,10 +91,10 @@ namespace Dapper.Forge.MySql.Strategies
         public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
         {
             string columnsTable = SqlDialectStrategy.RenderIdentifier("information_schema") + "." + SqlDialectStrategy.RenderIdentifier("columns");
-            string columnNameColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("COLUMN_NAME");
-            string ordinalPositionColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("ORDINAL_POSITION");
-            string tableNameColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("TABLE_NAME");
-            string tableSchemaColumn = columnsTable + "." + SqlDialectStrategy.RenderIdentifier("TABLE_SCHEMA");
+            string columnNameColumn = SqlDialectStrategy.RenderIdentifier("COLUMN_NAME");
+            string ordinalPositionColumn = SqlDialectStrategy.RenderIdentifier("ORDINAL_POSITION");
+            string tableNameColumn = SqlDialectStrategy.RenderIdentifier("TABLE_NAME");
+            string tableSchemaColumn = SqlDialectStrategy.RenderIdentifier("TABLE_SCHEMA");
 
             StringBuilder sqlBuffer = new();
 

@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Dapper.Forge.SqlServer.Strategies
 {
-    internal partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
+    internal sealed partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
     {
         protected override DbCommandInfo BuildGetFirstCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor>? sortDescriptors, int take) where TEntity : class
         {

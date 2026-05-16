@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Dapper.Forge.Core.Abstractions.Strategies
 {
-    public interface IDbCommandStrategy
+    internal interface IDbCommandStrategy
     {
         ISqlDialectStrategy SqlDialectStrategy { get; }
 

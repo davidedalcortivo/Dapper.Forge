@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Dapper.Forge.Core.Utilities
 {
-    public static class PropertyHelper
+    internal static class PropertyHelper
     {
         public static string GetPropertyName<TEntity, TSelector>(Expression<Func<TEntity, TSelector>> selector) where TEntity : class
         {

@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Dapper.Forge.PostgreSql.Strategies
 {
-    internal partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
+    internal sealed partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
     {
         public static SqlBuilderStrategy Instance { get; } = new(Strategies.SqlDialectStrategy.Instance);
 
@@ -109,13 +109,16 @@ namespace Dapper.Forge.PostgreSql.Strategies
             string pgAttributeTable = SqlDialectStrategy.RenderIdentifier("pg_attribute");
             string pgClassTable = SqlDialectStrategy.RenderIdentifier("pg_class");
             string pgNamespaceTable = SqlDialectStrategy.RenderIdentifier("pg_namespace");
-            string attnameColumn = pgAttributeTable + "." + SqlDialectStrategy.RenderIdentifier("attname");
-            string attnumColumn = pgAttributeTable + "." + SqlDialectStrategy.RenderIdentifier("attnum");
-            string attrelidColumn = pgAttributeTable + "." + SqlDialectStrategy.RenderIdentifier("attrelid");
-            string relnamespaceColumn = pgClassTable + "." + SqlDialectStrategy.RenderIdentifier("relnamespace");
-            string relnameColumn = pgClassTable + "." + SqlDialectStrategy.RenderIdentifier("relname");
-            string nspnameColumn = pgNamespaceTable + "." + SqlDialectStrategy.RenderIdentifier("nspname");
-            string attisdroppedColumn = pgAttributeTable + "." + SqlDialectStrategy.RenderIdentifier("attisdropped");
+            string aTable = SqlDialectStrategy.RenderIdentifier("a");
+            string cTable = SqlDialectStrategy.RenderIdentifier("c");
+            string nTable = SqlDialectStrategy.RenderIdentifier("n");
+            string attnameColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attname");
+            string attnumColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attnum");
+            string attrelidColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attrelid");
+            string attisdroppedColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attisdropped");
+            string relnamespaceColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("relnamespace");
+            string relnameColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("relname");
+            string nspnameColumn = nTable + "." + SqlDialectStrategy.RenderIdentifier("nspname");
             string oidColumn = SqlDialectStrategy.RenderIdentifier("oid");
 
             StringBuilder sqlBuffer = new();
@@ -132,16 +135,22 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
             sqlBuffer.AppendLine("FROM");
             sqlBuffer.Append("    ");
-            sqlBuffer.AppendLine(pgAttributeTable);
+            sqlBuffer.Append(pgAttributeTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(aTable);
             sqlBuffer.AppendLine("JOIN");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(pgClassTable);
-            sqlBuffer.AppendOnClause(string.Empty, attrelidColumn + " = " + pgClassTable + "." + oidColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(cTable);
+            sqlBuffer.AppendOnClause(string.Empty, attrelidColumn + " = " + cTable + "." + oidColumn);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("JOIN");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(pgNamespaceTable);
-            sqlBuffer.AppendOnClause(string.Empty, relnamespaceColumn + " = " + pgNamespaceTable + "." + oidColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(nTable);
+            sqlBuffer.AppendOnClause(string.Empty, relnamespaceColumn + " = " + nTable + "." + oidColumn);
             sqlBuffer.AppendWhereClause(string.Empty, nspnameColumn + " = {} AND " + relnameColumn + " = {} AND " + attnumColumn + " > 0 AND NOT " + attisdroppedColumn);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");

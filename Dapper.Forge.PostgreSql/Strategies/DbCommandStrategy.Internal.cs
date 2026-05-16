@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Dapper.Forge.PostgreSql.Strategies
 {
-    internal partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
+    internal sealed partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
     {
         protected override DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {

@@ -3,7 +3,7 @@
 
 namespace Dapper.Forge.SqlServer.Strategies
 {
-    internal partial class SqlDialectStrategy
+    internal sealed partial class SqlDialectStrategy
     {
         protected override void InitializeImpl(DbConnection connection)
         {

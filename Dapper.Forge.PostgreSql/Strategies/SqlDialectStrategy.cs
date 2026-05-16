@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Dapper.Forge.PostgreSql.Strategies
 {
-    internal partial class SqlDialectStrategy : BaseSqlDialectStrategy
+    internal sealed partial class SqlDialectStrategy : BaseSqlDialectStrategy
     {
         public static SqlDialectStrategy Instance { get; } = new();
 

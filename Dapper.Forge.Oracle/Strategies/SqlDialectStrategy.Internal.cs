@@ -4,7 +4,7 @@ using System.Data.Common;
 
 namespace Dapper.Forge.Oracle.Strategies
 {
-    internal partial class SqlDialectStrategy
+    internal sealed partial class SqlDialectStrategy
     {
         protected override void InitializeImpl(DbConnection connection)
         {

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Dapper.Forge.Core.Utilities
 {
-    public static class SqlBufferExtensions
+    internal static class SqlBufferExtensions
     {
         public static StringBuilder AppendSeparator(this StringBuilder sqlBuffer, int index, int count, bool inLine)
         {

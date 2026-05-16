@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Dapper.Forge.Oracle.Strategies
 {
-    internal partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
+    internal sealed partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
     {
         private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, SqlTemplate sqlTemplate) where TEntity : class
         {

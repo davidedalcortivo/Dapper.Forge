@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace Dapper.Forge.Core.Models
 {
-    public class FilterDescriptor : IFilterNode
+    public sealed class FilterDescriptor : IFilterNode
     {
         public string PropertyName { get; }
         public object? Value { get; }

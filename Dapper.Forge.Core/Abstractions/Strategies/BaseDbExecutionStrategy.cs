@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Dapper.Forge.Core.Abstractions.Strategies
 {
-    public abstract partial class BaseDbExecutionStrategy<TStrategy> : IDbExecutionStrategy where TStrategy : IDbCommandStrategy
+    internal abstract partial class BaseDbExecutionStrategy<TStrategy> : IDbExecutionStrategy where TStrategy : IDbCommandStrategy
     {
         public ISqlDialectStrategy SqlDialectStrategy { get; }
 

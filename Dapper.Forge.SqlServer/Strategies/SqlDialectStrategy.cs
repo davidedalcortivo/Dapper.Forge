@@ -5,7 +5,7 @@ using System.Data.Common;
 
 namespace Dapper.Forge.SqlServer.Strategies
 {
-    internal partial class SqlDialectStrategy : BaseSqlDialectStrategy
+    internal sealed partial class SqlDialectStrategy : BaseSqlDialectStrategy
     {
         public static SqlDialectStrategy Instance { get; } = new();
 

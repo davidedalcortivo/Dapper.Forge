@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Dapper.Forge.Core.Caching
 {
-    public static class ParamPropertyCache
+    internal static class ParamPropertyCache
     {
         private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _cache = new();
 

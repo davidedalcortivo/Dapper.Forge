@@ -4,7 +4,7 @@ using Dapper.Forge.Core.Models;
 
 namespace Dapper.Forge.Core.Caching
 {
-    public static class SqlBuilderCache<TEntity, TStrategy> where TEntity : class where TStrategy : ISqlBuilderStrategy
+    internal static class SqlBuilderCache<TEntity, TStrategy> where TEntity : class where TStrategy : ISqlBuilderStrategy
     {
         private static bool _isInitialized = false;
         private static readonly object _lock = new();

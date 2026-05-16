@@ -3,7 +3,7 @@
 
 namespace Dapper.Forge.Core.Abstractions.Strategies
 {
-    public interface ISqlBuilderStrategy
+    internal interface ISqlBuilderStrategy
     {
         ISqlDialectStrategy SqlDialectStrategy { get; }
 

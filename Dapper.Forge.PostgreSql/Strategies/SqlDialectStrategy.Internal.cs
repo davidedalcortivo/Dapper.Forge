@@ -3,7 +3,7 @@
 
 namespace Dapper.Forge.PostgreSql.Strategies
 {
-    internal partial class SqlDialectStrategy
+    internal sealed partial class SqlDialectStrategy
     {
         protected override void InitializeImpl(DbConnection connection)
         {

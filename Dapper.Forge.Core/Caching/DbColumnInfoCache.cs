@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace Dapper.Forge.Core.Caching
 {
-    public static class DbColumnInfoCache<TEntity> where TEntity : class
+    internal static class DbColumnInfoCache<TEntity> where TEntity : class
     {
         private static readonly ConcurrentDictionary<string, IReadOnlyList<DbColumnInfo>> _cache = new();
 

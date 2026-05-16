@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Dapper.Forge.Core.Caching
 {
-    public static class MemberEvaluatorCache
+    internal static class MemberEvaluatorCache
     {
         private static readonly ConcurrentDictionary<MemberInfo, Func<object?, object?>> _cache = new();
 

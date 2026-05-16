@@ -3,7 +3,7 @@
 
 namespace Dapper.Forge.Core.Models
 {
-    public class FilterGroup : IFilterNode
+    public sealed class FilterGroup : IFilterNode
     {
         public List<IFilterNode> FilterNodes { get; }
         public LogicalOperator LogicalOperator { get; }

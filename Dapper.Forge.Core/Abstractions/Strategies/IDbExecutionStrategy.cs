@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Dapper.Forge.Core.Abstractions.Strategies
 {
-    public interface IDbExecutionStrategy
+    internal interface IDbExecutionStrategy
     {
         ISqlDialectStrategy SqlDialectStrategy { get; }
         Task LoadDbCacheImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class;

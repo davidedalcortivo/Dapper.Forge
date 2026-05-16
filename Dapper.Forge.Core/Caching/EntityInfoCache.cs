@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Dapper.Forge.Core.Caching
 {
-    public static class EntityInfoCache<TEntity> where TEntity : class
+    internal static class EntityInfoCache<TEntity> where TEntity : class
     {
         public static string TableName { get; }
         public static string? SchemaName { get; }

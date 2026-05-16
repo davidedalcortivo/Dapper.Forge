@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Dapper.Forge.SqlServer.Strategies
 {
-    internal partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
+    internal sealed partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
     {
         private void AppendUpdateRange<TEntity>(StringBuilder sqlBuffer, string[] sqlLocks, string sourceTable, string targetTable, string clause) where TEntity : class
         {

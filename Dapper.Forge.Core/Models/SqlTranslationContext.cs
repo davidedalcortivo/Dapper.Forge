@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Dapper.Forge.Core.Models
 {
-    public sealed class SqlTranslationContext
+    internal sealed class SqlTranslationContext
     {
         private readonly Stack<StringBuilder> _stack;
 
