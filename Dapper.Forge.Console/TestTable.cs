@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Dapper.Forge.Core.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Dapper.Forge.Console
@@ -6,12 +7,15 @@ namespace Dapper.Forge.Console
     [Table("test_table", Schema = "public")]
     public class TestTable
     {
+        [UpsertKey]
         [Column("id")]
         public Guid Id { get; set; }
 
+        [UpsertKey]
         [Column("int_value")]
         public int? IntValue { get; set; }
 
+        [UpsertKey]
         [Column("decimal_value")]
         public decimal? DecimalValue { get; set; }
 

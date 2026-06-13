@@ -228,7 +228,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 idList.Add(id);
             }
 
-            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.GetByIdRangeSql, idList, batchSize, chunkSize, idProperty, true);
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlDialectStrategy, SqlBuilderCache<TEntity, TStrategy>.GetByIdRangeSql, idList, batchSize, chunkSize, idProperty, true);
         }
 
         public abstract IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
@@ -255,7 +255,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             for (int i = 0; i < entityArray.Length; i += _batchSize)
             {
-                if (chunkSize > 0 && chunkSize < _batchSize)
+                if (chunkSize > 0 && chunkSize < batchSize)
                     _batchSize = Math.Min(chunkSize, batchSize - s);
 
                 int end = Math.Min(i + _batchSize, entityArray.Length);
@@ -289,6 +289,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                     parameters = new();
                     s = 0;
                 }
+                else
+                {
+                    batchBuffer.AppendLine();
+                }
             }
 
             return commands;
@@ -300,7 +304,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idProperty.Name];
             List<object> idList = [.. entities.Select(x => propertyGetter(x)!)];
 
-            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idProperty, false);
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlDialectStrategy, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idProperty, false);
         }
 
         public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(DbConnection connection, IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
@@ -314,7 +318,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 idList.Add(id);
             }
 
-            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idProperty, false);
+            return BuildInRangeInvokerCache.Invoke<TEntity>(this, SqlDialectStrategy, SqlBuilderCache<TEntity, TStrategy>.DeleteRangeSql, idList, batchSize, chunkSize, idProperty, false);
         }
 
         public abstract IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;

@@ -47,7 +47,7 @@ namespace Dapper.Forge.Oracle.Strategies
                         sqlBuffer.AppendSeparator(k, properties.Length, true);
                     }
 
-                    sqlBuffer.Append(" FROM dual");
+                    sqlBuffer.Append(" FROM DUAL");
 
                     if (j < end - 1)
                     {

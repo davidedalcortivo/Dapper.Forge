@@ -9,10 +9,16 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 
-namespace Dapper.Forge.PostgreSql.Extensions
+namespace Dapper.Forge.SqlServer.Extensions
 {
     public static partial class DbConnectionExtensions
     {
+        public static async Task LoadDbCacheAsync<TEntity>(this SqlConnection connection, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            await DbExecutionStrategy.Instance.LoadDbCacheImplAsync<TEntity>(connection, false, commandTimeout, cancellationToken);
+        }
+
         public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -196,7 +202,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
         public static async Task<IReadOnlyList<TEntity?>> GetByIdRangeAsync<TEntity>(this SqlConnection connection, IEnumerable ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount);
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount) : SqlDialectStrategy.Instance.MaxParameterCount;
             return await DbExecutionStrategy.Instance.GetByIdRangeImplAsync<TEntity>(connection, false, ids, preserveDuplicates, preserveNulls, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 

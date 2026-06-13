@@ -8,15 +8,15 @@ namespace Dapper.Forge.Core.Models
     {
         private readonly Stack<StringBuilder> _stack;
 
-        public ISqlDialectStrategy Strategy { get; }
+        public ISqlDialectStrategy SqlDialectStrategy { get; }
         public int ParamIndex { get; set; }
         public StringBuilder SqlBuffer { get; private set; }
         public DynamicParameters? Parameters { get; private set; }
 
-        public SqlTranslationContext(ISqlDialectStrategy strategy, DynamicParameters? parameters = null)
+        public SqlTranslationContext(ISqlDialectStrategy sqlDialectStrategy, DynamicParameters? parameters = null)
         {
             _stack = new();
-            Strategy = strategy;
+            SqlDialectStrategy = sqlDialectStrategy;
             SqlBuffer = new();
             Parameters = parameters;
         }
@@ -37,11 +37,12 @@ namespace Dapper.Forge.Core.Models
         public string AddParameter(object? value)
         {
             Parameters ??= new();
-            ParamIndex++;
 
             string name = "__p" + ParamIndex;
             Parameters.Add(name, value);
-            return Strategy.RenderParameter(name);
+            ParamIndex++;
+
+            return SqlDialectStrategy.RenderParameter(name);
         }
     }
 }

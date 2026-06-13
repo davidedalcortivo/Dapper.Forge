@@ -26,6 +26,15 @@ namespace Dapper.Forge.SqlServer.Strategies
             return new(sql, parameters);
         }
 
+        protected override DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
+        {
+            StringBuilder sqlBuffer = new();
+            sqlBuffer.AppendWhereClause("                ", clause);
+
+            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.ExistsSql.Render(sqlBuffer);
+            return new(sql, parameters);
+        }
+
         private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize, SqlTemplate sqlTemplate, bool updateOnly) where TEntity : class
         {
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
@@ -47,7 +56,7 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             for (int i = 0; i < entityArray.Length; i += _batchSize)
             {
-                if (chunkSize > 0 && chunkSize < _batchSize)
+                if (chunkSize > 0 && chunkSize < batchSize)
                     _batchSize = Math.Min(chunkSize, batchSize - s);
 
                 int end = Math.Min(i + _batchSize, entityArray.Length);
@@ -83,6 +92,10 @@ namespace Dapper.Forge.SqlServer.Strategies
                     batchBuffer.Clear();
                     parameters = new();
                     s = 0;
+                }
+                else
+                {
+                    batchBuffer.AppendLine();
                 }
             }
 

@@ -95,19 +95,19 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual string Pagination(string skipParameter, string takeParameter)
         {
-            StringBuilder sb = new();
+            StringBuilder sqlBuffer = new();
 
-            sb.AppendLine();
-            sb.AppendLine("OFFSET");
-            sb.Append("    ");
-            sb.Append(skipParameter);
-            sb.AppendLine(" ROWS");
-            sb.AppendLine("FETCH NEXT");
-            sb.Append("    ");
-            sb.Append(takeParameter);
-            sb.Append(" ROWS ONLY");
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("OFFSET");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(skipParameter);
+            sqlBuffer.AppendLine(" ROWS");
+            sqlBuffer.AppendLine("FETCH NEXT");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(takeParameter);
+            sqlBuffer.Append(" ROWS ONLY");
 
-            return sb.ToString();
+            return sqlBuffer.ToString();
         }
 
         public abstract string GetConnectionId(DbConnection connection);

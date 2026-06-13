@@ -41,7 +41,9 @@ namespace Dapper.Forge.MySql.Strategies
         public override SqlTemplate UpdateRangeSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -53,13 +55,18 @@ namespace Dapper.Forge.MySql.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("UPDATE ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" AS ");
             sqlBuffer.AppendLine(targetTable);
-            sqlBuffer.AppendLine("JOIN (");
+            sqlBuffer.AppendLine("INNER JOIN (");
             sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(") AS ");
             sqlBuffer.Append(sourceTable);
+            sqlBuffer.Append(" (");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, properties, null, false, true);
+            sqlBuffer.Append(')');
             sqlBuffer.AppendOnClause(string.Empty, clause);
             sqlBuffer.AppendLine();
             sqlBuffer.Append("SET");
@@ -78,12 +85,13 @@ namespace Dapper.Forge.MySql.Strategies
         {
             StringBuilder sqlBuffer = new();
 
-            sqlBuffer.AppendLine("SELECT EXISTS (");
-            sqlBuffer.AppendLine("    SELECT");
-            sqlBuffer.Append("        1");
-            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "    ", null);
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.AppendLine("    EXISTS (");
+            sqlBuffer.AppendLine("        SELECT");
+            sqlBuffer.Append("            1");
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "        ", null);
             sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
-            sqlBuffer.Append(')');
+            sqlBuffer.Append("    )");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

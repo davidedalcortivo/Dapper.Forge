@@ -48,7 +48,6 @@ namespace Dapper.Forge.MySql.Strategies
             
             ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
-            ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             SqlTemplate updateRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql;
 
             if (batchSize <= 0)
@@ -72,13 +71,6 @@ namespace Dapper.Forge.MySql.Strategies
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-
-                        if (j == i)
-                        {
-                            sqlBuffer.Append(" AS ");
-                            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[property.Name]));
-                        }
-
                         sqlBuffer.AppendSeparator(k, properties.Length, true);
                     }
 

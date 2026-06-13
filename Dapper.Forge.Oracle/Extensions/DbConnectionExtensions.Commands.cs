@@ -10,6 +10,11 @@ namespace Dapper.Forge.Oracle.Extensions
 {
     public static partial class DbConnectionExtensions
     {
+        public static void LoadRuntimeCache<TEntity>(this OracleConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+        }
+
         public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -211,14 +216,14 @@ namespace Dapper.Forge.Oracle.Extensions
         public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount);
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount) : SqlDialectStrategy.Instance.MaxInValueCount;
             return DbCommandStrategy.Instance.DeleteRangeCommands(connection, entities, batchSize, 0);
         }
 
         public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this OracleConnection connection, IEnumerable ids, int batchSize = 500) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount);
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount) : SqlDialectStrategy.Instance.MaxInValueCount;
             return DbCommandStrategy.Instance.DeleteRangeCommands<TEntity>(connection, ids, batchSize, 0);
         }
 

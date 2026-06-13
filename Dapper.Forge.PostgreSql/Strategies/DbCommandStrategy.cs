@@ -48,12 +48,14 @@ namespace Dapper.Forge.PostgreSql.Strategies
                 return commands;
 
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, PropertyInfo> propertiesByColumnName = EntityInfoCache<TEntity>.PropertiesByColumnName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             SqlTemplate updateRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql;
 
             string table = SqlDialectStrategy.RenderIdentifier(tableName);
+            string schema = SqlDialectStrategy.RenderIdentifier(schemaName);
             string connectionId = SqlDialectStrategy.GetConnectionId(connection);
             IReadOnlyList<DbColumnInfo> columns = DbColumnInfoCache<TEntity>.GetValue(connectionId);
 
@@ -61,7 +63,6 @@ namespace Dapper.Forge.PostgreSql.Strategies
                 throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
 
             PropertyInfo[] sortProperties = new PropertyInfo[properties.Length];
-            StringBuilder columnBuffer = new();
 
             for (int i = 0; i < sortProperties.Length; i++)
             {
@@ -73,8 +74,6 @@ namespace Dapper.Forge.PostgreSql.Strategies
                 sortProperties[i] = property;
             }
 
-            columnBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, sortProperties, null, false, true);
-
             if (batchSize <= 0)
                 batchSize = entityArray.Length;
 
@@ -82,29 +81,31 @@ namespace Dapper.Forge.PostgreSql.Strategies
             {
                 int end = Math.Min(i + batchSize, entityArray.Length);
 
-                StringBuilder valueBuffer = new();
+                StringBuilder sqlBuffer = new();
                 DynamicParameters parameters = new();
 
                 for (int j = i; j < end; j++)
                 {
-                    valueBuffer.Append("            (ROW(");
+                    sqlBuffer.Append("            (ROW(");
 
                     for (int k = 0; k < sortProperties.Length; k++)
                     {
                         string parameterName = sortProperties[k].Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
-                        valueBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-                        valueBuffer.AppendSeparator(k, sortProperties.Length, true);
+                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
+                        sqlBuffer.AppendSeparator(k, sortProperties.Length, true);
                     }
 
-                    valueBuffer.Append(")::");
-                    valueBuffer.Append(table);
-                    valueBuffer.Append(')');
-                    valueBuffer.AppendSeparator(j, end, false);
+                    sqlBuffer.Append(")::");
+                    sqlBuffer.Append(schema);
+                    sqlBuffer.Append('.');
+                    sqlBuffer.Append(table);
+                    sqlBuffer.Append(')');
+                    sqlBuffer.AppendSeparator(j, end, false);
                 }
 
-                string sql = updateRangeSql.Render(valueBuffer, columnBuffer);
+                string sql = updateRangeSql.Render(sqlBuffer);
                 commands.Add(new(sql, parameters));
             }
 

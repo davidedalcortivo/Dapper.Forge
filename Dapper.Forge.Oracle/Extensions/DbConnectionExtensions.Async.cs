@@ -10,6 +10,12 @@ namespace Dapper.Forge.Oracle.Extensions
 {
     public static partial class DbConnectionExtensions
     {
+        public static async Task LoadDbCacheAsync<TEntity>(this OracleConnection connection, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            await DbExecutionStrategy.Instance.LoadDbCacheImplAsync<TEntity>(connection, false, commandTimeout, cancellationToken);
+        }
+
         public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -211,14 +217,14 @@ namespace Dapper.Forge.Oracle.Extensions
         public static async Task<int> DeleteRangeAsync<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount);
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount) : SqlDialectStrategy.Instance.MaxInValueCount;
             return await DbExecutionStrategy.Instance.DeleteRangeImplAsync(connection, false, entities, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<int> DeleteRangeAsync<TEntity>(this OracleConnection connection, IEnumerable ids, int batchSize = 500, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            batchSize = Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount);
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxInValueCount) : SqlDialectStrategy.Instance.MaxInValueCount;
             return await DbExecutionStrategy.Instance.DeleteRangeImplAsync<TEntity>(connection, false, ids, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 

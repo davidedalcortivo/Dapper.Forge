@@ -8,9 +8,9 @@ namespace Dapper.Forge.Core.Utilities
 {
     internal static class FilterNodeTranslator
     {
-        public static (string, DynamicParameters?) Translate(ISqlDialectStrategy strategy, IFilterNode node, DynamicParameters? parameters = null)
+        public static (string, DynamicParameters?) Translate(ISqlDialectStrategy sqlDialectStrategy, IFilterNode node, DynamicParameters? parameters = null)
         {
-            SqlTranslationContext ctx = new(strategy, parameters);
+            SqlTranslationContext ctx = new(sqlDialectStrategy, parameters);
             TranslateNode(node, ctx);
             return (ctx.SqlBuffer.ToString(), ctx.Parameters);
         }

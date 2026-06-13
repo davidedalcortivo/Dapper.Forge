@@ -21,23 +21,21 @@ namespace Dapper.Forge.SqlServer.Strategies
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+            ImmutableArray<PropertyInfo> upsertKeyProperties = EntityInfoCache<TEntity>.UpsertKeyProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
 
             StringBuilder updateBuffer = new();
             StringBuilder insertBuffer = new();
+            StringBuilder upsertKeyBuffer = new();
             DynamicParameters parameters = new();
-            string idParameterName = idProperty.Name;
-            string idParameter = SqlDialectStrategy.RenderParameter(idParameterName);
-
-            parameters.Add(idParameterName, propertyGettersByPropertyName[idParameterName](entity));
 
             for (int i = 0; i < updateProperties.Length; i++)
             {
                 string parameterName = updateProperties[i].Name;
                 object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
 
-                updateBuffer.Append("        ");
+                updateBuffer.Append("    ");
                 updateBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
                 updateBuffer.Append(" = ");
                 updateBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
@@ -54,7 +52,23 @@ namespace Dapper.Forge.SqlServer.Strategies
                 insertBuffer.AppendSeparator(i, insertProperties.Length, false);
             }
 
-            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(idParameter, updateBuffer, idParameter, insertBuffer);
+            for (int i = 0; i < upsertKeyProperties.Length; i++)
+            {
+                string parameterName = upsertKeyProperties[i].Name;
+                object? parameterValue = propertyGettersByPropertyName[parameterName](entity);
+
+                if (i > 0)
+                {
+                    upsertKeyBuffer.AppendLine();
+                    upsertKeyBuffer.Append("    AND ");
+                }
+
+                upsertKeyBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[parameterName]));
+                upsertKeyBuffer.Append(" = ");
+                upsertKeyBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName, parameterValue);
+            }
+
+            string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertSql.Render(updateBuffer, upsertKeyBuffer, insertBuffer);
             return new(sql, parameters);
         }
 

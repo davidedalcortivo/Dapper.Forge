@@ -72,10 +72,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         public virtual SqlTemplate UpdateSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
 
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("UPDATE ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.AppendLine("SET");
             sqlBuffer.Append(SqlDialectStrategy.Placeholder);
@@ -87,11 +90,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         public virtual SqlTemplate InsertSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
 
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
@@ -108,10 +114,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         public virtual SqlTemplate DeleteSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
 
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("DELETE FROM ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
@@ -145,11 +154,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         public virtual SqlTemplate InsertRangeSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
 
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
@@ -165,6 +177,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         public virtual SqlTemplate DeleteRangeSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -173,6 +186,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             string clause = inPrefix + SqlDialectStrategy.Placeholder + inSuffix;
 
             sqlBuffer.Append("DELETE FROM ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.AppendWhereClause(string.Empty, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
@@ -194,8 +209,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "            ", null);
             sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("        )");
-            sqlBuffer.AppendLine("        THEN 1");
-            sqlBuffer.AppendLine("        ELSE 0");
+            sqlBuffer.AppendLine("        THEN");
+            sqlBuffer.AppendLine("            1");
+            sqlBuffer.AppendLine("        ELSE");
+            sqlBuffer.AppendLine("            0");
             sqlBuffer.Append("    END");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 

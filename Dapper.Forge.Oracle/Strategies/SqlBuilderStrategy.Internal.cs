@@ -14,21 +14,22 @@ namespace Dapper.Forge.Oracle.Strategies
         private SqlTemplate BuildUpsertSql<TEntity>(bool isRange, bool appendInsert) where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
-            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+            ImmutableArray<PropertyInfo> upsertKeyProperties = EntityInfoCache<TEntity>.UpsertKeyProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
-            string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]);
             string sourceTable = SqlDialectStrategy.RenderIdentifier("SOURCE");
             string targetTable = SqlDialectStrategy.RenderIdentifier("TARGET");
-            string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
 
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("MERGE INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(' ');
             sqlBuffer.AppendLine(targetTable);
             sqlBuffer.AppendLine("USING (");
 
@@ -41,12 +42,44 @@ namespace Dapper.Forge.Oracle.Strategies
                 sqlBuffer.AppendLine("    SELECT");
                 sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
                 sqlBuffer.AppendLine("    FROM");
-                sqlBuffer.AppendLine("        dual");
+                sqlBuffer.AppendLine("        DUAL");
             }
 
-            sqlBuffer.Append(") AS ");
+            sqlBuffer.Append(") ");
             sqlBuffer.Append(sourceTable);
-            sqlBuffer.AppendOnClause(string.Empty, clause);
+
+            if (isRange)
+            {
+                ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
+
+                sqlBuffer.Append(" (");
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, properties, null, false, true);
+                sqlBuffer.Append(')');
+            }
+
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("ON");
+            sqlBuffer.Append("    ");
+
+            for (int i = 0; i < upsertKeyProperties.Length; i++)
+            {
+                string propertyColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[upsertKeyProperties[i].Name]);
+
+                if (i > 0)
+                {
+                    sqlBuffer.AppendLine();
+                    sqlBuffer.Append("    AND ");
+                }
+
+                sqlBuffer.Append(targetTable);
+                sqlBuffer.Append('.');
+                sqlBuffer.Append(propertyColumn);
+                sqlBuffer.Append(" = ");
+                sqlBuffer.Append(sourceTable);
+                sqlBuffer.Append('.');
+                sqlBuffer.Append(propertyColumn);
+            }
+
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("WHEN MATCHED THEN");
             sqlBuffer.Append("    UPDATE SET");

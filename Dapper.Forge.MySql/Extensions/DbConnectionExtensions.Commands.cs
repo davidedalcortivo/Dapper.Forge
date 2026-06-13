@@ -10,6 +10,11 @@ namespace Dapper.Forge.MySql.Extensions
 {
     public static partial class DbConnectionExtensions
     {
+        public static void LoadRuntimeCache<TEntity>(this MySqlConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+        }
+
         public static DbCommandInfo GetAllCommand<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);

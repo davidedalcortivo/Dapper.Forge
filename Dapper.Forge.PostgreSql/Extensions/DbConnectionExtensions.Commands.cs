@@ -10,6 +10,11 @@ namespace Dapper.Forge.PostgreSql.Extensions
 {
     public static partial class DbConnectionExtensions
     {
+        public static void LoadRuntimeCache<TEntity>(this NpgsqlConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+        }
+
         public static DbCommandInfo GetAllCommand<TEntity>(this NpgsqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);

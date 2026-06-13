@@ -10,6 +10,12 @@ namespace Dapper.Forge.PostgreSql.Extensions
 {
     public static partial class DbConnectionExtensions
     {
+        public static async Task LoadDbCacheAsync<TEntity>(this NpgsqlConnection connection, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            await DbExecutionStrategy.Instance.LoadDbCacheImplAsync<TEntity>(connection, false, commandTimeout, cancellationToken);
+        }
+
         public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this NpgsqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);

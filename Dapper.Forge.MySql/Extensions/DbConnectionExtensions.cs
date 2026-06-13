@@ -10,6 +10,12 @@ namespace Dapper.Forge.MySql.Extensions
 {
     public static partial class DbConnectionExtensions
     {
+        public static void LoadDbCache<TEntity>(this MySqlConnection connection, int? commandTimeout = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            DbExecutionStrategy.Instance.LoadDbCacheImplAsync<TEntity>(connection, true, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+        }
+
         public static IReadOnlyList<TEntity> GetAll<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);

@@ -14,14 +14,17 @@ namespace Dapper.Forge.PostgreSql.Strategies
         private SqlTemplate BuildUpsertSql<TEntity>(bool isRange) where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
-            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+            ImmutableArray<PropertyInfo> upsertKeyProperties = EntityInfoCache<TEntity>.UpsertKeyProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
@@ -42,10 +45,16 @@ namespace Dapper.Forge.PostgreSql.Strategies
             }
             
             sqlBuffer.Append("ON CONFLICT (");
-            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]));
-            sqlBuffer.AppendLine(")");
-            sqlBuffer.AppendLine("DO UPDATE");
-            sqlBuffer.Append("SET");
+
+            for (int i = 0; i < upsertKeyProperties.Length; i++)
+            {
+                sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[upsertKeyProperties[i].Name]));
+
+                if (i < upsertKeyProperties.Length - 1)
+                    sqlBuffer.Append(", ");
+            }
+
+            sqlBuffer.Append(") DO UPDATE SET");
             sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, "EXCLUDED", null);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

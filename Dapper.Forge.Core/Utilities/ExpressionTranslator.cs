@@ -17,9 +17,9 @@ namespace Dapper.Forge.Core.Utilities
             this.ctx = ctx;
         }
 
-        public static (string, DynamicParameters?) Translate(ISqlDialectStrategy strategy, Expression<Func<TEntity, bool>> expression, DynamicParameters? parameters = null)
+        public static (string, DynamicParameters?) Translate(ISqlDialectStrategy sqlDialectStrategy, Expression<Func<TEntity, bool>> expression, DynamicParameters? parameters = null)
         {
-            SqlTranslationContext ctx = new(strategy, parameters);
+            SqlTranslationContext ctx = new(sqlDialectStrategy, parameters);
             ExpressionTranslator<TEntity> visitor = new(ctx);
 
             visitor.Visit(expression);
@@ -27,7 +27,7 @@ namespace Dapper.Forge.Core.Utilities
             return (ctx.SqlBuffer.ToString(), ctx.Parameters);
         }
 
-        public (string, DynamicParameters?) Translate(ISqlDialectStrategy strategy, IFilterNode node, DynamicParameters? parameters = null)
+        public (string, DynamicParameters?) Translate(ISqlDialectStrategy sqlDialectStrategy, IFilterNode node, DynamicParameters? parameters = null)
         {
             throw new NotImplementedException();
         }
@@ -37,7 +37,7 @@ namespace Dapper.Forge.Core.Utilities
             ctx.Push();
             Visit(expr);
             string sql = ctx.Pop();
-            return lower ? ctx.Strategy.ToLower(sql) : sql;
+            return lower ? ctx.SqlDialectStrategy.ToLower(sql) : sql;
         }
 
         private static bool TryEval(Expression expr, out object? value)
@@ -97,7 +97,7 @@ namespace Dapper.Forge.Core.Utilities
         {
             if (node.Expression is ParameterExpression)
             {
-                ctx.SqlBuffer.Append(ctx.Strategy.RenderIdentifier(node.Member.Name));
+                ctx.SqlBuffer.Append(ctx.SqlDialectStrategy.RenderIdentifier(node.Member.Name));
                 return node;
             }
 
@@ -161,8 +161,8 @@ namespace Dapper.Forge.Core.Utilities
 
                     ctx.SqlBuffer.Append(
                         node.NodeType == ExpressionType.Equal
-                            ? ctx.Strategy.IsNull(sql)
-                            : ctx.Strategy.IsNotNull(sql)
+                            ? ctx.SqlDialectStrategy.IsNull(sql)
+                            : ctx.SqlDialectStrategy.IsNotNull(sql)
                     );
 
                     return node;
@@ -249,21 +249,21 @@ namespace Dapper.Forge.Core.Utilities
                     return m;
                 }
 
-                string val = ctx.Strategy.EscapeLike(raw.ToString()!);
+                string val = ctx.SqlDialectStrategy.EscapeLike(raw.ToString()!);
                 string p = ctx.AddParameter(val);
 
                 string col = ExtractSql(m.Object!, ignoreCase);
-                string pp = ignoreCase ? ctx.Strategy.ToLower(p) : p;
+                string pp = ignoreCase ? ctx.SqlDialectStrategy.ToLower(p) : p;
 
                 string pat = m.Method.Name switch
                 {
-                    "Contains" => ctx.Strategy.Concat("'%'", pp, "'%'"),
-                    "StartsWith" => ctx.Strategy.Concat(pp, "'%'"),
-                    "EndsWith" => ctx.Strategy.Concat("'%'", pp),
+                    "Contains" => ctx.SqlDialectStrategy.Concat("'%'", pp, "'%'"),
+                    "StartsWith" => ctx.SqlDialectStrategy.Concat(pp, "'%'"),
+                    "EndsWith" => ctx.SqlDialectStrategy.Concat("'%'", pp),
                     _ => throw new NotSupportedException()
                 };
 
-                ctx.SqlBuffer.Append($"({ctx.Strategy.Like(col, pat)})");
+                ctx.SqlBuffer.Append($"({ctx.SqlDialectStrategy.Like(col, pat)})");
                 return m;
             }
 
@@ -293,29 +293,29 @@ namespace Dapper.Forge.Core.Utilities
 
                 case ExpressionType.LessThan:
                     ctx.SqlBuffer.Append("(" +
-                        $"({ctx.Strategy.IsNull(a)} AND {ctx.Strategy.IsNotNull(b)}) OR " +
-                        $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNotNull(b)} AND {a} < {b})" +
+                        $"({ctx.SqlDialectStrategy.IsNull(a)} AND {ctx.SqlDialectStrategy.IsNotNull(b)}) OR " +
+                        $"({ctx.SqlDialectStrategy.IsNotNull(a)} AND {ctx.SqlDialectStrategy.IsNotNull(b)} AND {a} < {b})" +
                         ")");
                     return be;
 
                 case ExpressionType.GreaterThan:
                     ctx.SqlBuffer.Append("(" +
-                        $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNull(b)}) OR " +
-                        $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNotNull(b)} AND {a} > {b})" +
+                        $"({ctx.SqlDialectStrategy.IsNotNull(a)} AND {ctx.SqlDialectStrategy.IsNull(b)}) OR " +
+                        $"({ctx.SqlDialectStrategy.IsNotNull(a)} AND {ctx.SqlDialectStrategy.IsNotNull(b)} AND {a} > {b})" +
                         ")");
                     return be;
 
                 case ExpressionType.LessThanOrEqual:
                     ctx.SqlBuffer.Append("(" +
-                        $"({ctx.Strategy.IsNull(a)} AND {ctx.Strategy.IsNotNull(b)}) OR " +
-                        $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNotNull(b)} AND {a} <= {b})" +
+                        $"({ctx.SqlDialectStrategy.IsNull(a)} AND {ctx.SqlDialectStrategy.IsNotNull(b)}) OR " +
+                        $"({ctx.SqlDialectStrategy.IsNotNull(a)} AND {ctx.SqlDialectStrategy.IsNotNull(b)} AND {a} <= {b})" +
                         ")");
                     return be;
 
                 case ExpressionType.GreaterThanOrEqual:
                     ctx.SqlBuffer.Append("(" +
-                        $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNull(b)}) OR " +
-                        $"({ctx.Strategy.IsNotNull(a)} AND {ctx.Strategy.IsNotNull(b)} AND {a} >= {b})" +
+                        $"({ctx.SqlDialectStrategy.IsNotNull(a)} AND {ctx.SqlDialectStrategy.IsNull(b)}) OR " +
+                        $"({ctx.SqlDialectStrategy.IsNotNull(a)} AND {ctx.SqlDialectStrategy.IsNotNull(b)} AND {a} >= {b})" +
                         ")");
                     return be;
 
@@ -361,12 +361,12 @@ namespace Dapper.Forge.Core.Utilities
             List<string> parts = [];
 
             if (hasNull)
-                parts.Add(ctx.Strategy.IsNull(colSql));
+                parts.Add(ctx.SqlDialectStrategy.IsNull(colSql));
 
             if (values.Count > 0)
             {
                 string p = ctx.AddParameter(values.ToArray());
-                parts.Add(ctx.Strategy.In(colSql, p));
+                parts.Add(ctx.SqlDialectStrategy.In(colSql, p));
             }
 
             ctx.SqlBuffer.Append("(" + string.Join(" OR ", parts) + ")");

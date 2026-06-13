@@ -1,4 +1,5 @@
-﻿using Dapper.Forge.Core.Models;
+﻿using Dapper.Forge.Core.Abstractions.Strategies;
+using Dapper.Forge.Core.Models;
 using System.Collections.Concurrent;
 using System.Reflection;
 
@@ -7,10 +8,10 @@ namespace Dapper.Forge.Core.Caching
 {
     internal static class BuildInRangeInvokerCache
     {
-        private delegate List<DbCommandInfo> BuildInRangeInvoker(SqlTemplate sqlTemplate, IReadOnlyList<object> idList, int batchSize, int chunkSize, PropertyInfo idProperty, bool useUnion);
+        private delegate List<DbCommandInfo> BuildInRangeInvoker(ISqlDialectStrategy sqlDialectStrategy, SqlTemplate sqlTemplate, IReadOnlyList<object> idList, int batchSize, int chunkSize, PropertyInfo idProperty, bool useUnion);
         private static readonly ConcurrentDictionary<Type, BuildInRangeInvoker> _cache = new();
 
-        public static List<DbCommandInfo> Invoke<TEntity>(object instance, SqlTemplate sqlTemplate, IReadOnlyList<object> idList, int batchSize, int chunkSize, PropertyInfo idProperty, bool useUnion) where TEntity : class
+        public static List<DbCommandInfo> Invoke<TEntity>(object instance, ISqlDialectStrategy sqlDialectStrategy, SqlTemplate sqlTemplate, IReadOnlyList<object> idList, int batchSize, int chunkSize, PropertyInfo idProperty, bool useUnion) where TEntity : class
         {
             Type entityType = typeof(TEntity);
 
@@ -23,7 +24,7 @@ namespace Dapper.Forge.Core.Caching
                 return (BuildInRangeInvoker)Delegate.CreateDelegate(typeof(BuildInRangeInvoker), instance, method);
             });
 
-            return invoker(sqlTemplate, idList, batchSize, chunkSize, idProperty, useUnion);
+            return invoker(sqlDialectStrategy, sqlTemplate, idList, batchSize, chunkSize, idProperty, useUnion);
         }
     }
 }

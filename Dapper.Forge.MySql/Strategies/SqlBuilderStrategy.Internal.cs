@@ -14,12 +14,16 @@ namespace Dapper.Forge.MySql.Strategies
         private SqlTemplate BuildUpsertSql<TEntity>(bool isRange) where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
 
             StringBuilder sqlBuffer = new();
+            string newTable = SqlDialectStrategy.RenderIdentifier("new");
 
             sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
@@ -39,9 +43,10 @@ namespace Dapper.Forge.MySql.Strategies
                 sqlBuffer.Append(") ");
             }
 
-            sqlBuffer.AppendLine("AS new");
+            sqlBuffer.Append("AS ");
+            sqlBuffer.AppendLine(newTable);
             sqlBuffer.Append("ON DUPLICATE KEY UPDATE");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, "new", null);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, newTable, null);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

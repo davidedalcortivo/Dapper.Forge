@@ -12,7 +12,7 @@ namespace Dapper.Forge.MySql.Strategies
         protected override DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
-            sqlBuffer.AppendWhereClause("    ", clause);
+            sqlBuffer.AppendWhereClause("        ", clause);
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.ExistsSql.Render(sqlBuffer);
             return new(sql, parameters);

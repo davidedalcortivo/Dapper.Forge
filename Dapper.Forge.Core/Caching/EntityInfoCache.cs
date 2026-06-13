@@ -1,4 +1,5 @@
-﻿using Dapper.Forge.Core.Utilities;
+﻿using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,6 +16,7 @@ namespace Dapper.Forge.Core.Caching
         public static ImmutableArray<PropertyInfo> Properties { get; }
         public static ImmutableArray<PropertyInfo> UpdateProperties { get; }
         public static ImmutableArray<PropertyInfo> InsertProperties { get; }
+        public static ImmutableArray<PropertyInfo> UpsertKeyProperties { get; }
         public static ImmutableDictionary<string, string> ColumnNamesByPropertyName { get; }
         public static ImmutableDictionary<string, PropertyInfo> PropertiesByPropertyName { get; }
         public static ImmutableDictionary<string, PropertyInfo> PropertiesByColumnName { get; }
@@ -69,6 +71,10 @@ namespace Dapper.Forge.Core.Caching
             Properties = [.. stack];
             UpdateProperties = [.. Properties.Where(x => !(x == IdProperty || x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
             InsertProperties = [.. Properties.Where(x => !(x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
+            UpsertKeyProperties = [.. Properties.Where(x => x.IsDefined(typeof(UpsertKeyAttribute), true))];
+
+            if (UpsertKeyProperties.Length == 0)
+                UpsertKeyProperties = [IdProperty];
 
             ImmutableDictionary<string, string>.Builder columnNamesByPropertyNameBuilder = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
             ImmutableDictionary<string, PropertyInfo>.Builder propertiesByPropertyNameBuilder = ImmutableDictionary.CreateBuilder<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);

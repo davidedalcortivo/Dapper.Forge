@@ -126,7 +126,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        protected virtual List<DbCommandInfo> BuildInRangeCommands<TEntity, TPrimaryKey>(SqlTemplate sqlTemplate, IReadOnlyList<object> idList, int batchSize, int chunkSize, PropertyInfo idProperty, bool useUnion) where TEntity : class where TPrimaryKey : notnull
+        protected virtual List<DbCommandInfo> BuildInRangeCommands<TEntity, TPrimaryKey>(ISqlDialectStrategy sqlDialectStrategy, SqlTemplate sqlTemplate, IReadOnlyList<object> idList, int batchSize, int chunkSize, PropertyInfo idProperty, bool useUnion) where TEntity : class where TPrimaryKey : notnull
         {
             List<DbCommandInfo> commands = [];
 
@@ -149,14 +149,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             for (int i = 0; i < idArray.Length; i += _batchSize)
             {
-                if (chunkSize > 0 && chunkSize < _batchSize)
+                if (chunkSize > 0 && chunkSize < batchSize)
                     _batchSize = Math.Min(chunkSize, batchSize - s);
 
                 int end = Math.Min(i + _batchSize, idArray.Length);
                 StringBuilder sqlBuffer = new();
 
                 string parameterName = idProperty.Name + "Array" + j;
-                sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
+                sqlBuffer.Append(sqlDialectStrategy.RenderParameter(parameterName));
                 parameters.Add(parameterName, idArray[i..end]);
 
                 j++;
@@ -166,7 +166,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
                 if (s >= batchSize || end >= idArray.Length)
                 {
-                    batchBuffer.Append(SqlDialectStrategy.Terminator);
+                    batchBuffer.Append(sqlDialectStrategy.Terminator);
                     commands.Add(new(batchBuffer.ToString(), parameters));
                     batchBuffer.Clear();
                     parameters = new();
@@ -179,7 +179,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 }
                 else
                 {
-                    batchBuffer.Append(SqlDialectStrategy.Terminator);
+                    batchBuffer.Append(sqlDialectStrategy.Terminator);
+                    batchBuffer.AppendLine();
                 }
             }
 
