@@ -30,6 +30,22 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             SqlBuilderCache<TEntity, TStrategy>.Initialize(sqlBuilderStrategy);
         }
 
+        public virtual DbCommandInfo GetColumnsCommand<TEntity>(DbConnection connection) where TEntity : class
+        {
+            string table = EntityInfoCache<TEntity>.TableName;
+            string schema = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
+
+            DynamicParameters parameters = new();
+
+            string schemaName = "SchemaName";
+            string tableName = "TableName";
+            parameters.Add(schemaName, schema);
+            parameters.Add(tableName, table);
+
+            string sql = SqlBuilderCache<TEntity, TStrategy>.GetColumnsSql.Render(SqlDialectStrategy.RenderParameter(schemaName), SqlDialectStrategy.RenderParameter(tableName));
+            return new(sql, parameters);
+        }
+
         public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
@@ -453,22 +469,6 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, propertyName, clause, parameters);
-        }
-
-        public virtual DbCommandInfo GetColumnsCommand<TEntity>(DbConnection connection) where TEntity : class
-        {
-            string table = EntityInfoCache<TEntity>.TableName;
-            string schema = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
-
-            DynamicParameters parameters = new();
-
-            string schemaName = "SchemaName";
-            string tableName = "TableName";
-            parameters.Add(schemaName, schema);
-            parameters.Add(tableName, table);
-
-            string sql = SqlBuilderCache<TEntity, TStrategy>.GetColumnsSql.Render(SqlDialectStrategy.RenderParameter(schemaName), SqlDialectStrategy.RenderParameter(tableName));
-            return new(sql, parameters);
         }
     }
 }

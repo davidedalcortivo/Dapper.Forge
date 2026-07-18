@@ -17,6 +17,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             SqlDialectStrategy = sqlDialectStrategy;
         }
 
+        public abstract SqlTemplate GetColumnsSqlBuilder<TEntity>() where TEntity : class;
+
         public virtual SqlTemplate GetAllSqlBuilder<TEntity>() where TEntity : class
         {
             ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
@@ -243,7 +245,5 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             return BuildAggregateSql<TEntity>("MAX");
         }
-
-        public abstract SqlTemplate GetColumnsSqlBuilder<TEntity>() where TEntity : class;
     }
 }

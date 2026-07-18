@@ -3,6 +3,7 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
+using System.Data.Common;
 using System.Reflection;
 using System.Text;
 
@@ -11,7 +12,7 @@ namespace Dapper.Forge.Oracle.Strategies
 {
     internal sealed partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
     {
-        private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, IReadOnlyList<PropertyInfo> properties, int batchSize, SqlTemplate sqlTemplate, string indentation) where TEntity : class
+        private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, IReadOnlyList<PropertyInfo> properties, int batchSize, SqlTemplate sqlTemplate, string indentation) where TEntity : class
         {
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
@@ -19,8 +20,22 @@ namespace Dapper.Forge.Oracle.Strategies
             if (entityArray.Length == 0)
                 return commands;
 
+            ImmutableArray<PropertyInfo> _properties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+            string connectionId = SqlDialectStrategy.GetConnectionId(connection);
+            IDictionary<string, DbColumnInfo> columns = DbColumnInfoCache<TEntity>.GetDictValue(connectionId);
+
+            if (_properties.Length != columns.Count)
+                throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {_properties.Length} mapped properties but found {columns.Count} database columns.");
+
+            foreach (PropertyInfo property in _properties)
+            {
+                string columnName = columnNamesByPropertyName[property.Name];
+
+                if (!columns.TryGetValue(columnName, out DbColumnInfo? _))
+                    throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
+            }
 
             if (batchSize <= 0)
                 batchSize = entityArray.Length;
@@ -40,10 +55,17 @@ namespace Dapper.Forge.Oracle.Strategies
                     for (int k = 0; k < properties.Count; k++)
                     {
                         PropertyInfo property = properties[k];
-                        string parameterName = property.Name;
-                        object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
+                        string propertyName = property.Name;
+                        string parameterName = propertyName + j;
+                        object? parameterValue = propertyGettersByPropertyName[propertyName](entityArray[j]);
+                        DbColumnInfo column = columns[columnNamesByPropertyName[propertyName]];
 
-                        sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
+                        if (column.IsCastable ?? false)
+                            sqlBuffer.Append(column.CastExpression!.Replace(SqlDialectStrategy.Placeholder, SqlDialectStrategy.RenderParameter(parameterName)));
+                        else
+                            sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
+
+                        parameters.Add(parameterName, parameterValue);
                         sqlBuffer.AppendSeparator(k, properties.Count, true);
                     }
 

@@ -107,6 +107,8 @@ for (int i = 0; i < 10000; i++)
     });
 #endregion
 
+oracleConnection.LoadDbCache<TestTableIdentityORACLE>();
+
 var qqa = oracleConnection.InsertRangeCommands(bb);
 var ww = oracleConnection.InsertRange(bb);
 

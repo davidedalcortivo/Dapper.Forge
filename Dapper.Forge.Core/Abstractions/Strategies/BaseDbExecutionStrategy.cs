@@ -23,7 +23,40 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual async Task LoadDbCacheImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            _ = await GetColumnsImplAsync<TEntity>(connection, sync, commandTimeout, cancellationToken);
+            await GetColumnsImplAsync<TEntity>(connection, sync, commandTimeout, cancellationToken);
+        }
+
+        public virtual async Task GetColumnsImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            string connectionId = SqlDialectStrategy.GetConnectionId(connection);
+            IReadOnlyList<DbColumnInfo>? columns = DbColumnInfoCache<TEntity>.GetListValueOrDefault(connectionId);
+
+            if (columns is null)
+            {
+                SemaphoreSlim semaphore = DbColumnInfoCache<TEntity>.GetSemaphore(connectionId);
+
+                if (sync)
+                    semaphore.Wait(cancellationToken);
+                else
+                    await semaphore.WaitAsync(cancellationToken);
+
+                try
+                {
+                    columns = DbColumnInfoCache<TEntity>.GetListValueOrDefault(connectionId);
+
+                    if (columns is null)
+                    {
+                        DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
+                        columns = await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, commandTimeout, cancellationToken);
+
+                        _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }
         }
 
         public virtual async Task<IReadOnlyList<TEntity>> GetAllImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
@@ -385,41 +418,6 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         {
             DbCommandInfo command = dbCommandStrategy.MaxCommand<TEntity>(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<decimal?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
-        }
-
-        public virtual async Task<IReadOnlyList<DbColumnInfo>> GetColumnsImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
-        {
-            string connectionId = SqlDialectStrategy.GetConnectionId(connection);
-            IReadOnlyList<DbColumnInfo>? columns = DbColumnInfoCache<TEntity>.GetValueOrDefault(connectionId);
-
-            if (columns is null)
-            {
-                SemaphoreSlim semaphore = DbColumnInfoCache<TEntity>.GetSemaphore(connectionId);
-
-                if (sync)
-                    semaphore.Wait(cancellationToken);
-                else
-                    await semaphore.WaitAsync(cancellationToken);
-
-                try
-                {
-                    columns = DbColumnInfoCache<TEntity>.GetValueOrDefault(connectionId);
-
-                    if (columns is null)
-                    {
-                        DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
-                        columns = await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, commandTimeout, cancellationToken);
-
-                        _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
-                    }
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            }
-            
-            return columns;
         }
     }
 }

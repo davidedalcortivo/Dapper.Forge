@@ -57,7 +57,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             string table = SqlDialectStrategy.RenderIdentifier(tableName);
             string schema = SqlDialectStrategy.RenderIdentifier(schemaName);
             string connectionId = SqlDialectStrategy.GetConnectionId(connection);
-            IReadOnlyList<DbColumnInfo> columns = DbColumnInfoCache<TEntity>.GetValue(connectionId);
+            IReadOnlyList<DbColumnInfo> columns = DbColumnInfoCache<TEntity>.GetListValue(connectionId);
 
             if (properties.Length != columns.Count)
                 throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");

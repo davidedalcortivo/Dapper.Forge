@@ -9,6 +9,7 @@ namespace Dapper.Forge.Core.Caching
         private static bool _isInitialized = false;
         private static readonly object _lock = new();
 
+        public static SqlTemplate GetColumnsSql { get; private set; } = null!;
         public static SqlTemplate GetAllSql { get; private set; } = null!;
         public static SqlTemplate GetFirstSql { get; private set; } = null!;
         public static SqlTemplate GetByIdSql { get; private set; } = null!;
@@ -27,7 +28,6 @@ namespace Dapper.Forge.Core.Caching
         public static SqlTemplate SumSql { get; private set; } = null!;
         public static SqlTemplate MinSql { get; private set; } = null!;
         public static SqlTemplate MaxSql { get; private set; } = null!;
-        public static SqlTemplate GetColumnsSql { get; private set; } = null!;
 
         public static void Initialize(TStrategy strategy)
         {
@@ -37,6 +37,7 @@ namespace Dapper.Forge.Core.Caching
                 {
                     if (!_isInitialized)
                     {
+                        GetColumnsSql = strategy.GetColumnsSqlBuilder<TEntity>();
                         GetAllSql = strategy.GetAllSqlBuilder<TEntity>();
                         GetFirstSql = strategy.GetFirstSqlBuilder<TEntity>();
                         GetByIdSql = strategy.GetByIdSqlBuilder<TEntity>();
@@ -55,7 +56,6 @@ namespace Dapper.Forge.Core.Caching
                         SumSql = strategy.SumSqlBuilder<TEntity>();
                         MinSql = strategy.MinSqlBuilder<TEntity>();
                         MaxSql = strategy.MaxSqlBuilder<TEntity>();
-                        GetColumnsSql = strategy.GetColumnsSqlBuilder<TEntity>();
 
                         _isInitialized = true;
                     }

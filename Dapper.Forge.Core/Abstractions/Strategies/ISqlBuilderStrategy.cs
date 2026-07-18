@@ -7,6 +7,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
     {
         ISqlDialectStrategy SqlDialectStrategy { get; }
 
+        SqlTemplate GetColumnsSqlBuilder<TEntity>() where TEntity : class;
         SqlTemplate GetAllSqlBuilder<TEntity>() where TEntity : class;
         SqlTemplate GetFirstSqlBuilder<TEntity>() where TEntity : class;
         SqlTemplate GetByIdSqlBuilder<TEntity>() where TEntity : class;
@@ -25,6 +26,5 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         SqlTemplate SumSqlBuilder<TEntity>() where TEntity : class;
         SqlTemplate MinSqlBuilder<TEntity>() where TEntity : class;
         SqlTemplate MaxSqlBuilder<TEntity>() where TEntity : class;
-        SqlTemplate GetColumnsSqlBuilder<TEntity>() where TEntity : class;
     }
 }

@@ -12,6 +12,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         ISqlDialectStrategy SqlDialectStrategy { get; }
 
         void LoadRuntimeCache<TEntity>(DbConnection connection) where TEntity : class;
+        DbCommandInfo GetColumnsCommand<TEntity>(DbConnection connection) where TEntity : class;
         DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
         DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
         DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
@@ -62,6 +63,5 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         DbCommandInfo MaxCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class;
         DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo GetColumnsCommand<TEntity>(DbConnection connection) where TEntity : class;
     }
 }

@@ -15,6 +15,176 @@ namespace Dapper.Forge.Oracle.Strategies
 
         private SqlBuilderStrategy(SqlDialectStrategy strategy) : base(strategy) { }
 
+        public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
+        {
+            string allTabColumnsTable = SqlDialectStrategy.RenderIdentifier("ALL_TAB_COLUMNS");
+            string columnNameColumn = SqlDialectStrategy.RenderIdentifier("COLUMN_NAME");
+            string dataTypeNameColumn = SqlDialectStrategy.RenderIdentifier("DATA_TYPE");
+            string dataLengthNameColumn = SqlDialectStrategy.RenderIdentifier("DATA_LENGTH");
+            string dataPrecisionNameColumn = SqlDialectStrategy.RenderIdentifier("DATA_PRECISION");
+            string dataScaleNameColumn = SqlDialectStrategy.RenderIdentifier("DATA_SCALE");
+            string tableNameColumn = SqlDialectStrategy.RenderIdentifier("TABLE_NAME");
+            string ownerColumn = SqlDialectStrategy.RenderIdentifier("OWNER");
+
+            StringBuilder conditionBuffer1 = new();
+            StringBuilder conditionBuffer2 = new();
+            StringBuilder conditionBuffer3 = new();
+            StringBuilder conditionBuffer4 = new();
+            StringBuilder conditionBuffer5 = new();
+            StringBuilder conditionBuffer6 = new();
+
+            conditionBuffer1.Append("                IF c.");
+            conditionBuffer1.Append(dataPrecisionNameColumn);
+            conditionBuffer1.Append(" IS NOT NULL AND c.");
+            conditionBuffer1.Append(dataScaleNameColumn);
+            conditionBuffer1.AppendLine(" IS NOT NULL THEN");
+            conditionBuffer1.Append("                    v_type := v_type || '(' || c.");
+            conditionBuffer1.Append(dataPrecisionNameColumn);
+            conditionBuffer1.Append(" || ',' || c.");
+            conditionBuffer1.Append(dataScaleNameColumn);
+            conditionBuffer1.AppendLine(" || ')';");
+            conditionBuffer1.AppendLine("                END IF;");
+            conditionBuffer1.AppendLine();
+            conditionBuffer1.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+
+            conditionBuffer2.Append("                IF c.");
+            conditionBuffer2.Append(dataPrecisionNameColumn);
+            conditionBuffer2.AppendLine(" IS NOT NULL THEN");
+            conditionBuffer2.Append("                    v_type := v_type || '(' || c.");
+            conditionBuffer2.Append(dataPrecisionNameColumn);
+            conditionBuffer2.AppendLine(" || ')';");
+            conditionBuffer2.AppendLine("                END IF;");
+            conditionBuffer2.AppendLine();
+            conditionBuffer2.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+
+            conditionBuffer3.Append("                IF c.");
+            conditionBuffer3.Append(dataScaleNameColumn);
+            conditionBuffer3.AppendLine(" IS NOT NULL THEN");
+            conditionBuffer3.Append("                    v_type := v_type || '(' || c.");
+            conditionBuffer3.Append(dataScaleNameColumn);
+            conditionBuffer3.AppendLine(" || ')';");
+            conditionBuffer3.AppendLine("                END IF;");
+            conditionBuffer3.AppendLine();
+            conditionBuffer3.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+
+            conditionBuffer4.Append("                IF c.");
+            conditionBuffer4.Append(dataLengthNameColumn);
+            conditionBuffer4.AppendLine(" IS NOT NULL THEN");
+            conditionBuffer4.Append("                    v_type := v_type || '(' || c.");
+            conditionBuffer4.Append(dataLengthNameColumn);
+            conditionBuffer4.AppendLine(" || ')';");
+            conditionBuffer4.AppendLine("                END IF;");
+            conditionBuffer4.AppendLine();
+            conditionBuffer4.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+
+            conditionBuffer5.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+
+            conditionBuffer6.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE TO_' || v_type || '(NULL) IS NULL';");
+
+            StringBuilder[] conditionBuffers = [
+                conditionBuffer1,
+                conditionBuffer2,
+                conditionBuffer3,
+                conditionBuffer4,
+                conditionBuffer5,
+                conditionBuffer6
+            ];
+
+            string[] vTypes = [
+                "                v_type := 'CAST({} AS ' || v_type || ')';",
+                "                v_type := 'CAST({} AS ' || v_type || ')';",
+                "                v_type := 'CAST({} AS ' || v_type || ')';",
+                "                v_type := 'CAST({} AS ' || v_type || ')';",
+                "                v_type := 'CAST({} AS ' || v_type || ')';",
+                "                v_type := 'TO_' || v_type || '({})';"
+            ];
+
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("DECLARE");
+            sqlBuffer.AppendLine("    v_sql VARCHAR2(4000);");
+            sqlBuffer.AppendLine("    v_type VARCHAR2(4000);");
+            sqlBuffer.AppendLine("    v_ok BOOLEAN;");
+            sqlBuffer.AppendLine("    v_json CLOB;");
+            sqlBuffer.AppendLine("BEGIN");
+            sqlBuffer.AppendLine("    v_json := '[';");
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("    FOR c IN (");
+            sqlBuffer.AppendLine("        SELECT");
+            sqlBuffer.Append("            ");
+            sqlBuffer.Append(columnNameColumn);
+            sqlBuffer.AppendLine(",");
+            sqlBuffer.Append("            ");
+            sqlBuffer.Append(dataTypeNameColumn);
+            sqlBuffer.AppendLine(",");
+            sqlBuffer.Append("            ");
+            sqlBuffer.Append(dataLengthNameColumn);
+            sqlBuffer.AppendLine(",");
+            sqlBuffer.Append("            ");
+            sqlBuffer.Append(dataPrecisionNameColumn);
+            sqlBuffer.AppendLine(",");
+            sqlBuffer.Append("            ");
+            sqlBuffer.AppendLine(dataScaleNameColumn);
+            sqlBuffer.AppendLine("        FROM");
+            sqlBuffer.Append("            ");
+            sqlBuffer.Append(allTabColumnsTable);
+            sqlBuffer.AppendWhereClause(ownerColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "            AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder, "        ");
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("    )");
+            sqlBuffer.AppendLine("    LOOP");
+            sqlBuffer.AppendLine("        v_ok := FALSE;");
+            sqlBuffer.AppendLine();
+
+            for (int i = 0; i < conditionBuffers.Length; i++)
+            {
+                sqlBuffer.AppendLine("        IF NOT v_ok THEN");
+                sqlBuffer.AppendLine("            BEGIN");
+                sqlBuffer.Append("                v_type := c.");
+                sqlBuffer.Append(dataTypeNameColumn);
+                sqlBuffer.AppendLine(";");
+                sqlBuffer.AppendLine();
+                sqlBuffer.Append(conditionBuffers[i]);
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine("                DECLARE");
+                sqlBuffer.AppendLine("                    v_dummy VARCHAR2(1);");
+                sqlBuffer.AppendLine("                BEGIN");
+                sqlBuffer.AppendLine("                    EXECUTE IMMEDIATE v_sql INTO v_dummy;");
+                sqlBuffer.AppendLine("                END;");
+                sqlBuffer.AppendLine();
+                sqlBuffer.AppendLine(vTypes[i]);
+                sqlBuffer.AppendLine("                v_ok := TRUE;");
+                sqlBuffer.AppendLine("            EXCEPTION");
+                sqlBuffer.AppendLine("                WHEN OTHERS THEN");
+                sqlBuffer.AppendLine("                    v_ok := FALSE;");
+                sqlBuffer.AppendLine("            END;");
+                sqlBuffer.AppendLine("        END IF;");
+                sqlBuffer.AppendLine();
+            }
+
+            sqlBuffer.AppendLine("        IF DBMS_LOB.GETLENGTH(v_json) > 1 THEN");
+            sqlBuffer.AppendLine("            v_json := v_json || ',';");
+            sqlBuffer.AppendLine("        END IF;");
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("        v_json := v_json ||");
+            sqlBuffer.AppendLine("            '{' ||");
+            sqlBuffer.Append("                '\"Name\":\"' || c.");
+            sqlBuffer.Append(columnNameColumn);
+            sqlBuffer.AppendLine(" || '\",' ||");
+            sqlBuffer.Append("                '\"DataType\":\"' || c.");
+            sqlBuffer.Append(dataTypeNameColumn);
+            sqlBuffer.AppendLine(" || '\",' ||");
+            sqlBuffer.AppendLine("                '\"CastExpression\":' || CASE WHEN v_ok THEN '\"' || v_type || '\"' ELSE 'null' END || ',' ||");
+            sqlBuffer.AppendLine("                '\"IsCastable\":' || CASE WHEN v_ok THEN 'true' ELSE 'false' END ||");
+            sqlBuffer.AppendLine("            '}';");
+            sqlBuffer.AppendLine("    END LOOP;");
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("    v_json := v_json || ']';");
+            sqlBuffer.AppendLine("    :result := v_json;");
+            sqlBuffer.AppendLine("END;");
+
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
+        }
+
         public override SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class
         {
             return BuildUpsertSql<TEntity>(false, true);
@@ -50,39 +220,6 @@ namespace Dapper.Forge.Oracle.Strategies
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
         {
             return BuildUpsertSql<TEntity>(true, true);
-        }
-
-        public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
-        {
-            string allTabColumnsTable = SqlDialectStrategy.RenderIdentifier("ALL_TAB_COLUMNS");
-            string columnNameColumn = SqlDialectStrategy.RenderIdentifier("COLUMN_NAME");
-            string columnIdColumn = SqlDialectStrategy.RenderIdentifier("COLUMN_ID");
-            string tableNameColumn = SqlDialectStrategy.RenderIdentifier("TABLE_NAME");
-            string ownerColumn = SqlDialectStrategy.RenderIdentifier("OWNER");
-
-            StringBuilder sqlBuffer = new();
-
-            sqlBuffer.AppendLine("SELECT");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnNameColumn);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.Name)));
-            sqlBuffer.AppendLine(",");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnIdColumn);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
-            sqlBuffer.AppendLine("FROM");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(allTabColumnsTable);
-            sqlBuffer.AppendWhereClause(ownerColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "    AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder, string.Empty);
-            sqlBuffer.AppendLine();
-            sqlBuffer.AppendLine("ORDER BY");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnIdColumn);
-            sqlBuffer.Append(SqlDialectStrategy.Terminator);
-
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

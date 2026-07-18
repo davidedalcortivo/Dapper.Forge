@@ -15,6 +15,64 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
         private SqlBuilderStrategy(SqlDialectStrategy strategy) : base(strategy) { }
 
+        public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
+        {
+            string pgAttributeTable = SqlDialectStrategy.RenderIdentifier("pg_attribute");
+            string pgClassTable = SqlDialectStrategy.RenderIdentifier("pg_class");
+            string pgNamespaceTable = SqlDialectStrategy.RenderIdentifier("pg_namespace");
+            string aTable = SqlDialectStrategy.RenderIdentifier("a");
+            string cTable = SqlDialectStrategy.RenderIdentifier("c");
+            string nTable = SqlDialectStrategy.RenderIdentifier("n");
+            string attnameColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attname");
+            string attnumColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attnum");
+            string attrelidColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attrelid");
+            string attisdroppedColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attisdropped");
+            string relnamespaceColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("relnamespace");
+            string relnameColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("relname");
+            string nspnameColumn = nTable + "." + SqlDialectStrategy.RenderIdentifier("nspname");
+            string oidColumn = SqlDialectStrategy.RenderIdentifier("oid");
+            string newLine = Environment.NewLine;
+
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(attnameColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.Name)));
+            sqlBuffer.AppendLine(",");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(attnumColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
+            sqlBuffer.AppendLine("FROM");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(pgAttributeTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(aTable);
+            sqlBuffer.AppendLine("INNER JOIN");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(pgClassTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(cTable);
+            sqlBuffer.AppendOnClause(attrelidColumn + " = " + cTable + "." + oidColumn, string.Empty);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("INNER JOIN");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(pgNamespaceTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(nTable);
+            sqlBuffer.AppendOnClause(relnamespaceColumn + " = " + nTable + "." + oidColumn, string.Empty);
+            sqlBuffer.AppendWhereClause(nspnameColumn + " = " + SqlDialectStrategy.Placeholder + newLine + "    AND " + relnameColumn + " = " + SqlDialectStrategy.Placeholder + newLine + "    AND " + attnumColumn + " > 0" + newLine + "    AND NOT " + attisdroppedColumn, string.Empty);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("ORDER BY");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(attnumColumn);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
+        }
+
         public override SqlTemplate GetFirstSqlBuilder<TEntity>() where TEntity : class
         {
             ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
@@ -101,64 +159,6 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "        ", null);
             sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append("    )");
-            sqlBuffer.Append(SqlDialectStrategy.Terminator);
-
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
-        }
-
-        public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
-        {
-            string pgAttributeTable = SqlDialectStrategy.RenderIdentifier("pg_attribute");
-            string pgClassTable = SqlDialectStrategy.RenderIdentifier("pg_class");
-            string pgNamespaceTable = SqlDialectStrategy.RenderIdentifier("pg_namespace");
-            string aTable = SqlDialectStrategy.RenderIdentifier("a");
-            string cTable = SqlDialectStrategy.RenderIdentifier("c");
-            string nTable = SqlDialectStrategy.RenderIdentifier("n");
-            string attnameColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attname");
-            string attnumColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attnum");
-            string attrelidColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attrelid");
-            string attisdroppedColumn = aTable + "." + SqlDialectStrategy.RenderIdentifier("attisdropped");
-            string relnamespaceColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("relnamespace");
-            string relnameColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("relname");
-            string nspnameColumn = nTable + "." + SqlDialectStrategy.RenderIdentifier("nspname");
-            string oidColumn = SqlDialectStrategy.RenderIdentifier("oid");
-            string newLine = Environment.NewLine;
-
-            StringBuilder sqlBuffer = new();
-
-            sqlBuffer.AppendLine("SELECT");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(attnameColumn);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.Name)));
-            sqlBuffer.AppendLine(",");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(attnumColumn);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
-            sqlBuffer.AppendLine("FROM");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(pgAttributeTable);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.AppendLine(aTable);
-            sqlBuffer.AppendLine("INNER JOIN");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(pgClassTable);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.Append(cTable);
-            sqlBuffer.AppendOnClause(attrelidColumn + " = " + cTable + "." + oidColumn, string.Empty);
-            sqlBuffer.AppendLine();
-            sqlBuffer.AppendLine("INNER JOIN");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(pgNamespaceTable);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.Append(nTable);
-            sqlBuffer.AppendOnClause(relnamespaceColumn + " = " + nTable + "." + oidColumn, string.Empty);
-            sqlBuffer.AppendWhereClause(nspnameColumn + " = " + SqlDialectStrategy.Placeholder + newLine + "    AND " + relnameColumn + " = " + SqlDialectStrategy.Placeholder + newLine + "    AND " + attnumColumn + " > 0" + newLine + "    AND NOT " + attisdroppedColumn, string.Empty);
-            sqlBuffer.AppendLine();
-            sqlBuffer.AppendLine("ORDER BY");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(attnumColumn);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

@@ -43,17 +43,17 @@ namespace Dapper.Forge.Oracle.Strategies
 
         public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            return BuildUpsertRangeCommands(entities, EntityInfoCache<TEntity>.Properties, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql, "    ");
+            return BuildUpsertRangeCommands(connection, entities, EntityInfoCache<TEntity>.Properties, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpdateRangeSql, "    ");
         }
 
         public override IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            return BuildUpsertRangeCommands(entities, EntityInfoCache<TEntity>.InsertProperties, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.InsertRangeSql, string.Empty);
+            return BuildUpsertRangeCommands(connection, entities, EntityInfoCache<TEntity>.InsertProperties, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.InsertRangeSql, string.Empty);
         }
 
         public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
-            return BuildUpsertRangeCommands(entities, EntityInfoCache<TEntity>.Properties, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql, "    ");
+            return BuildUpsertRangeCommands(connection, entities, EntityInfoCache<TEntity>.Properties, batchSize, SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql, "    ");
         }
     }
 }
