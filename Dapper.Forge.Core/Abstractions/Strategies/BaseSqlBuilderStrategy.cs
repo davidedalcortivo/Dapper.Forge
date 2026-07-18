@@ -24,7 +24,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, "    ", true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
@@ -39,7 +39,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, "    ", true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("FETCH FIRST");
@@ -61,9 +61,9 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]) + " = " + SqlDialectStrategy.Placeholder;
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, "    ", true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
@@ -100,7 +100,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "    ", false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("VALUES (");
@@ -141,9 +141,9 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             string clause = inPrefix + SqlDialectStrategy.Placeholder + inSuffix;
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, "    ", true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
@@ -164,7 +164,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "    ", false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("VALUES");
@@ -189,7 +189,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
             sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

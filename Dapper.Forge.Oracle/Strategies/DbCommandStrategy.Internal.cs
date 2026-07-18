@@ -11,7 +11,7 @@ namespace Dapper.Forge.Oracle.Strategies
 {
     internal sealed partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
     {
-        private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, SqlTemplate sqlTemplate) where TEntity : class
+        private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, IReadOnlyList<PropertyInfo> properties, int batchSize, SqlTemplate sqlTemplate, string indentation) where TEntity : class
         {
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
@@ -19,7 +19,6 @@ namespace Dapper.Forge.Oracle.Strategies
             if (entityArray.Length == 0)
                 return commands;
 
-            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -35,16 +34,17 @@ namespace Dapper.Forge.Oracle.Strategies
 
                 for (int j = i; j < end; j++)
                 {
-                    sqlBuffer.Append("    SELECT ");
+                    sqlBuffer.Append(indentation);
+                    sqlBuffer.Append("SELECT ");
 
-                    for (int k = 0; k < properties.Length; k++)
+                    for (int k = 0; k < properties.Count; k++)
                     {
                         PropertyInfo property = properties[k];
                         string parameterName = property.Name;
                         object? parameterValue = propertyGettersByPropertyName[parameterName](entityArray[j]);
 
                         sqlBuffer.AppendAndBindParameter(SqlDialectStrategy, parameters, parameterName + j, parameterValue);
-                        sqlBuffer.AppendSeparator(k, properties.Length, true);
+                        sqlBuffer.AppendSeparator(k, properties.Count, true);
                     }
 
                     sqlBuffer.Append(" FROM DUAL");
@@ -52,7 +52,8 @@ namespace Dapper.Forge.Oracle.Strategies
                     if (j < end - 1)
                     {
                         sqlBuffer.AppendLine();
-                        sqlBuffer.AppendLine("    UNION ALL");
+                        sqlBuffer.Append(indentation);
+                        sqlBuffer.AppendLine("UNION ALL");
                     }
                 }
 

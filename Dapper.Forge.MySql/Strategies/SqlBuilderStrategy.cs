@@ -22,7 +22,7 @@ namespace Dapper.Forge.MySql.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, "    ", true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("LIMIT");
@@ -65,12 +65,12 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.Append(") AS ");
             sqlBuffer.Append(sourceTable);
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, properties, null, false, true);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, string.Empty, false, true);
             sqlBuffer.Append(')');
-            sqlBuffer.AppendOnClause(string.Empty, clause);
+            sqlBuffer.AppendOnClause(clause, string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.Append("SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, sourceTable, targetTable);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, sourceTable, targetTable, "    ");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
@@ -119,8 +119,8 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
             sqlBuffer.AppendLine("FROM");
             sqlBuffer.Append("    ");
-            sqlBuffer.AppendLine(columnsTable);
-            sqlBuffer.AppendWhereClause(string.Empty, tableSchemaColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(columnsTable);
+            sqlBuffer.AppendWhereClause(tableSchemaColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "    AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder, string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");

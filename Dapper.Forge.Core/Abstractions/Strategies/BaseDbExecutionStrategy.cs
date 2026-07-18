@@ -392,13 +392,33 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             string connectionId = SqlDialectStrategy.GetConnectionId(connection);
             IReadOnlyList<DbColumnInfo>? columns = DbColumnInfoCache<TEntity>.GetValueOrDefault(connectionId);
 
-            if (columns is not null)
-                return columns;
+            if (columns is null)
+            {
+                SemaphoreSlim semaphore = DbColumnInfoCache<TEntity>.GetSemaphore(connectionId);
 
-            DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
-            columns = await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, commandTimeout, cancellationToken);
+                if (sync)
+                    semaphore.Wait(cancellationToken);
+                else
+                    await semaphore.WaitAsync(cancellationToken);
 
-            _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
+                try
+                {
+                    columns = DbColumnInfoCache<TEntity>.GetValueOrDefault(connectionId);
+
+                    if (columns is null)
+                    {
+                        DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
+                        columns = await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, commandTimeout, cancellationToken);
+
+                        _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }
+            
             return columns;
         }
     }

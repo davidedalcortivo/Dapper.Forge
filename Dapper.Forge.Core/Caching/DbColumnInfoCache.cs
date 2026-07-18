@@ -8,6 +8,7 @@ namespace Dapper.Forge.Core.Caching
     internal static class DbColumnInfoCache<TEntity> where TEntity : class
     {
         private static readonly ConcurrentDictionary<string, IReadOnlyList<DbColumnInfo>> _cache = new();
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
 
         public static IReadOnlyList<DbColumnInfo>? GetValueOrDefault(string connectionId)
         {
@@ -25,6 +26,11 @@ namespace Dapper.Forge.Core.Caching
         public static bool TryAdd(string connectionId, IReadOnlyList<DbColumnInfo> columns)
         {
             return _cache.TryAdd(connectionId, columns);
+        }
+
+        public static SemaphoreSlim GetSemaphore(string connectionId)
+        {
+            return _semaphores.GetOrAdd(connectionId, static _ => new(1, 1));
         }
     }
 }

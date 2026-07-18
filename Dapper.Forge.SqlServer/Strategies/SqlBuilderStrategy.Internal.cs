@@ -18,7 +18,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append("UPDATE ");
             sqlBuffer.AppendLine(targetTable);
             sqlBuffer.Append("SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, sourceTable, null);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, sourceTable, null, "    ");
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, targetTable);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("INNER JOIN (");
@@ -27,9 +27,9 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(") AS ");
             sqlBuffer.Append(sourceTable);
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, properties, null, false, true);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, string.Empty, false, true);
             sqlBuffer.Append(')');
-            sqlBuffer.AppendOnClause(string.Empty, clause);
+            sqlBuffer.AppendOnClause(clause, string.Empty);
         }
     }
 }

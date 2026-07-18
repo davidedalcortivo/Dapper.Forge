@@ -9,90 +9,112 @@ using MySqlConnector;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
 
+
 List<SortDescriptor> sorts = [];
 sorts.Add(new("Id", "desc"));
 sorts.Add(new("StringValue", SortDirection.Ascending));
 sorts.Add(new("GuidValue", "descending"));
-sorts.Add(SortDescriptor.For<TestTable>(x => x.GuidValue, "descending"));
 
 List<FilterDescriptor> filters = [];
 filters.Add(new("StringValue", "ciao", ComparisonOperator.Equal));
 
 FilterGroup group = new(filters, LogicalOperator.AndAlso);
 
-TestTable testTable = new()
-{
-    Id = new("c0ce8453-f109-452a-850d-717a33947e10"),
-    IntValue = 1,
-    DecimalValue = (decimal?)3.4,
-    StringValue = "ciao",
-    BoolValue = true,
-    DateValue = null,
-    TimeValue = null,
-    TimestampValue = DateTime.Now,
-    TimestamptzValue = DateTime.Now,
-    GuidValue = Guid.NewGuid()
-};
 
-TestTableIdentity testTableIdentity = new()
-{
-    IntValue = 1,
-    DecimalValue = (decimal?)3.4,
-    StringValue = "hola",
-    DateValue = null,
-    TimeValue = null,
-    TimestampValue = DateTime.Now,
-    GuidValue = Guid.NewGuid()
-};
+var rnd = new Random();
+var aa = new List<TestTableORACLE>();
+var bb = new List<TestTableIdentityORACLE>();
 
+#region DACHIUDERE
+for (int i = 0; i < 10000; i++)
+    aa.Add(new() {
+        Id = Guid.NewGuid().ToString(),
+        IntValue = rnd.Next(0, 100000) switch
+        {
+            < 20000 => null,
+            _ => rnd.Next()
+        },
 
-MySqlConnection mysqlConnection = new();
-OracleConnection oracleConnection = new();
-SqlConnection sqlserverConnection = new();
+        DecimalValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => (decimal)(rnd.NextDouble() * 10000)
+        },
 
-var aa = new List<TestTable>();
+        StringValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => "ciao"
+        },
+
+        BoolValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => rnd.Next(0, 2) == 1 ? 1 : 0
+        },
+
+        TimestampValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => DateTime.UtcNow.AddSeconds(-rnd.Next(0, 1000000))
+        },
+
+        GuidValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => Guid.NewGuid().ToString()
+        }
+    });
 
 for (int i = 0; i < 10000; i++)
-    aa.Add(new TestTable() { Id = Guid.NewGuid() });
+    bb.Add(new()
+    {
+        IntValue = rnd.Next(0, 100000) switch
+        {
+            < 20000 => null,
+            _ => rnd.Next()
+        },
 
-var bb = new List<TestTableIdentity>();
+        DecimalValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => (decimal)(rnd.NextDouble() * 10000)
+        },
 
-for (int i = 0; i < 10000; i++)
-    bb.Add(new TestTableIdentity() { Id = 1 });
+        StringValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => "ciao"
+        },
 
-//postgresqlConnection.LoadDbCache<TestTable>();
+        BoolValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => rnd.Next(0, 2) == 1 ? 1 : 0
+        },
 
+        TimestampValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => DateTime.UtcNow.AddSeconds(-rnd.Next(0, 1000000))
+        },
 
-var mysqlCommands = mysqlConnection.GetPageCommand<TestTable>(null, 10, 4);
+        GuidValue = rnd.Next(0, 100) switch
+        {
+            < 20 => null,
+            _ => Guid.NewGuid().ToString()
+        }
+    });
+#endregion
 
-var mysqlCommand = mysqlConnection.MaxCommand<TestTable>(x => x.IntValue);
-var oracleCommand = oracleConnection.MaxCommand<TestTable>(x => x.IntValue);
-var postgresqlCommand = postgresqlConnection.MaxCommand<TestTable>(x => x.IntValue);
-var sqlserverCommand = sqlserverConnection.MaxCommand<TestTable>(x => x.IntValue);
+var qqa = oracleConnection.InsertRangeCommands(bb);
+var ww = oracleConnection.InsertRange(bb);
 
-mysqlCommand = mysqlConnection.MaxCommand<TestTable>(x => x.IntValue, x => x.StringValue == "ciao");
-oracleCommand = oracleConnection.MaxCommand<TestTable>(x => x.IntValue, x => x.StringValue == "ciao");
-postgresqlCommand = postgresqlConnection.MaxCommand<TestTable>(x => x.IntValue, x => x.StringValue == "ciao");
-sqlserverCommand = sqlserverConnection.MaxCommand<TestTable>(x => x.IntValue, x => x.StringValue == "ciao");
+var aaa = oracleConnection.GetAll<TestTableORACLE>();
+var qq = oracleConnection.DeleteRange(aaa);
+var bbb = oracleConnection.GetAll<TestTableIdentityORACLE>();
+var ee = oracleConnection.DeleteRange(bbb);
 
-mysqlCommand = mysqlConnection.MaxCommand<TestTable>(x => x.IntValue, group);
-oracleCommand = oracleConnection.MaxCommand<TestTable>(x => x.IntValue, group);
-postgresqlCommand = postgresqlConnection.MaxCommand<TestTable>(x => x.IntValue, group);
-sqlserverCommand = sqlserverConnection.MaxCommand<TestTable>(x => x.IntValue, group);
-
-mysqlCommand = mysqlConnection.MaxCommand<TestTable>("IntValue");
-oracleCommand = oracleConnection.MaxCommand<TestTable>("IntValue");
-postgresqlCommand = postgresqlConnection.MaxCommand<TestTable>("IntValue");
-sqlserverCommand = sqlserverConnection.MaxCommand<TestTable>("IntValue");
-
-mysqlCommand = mysqlConnection.MaxCommand<TestTable>("IntValue", x => x.StringValue == "ciao");
-oracleCommand = oracleConnection.MaxCommand<TestTable>("IntValue", x => x.StringValue == "ciao");
-postgresqlCommand = postgresqlConnection.MaxCommand<TestTable>("IntValue", x => x.StringValue == "ciao");
-sqlserverCommand = sqlserverConnection.MaxCommand<TestTable>("IntValue", x => x.StringValue == "ciao");
-
-mysqlCommand = mysqlConnection.MaxCommand<TestTable>("IntValue", group);
-oracleCommand = oracleConnection.MaxCommand<TestTable>("IntValue", group);
-postgresqlCommand = postgresqlConnection.MaxCommand<TestTable>("IntValue", group);
-sqlserverCommand = sqlserverConnection.MaxCommand<TestTable>("IntValue", group);
+ww = oracleConnection.InsertRange(bb);
 
 Console.WriteLine(string.Empty);

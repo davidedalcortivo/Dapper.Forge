@@ -27,7 +27,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "    ", false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.Append("VALUES");
@@ -55,7 +55,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             }
 
             sqlBuffer.Append(") DO UPDATE SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, "EXCLUDED", null);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, "EXCLUDED", null, "    ");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }

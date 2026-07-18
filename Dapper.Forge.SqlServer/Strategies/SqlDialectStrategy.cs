@@ -14,7 +14,7 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         private SqlDialectStrategy()
         {
-            MaxParameterCount = 2100;
+            MaxParameterCount = 2098;
             MaxInsertRowCount = 1000;
         }
 

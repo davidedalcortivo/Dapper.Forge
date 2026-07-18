@@ -46,10 +46,10 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             StringBuilder sqlBuffer = new();
             parameters ??= new();
 
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
             sqlBuffer.AppendSort<TEntity>(SqlDialectStrategy, sortDescriptors, true);
 
-            string takeName = nameof(take);
+            string takeName = "Take";
             parameters.Add(takeName, take);
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.GetFirstSql.Render(sqlBuffer, SqlDialectStrategy.RenderParameter(takeName));
@@ -65,12 +65,12 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, take!.Value);
 
             StringBuilder sqlBuffer = new();
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
 
             if (useSkip)
             {
-                string skipName = nameof(skip);
-                string takeName = nameof(take);
+                string skipName = "Skip";
+                string takeName = "Take";
 
                 sqlBuffer.AppendSort<TEntity>(SqlDialectStrategy, sortDescriptors, true);
                 sqlBuffer.Append(SqlDialectStrategy.Pagination(SqlDialectStrategy.RenderParameter(skipName), SqlDialectStrategy.RenderParameter(takeName)));
@@ -111,7 +111,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 sqlBuffer.AppendSeparator(i, properties.Count, false);
             }
 
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.UpdateSql.Render(sqlBuffer);
             return new(sql, parameters);
@@ -120,7 +120,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         protected virtual DbCommandInfo BuildDeleteCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.DeleteSql.Render(sqlBuffer);
             return new(sql, parameters);
@@ -190,7 +190,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         protected virtual DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
-            sqlBuffer.AppendWhereClause("            ", clause);
+            sqlBuffer.AppendWhereClause(clause, "            ");
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.ExistsSql.Render(sqlBuffer);
             return new(sql, parameters);
@@ -203,7 +203,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             StringBuilder sqlBuffer = new();
             string column = propertyName is null ? "*" : SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyName]);
 
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
 
             string sql = sqlTemplate.Render(column, sqlBuffer);
             return new(sql, parameters);

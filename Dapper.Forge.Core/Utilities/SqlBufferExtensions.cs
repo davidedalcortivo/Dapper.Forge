@@ -23,7 +23,7 @@ namespace Dapper.Forge.Core.Utilities
             return sqlBuffer;
         }
 
-        public static StringBuilder AppendColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy sqlDialectStrategy, string indentation, IReadOnlyList<PropertyInfo> properties, string? table, bool useAlias, bool inLine) where TEntity : class
+        public static StringBuilder AppendColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy sqlDialectStrategy, IReadOnlyList<PropertyInfo> properties, string? table, string indentation, bool useAlias, bool inLine) where TEntity : class
         {
             if (properties.Count == 0)
                 return sqlBuffer;
@@ -60,7 +60,7 @@ namespace Dapper.Forge.Core.Utilities
             return sqlBuffer;
         }
 
-        public static StringBuilder AppendSetColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy sqlDialectStrategy, string indentation, IReadOnlyList<PropertyInfo> properties, string? sourceTable, string? targetTable) where TEntity : class
+        public static StringBuilder AppendSetColumns<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy sqlDialectStrategy, IReadOnlyList<PropertyInfo> properties, string? sourceTable, string? targetTable, string indentation) where TEntity : class
         {
             if (properties.Count == 0)
                 return sqlBuffer;
@@ -119,7 +119,7 @@ namespace Dapper.Forge.Core.Utilities
             return sqlBuffer;
         }
 
-        public static StringBuilder AppendWhereClause(this StringBuilder sqlBuffer, string indentation, string? clause)
+        public static StringBuilder AppendWhereClause(this StringBuilder sqlBuffer, string? clause, string indentation)
         {
             if (clause is not null)
             {
@@ -134,7 +134,7 @@ namespace Dapper.Forge.Core.Utilities
             return sqlBuffer;
         }
 
-        public static StringBuilder AppendOnClause(this StringBuilder sqlBuffer, string indentation, string? clause)
+        public static StringBuilder AppendOnClause(this StringBuilder sqlBuffer, string? clause, string indentation)
         {
             if (clause is not null)
             {

@@ -25,7 +25,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append("SELECT TOP (");
             sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(')');
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, "    ", true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
@@ -36,24 +36,32 @@ namespace Dapper.Forge.SqlServer.Strategies
         public override SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+
+            string table = SqlDialectStrategy.RenderIdentifier(tableName);
+            string schema = SqlDialectStrategy.RenderIdentifier(schemaName);
 
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("UPDATE ");
-            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(schema);
+            sqlBuffer.Append('.');
+            sqlBuffer.AppendLine(table);
             sqlBuffer.AppendLine("WITH (UPDLOCK, HOLDLOCK)");
             sqlBuffer.AppendLine("SET");
             sqlBuffer.Append(SqlDialectStrategy.Placeholder);
-            sqlBuffer.AppendWhereClause(string.Empty, SqlDialectStrategy.Placeholder);
+            sqlBuffer.AppendWhereClause(SqlDialectStrategy.Placeholder, string.Empty);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("IF @@ROWCOUNT = 0");
             sqlBuffer.AppendLine("BEGIN");
             sqlBuffer.Append("    INSERT INTO ");
-            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(schema);
+            sqlBuffer.Append('.');
+            sqlBuffer.Append(table);
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertProperties, null, false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "        ", false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("    )");
             sqlBuffer.AppendLine("    VALUES (");
@@ -86,6 +94,7 @@ namespace Dapper.Forge.SqlServer.Strategies
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
             ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableArray<PropertyInfo> upsertKeyProperties = EntityInfoCache<TEntity>.UpsertKeyProperties;
@@ -123,13 +132,15 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             sqlBuffer.AppendLine();
             sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "    ", false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "    ", true, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("FROM (");
             sqlBuffer.AppendLine("    VALUES");
@@ -137,7 +148,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(") AS ");
             sqlBuffer.Append(sourceTable);
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, properties, null, false, true);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, string.Empty, false, true);
             sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("WHERE NOT EXISTS (");
             sqlBuffer.AppendLine("    SELECT");
@@ -237,15 +248,15 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(tablesTable);
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(tTable);
-            sqlBuffer.AppendOnClause(string.Empty, cTable + "." + objectIdColumn + " = " + tTable + "." + objectIdColumn);
+            sqlBuffer.AppendOnClause(cTable + "." + objectIdColumn + " = " + tTable + "." + objectIdColumn, string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("INNER JOIN");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(schemasTable);
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(sTable);
-            sqlBuffer.AppendOnClause(string.Empty, tTable + "." + schemaIdColumn + " = " + sTable + "." + schemaIdColumn);
-            sqlBuffer.AppendWhereClause(string.Empty, sTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + tTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder);
+            sqlBuffer.AppendOnClause(tTable + "." + schemaIdColumn + " = " + sTable + "." + schemaIdColumn, string.Empty);
+            sqlBuffer.AppendWhereClause(sTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "    AND " + tTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder, string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");

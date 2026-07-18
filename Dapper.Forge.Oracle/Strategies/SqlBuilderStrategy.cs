@@ -1,6 +1,9 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
+using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.Core.Utilities;
+using System.Collections.Immutable;
+using System.Reflection;
 using System.Text;
 
 
@@ -24,14 +27,21 @@ namespace Dapper.Forge.Oracle.Strategies
 
         public override SqlTemplate InsertRangeSqlBuilder<TEntity>() where TEntity : class
         {
+            string tableName = EntityInfoCache<TEntity>.TableName;
+            string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+
             StringBuilder sqlBuffer = new();
 
-            sqlBuffer.AppendLine("INSERT ALL");
-            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
-            sqlBuffer.AppendLine("SELECT");
-            sqlBuffer.AppendLine("    *");
-            sqlBuffer.AppendLine("FROM");
-            sqlBuffer.Append("    dual");
+            sqlBuffer.Append("INSERT INTO ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(schemaName));
+            sqlBuffer.Append('.');
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
+            sqlBuffer.Append(" (");
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "    ", false, false);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine(")");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
@@ -64,8 +74,8 @@ namespace Dapper.Forge.Oracle.Strategies
             sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
             sqlBuffer.AppendLine("FROM");
             sqlBuffer.Append("    ");
-            sqlBuffer.AppendLine(allTabColumnsTable);
-            sqlBuffer.AppendWhereClause(string.Empty, ownerColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(allTabColumnsTable);
+            sqlBuffer.AppendWhereClause(ownerColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "    AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder, string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");

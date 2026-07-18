@@ -462,8 +462,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             DynamicParameters parameters = new();
 
-            string schemaName = nameof(schema);
-            string tableName = nameof(table);
+            string schemaName = "SchemaName";
+            string tableName = "TableName";
             parameters.Add(schemaName, schema);
             parameters.Add(tableName, table);
 

@@ -210,39 +210,41 @@ namespace Dapper.Forge.SqlServer.Extensions
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
-            int chunkSize = SqlDialectStrategy.Instance.MaxParameterCount / properties.Length;
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount / properties.Length) : SqlDialectStrategy.Instance.MaxParameterCount / properties.Length;
 
-            return DbExecutionStrategy.Instance.UpdateRangeImplAsync(connection, true, entities, batchSize, chunkSize, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.UpdateRangeImplAsync(connection, true, entities, batchSize, 0, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int InsertRange<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
-            int chunkSize = Math.Min(SqlDialectStrategy.Instance.MaxParameterCount / insertProperties.Length, SqlDialectStrategy.Instance.MaxInsertRowCount);
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount / insertProperties.Length) : SqlDialectStrategy.Instance.MaxParameterCount / insertProperties.Length;
 
-            return DbExecutionStrategy.Instance.InsertRangeImplAsync(connection, true, entities, batchSize, chunkSize, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.InsertRangeImplAsync(connection, true, entities, batchSize, SqlDialectStrategy.Instance.MaxInsertRowCount, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int DeleteRange<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.DeleteRangeImplAsync(connection, true, entities, batchSize, SqlDialectStrategy.Instance.MaxParameterCount, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount) : SqlDialectStrategy.Instance.MaxParameterCount;
+            return DbExecutionStrategy.Instance.DeleteRangeImplAsync(connection, true, entities, batchSize, 0, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int DeleteRange<TEntity>(this SqlConnection connection, IEnumerable ids, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.DeleteRangeImplAsync<TEntity>(connection, true, ids, batchSize, SqlDialectStrategy.Instance.MaxParameterCount, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount) : SqlDialectStrategy.Instance.MaxParameterCount;
+            return DbExecutionStrategy.Instance.DeleteRangeImplAsync<TEntity>(connection, true, ids, batchSize, 0, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int UpsertRange<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
-            int chunkSize = SqlDialectStrategy.Instance.MaxParameterCount / properties.Length;
+            batchSize = batchSize > 0 ? Math.Min(batchSize, SqlDialectStrategy.Instance.MaxParameterCount / properties.Length) : SqlDialectStrategy.Instance.MaxParameterCount / properties.Length;
 
-            return DbExecutionStrategy.Instance.UpsertRangeImplAsync(connection, true, entities, batchSize, chunkSize, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.UpsertRangeImplAsync(connection, true, entities, batchSize, 0, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static bool Exists<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class

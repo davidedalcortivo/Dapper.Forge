@@ -65,7 +65,7 @@ namespace Dapper.Forge.Core.Caching
             }
 
             TableAttribute? tableAttribute = entityType.GetCustomAttribute<TableAttribute>();
-            TableName = tableAttribute?.Name ?? entityType.Name + "s";
+            TableName = tableAttribute?.Name ?? entityType.Name;
             SchemaName = tableAttribute?.Schema;
 
             Properties = [.. stack];

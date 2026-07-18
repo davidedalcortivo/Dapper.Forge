@@ -22,7 +22,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.Append("SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", properties, null, true, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, "    ", true, false);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.AppendLine("LIMIT");
@@ -63,11 +63,11 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append(" AS ");
             sqlBuffer.AppendLine(targetTable);
             sqlBuffer.Append("SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, sourceTable, null);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, sourceTable, null, "    ");
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("FROM (");
             sqlBuffer.Append("    SELECT");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", properties, "(" + dataTable + "." + row + ")", false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, "(" + dataTable + "." + row + ")", "        ", false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("    FROM (");
             sqlBuffer.AppendLine("        VALUES");
@@ -79,7 +79,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.AppendLine(")");
             sqlBuffer.Append(") AS ");
             sqlBuffer.Append(sourceTable);
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
@@ -122,6 +122,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             string relnameColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("relname");
             string nspnameColumn = nTable + "." + SqlDialectStrategy.RenderIdentifier("nspname");
             string oidColumn = SqlDialectStrategy.RenderIdentifier("oid");
+            string newLine = Environment.NewLine;
 
             StringBuilder sqlBuffer = new();
 
@@ -145,15 +146,15 @@ namespace Dapper.Forge.PostgreSql.Strategies
             sqlBuffer.Append(pgClassTable);
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(cTable);
-            sqlBuffer.AppendOnClause(string.Empty, attrelidColumn + " = " + cTable + "." + oidColumn);
+            sqlBuffer.AppendOnClause(attrelidColumn + " = " + cTable + "." + oidColumn, string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("INNER JOIN");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(pgNamespaceTable);
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(nTable);
-            sqlBuffer.AppendOnClause(string.Empty, relnamespaceColumn + " = " + nTable + "." + oidColumn);
-            sqlBuffer.AppendWhereClause(string.Empty, nspnameColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + relnameColumn + " = " + SqlDialectStrategy.Placeholder + " AND " + attnumColumn + " > 0 AND NOT " + attisdroppedColumn);
+            sqlBuffer.AppendOnClause(relnamespaceColumn + " = " + nTable + "." + oidColumn, string.Empty);
+            sqlBuffer.AppendWhereClause(nspnameColumn + " = " + SqlDialectStrategy.Placeholder + newLine + "    AND " + relnameColumn + " = " + SqlDialectStrategy.Placeholder + newLine + "    AND " + attnumColumn + " > 0" + newLine + "    AND NOT " + attisdroppedColumn, string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ORDER BY");
             sqlBuffer.Append("    ");

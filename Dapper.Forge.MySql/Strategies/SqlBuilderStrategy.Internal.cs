@@ -26,7 +26,7 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.Append('.');
             sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(tableName));
             sqlBuffer.Append(" (");
-            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "    ", insertProperties, null, false, false);
+            sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "    ", false, false);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine(")");
             sqlBuffer.Append("VALUES");
@@ -46,7 +46,7 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.Append("AS ");
             sqlBuffer.AppendLine(newTable);
             sqlBuffer.Append("ON DUPLICATE KEY UPDATE");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "    ", updateProperties, newTable, null);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, newTable, null, "    ");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

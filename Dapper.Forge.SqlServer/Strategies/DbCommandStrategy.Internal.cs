@@ -16,10 +16,10 @@ namespace Dapper.Forge.SqlServer.Strategies
             StringBuilder sqlBuffer = new();
             parameters ??= new();
 
-            sqlBuffer.AppendWhereClause(string.Empty, clause);
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
             sqlBuffer.AppendSort<TEntity>(SqlDialectStrategy, sortDescriptors, true);
 
-            string takeName = nameof(take);
+            string takeName = "Take";
             parameters.Add(takeName, take);
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.GetFirstSql.Render(SqlDialectStrategy.RenderParameter(takeName), sqlBuffer);
@@ -29,7 +29,7 @@ namespace Dapper.Forge.SqlServer.Strategies
         protected override DbCommandInfo BuildExistsCommand<TEntity>(string? clause, DynamicParameters? parameters) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
-            sqlBuffer.AppendWhereClause("                ", clause);
+            sqlBuffer.AppendWhereClause(clause, "                ");
 
             string sql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.ExistsSql.Render(sqlBuffer);
             return new(sql, parameters);

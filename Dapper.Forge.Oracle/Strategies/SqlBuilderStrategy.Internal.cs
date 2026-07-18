@@ -53,7 +53,7 @@ namespace Dapper.Forge.Oracle.Strategies
                 ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
 
                 sqlBuffer.Append(" (");
-                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, string.Empty, properties, null, false, true);
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, string.Empty, false, true);
                 sqlBuffer.Append(')');
             }
 
@@ -83,18 +83,18 @@ namespace Dapper.Forge.Oracle.Strategies
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("WHEN MATCHED THEN");
             sqlBuffer.Append("    UPDATE SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, "        ", updateProperties, sourceTable, targetTable);
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, sourceTable, targetTable, "        ");
 
             if (appendInsert)
             {
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("WHEN NOT MATCHED THEN");
                 sqlBuffer.Append("    INSERT (");
-                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertProperties, null, false, false);
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, null, "        ", false, false);
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("    )");
                 sqlBuffer.Append("    VALUES (");
-                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, "        ", insertProperties, sourceTable, false, false);
+                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, insertProperties, sourceTable, "        ", false, false);
                 sqlBuffer.AppendLine();
                 sqlBuffer.Append("    )");
             }
