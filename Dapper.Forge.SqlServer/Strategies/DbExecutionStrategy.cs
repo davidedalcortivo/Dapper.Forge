@@ -44,7 +44,7 @@ namespace Dapper.Forge.SqlServer.Strategies
                 using DbTransaction? _ = tempTransaction;
                 _transaction ??= tempTransaction!;
 
-                result = await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
+                result = await ExecuteImplAsync(connection, sync, command, _transaction, commandTimeout, cancellationToken);
 
                 if (ownsTransaction)
                 {

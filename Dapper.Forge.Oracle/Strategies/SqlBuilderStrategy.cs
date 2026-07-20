@@ -33,6 +33,7 @@ namespace Dapper.Forge.Oracle.Strategies
             StringBuilder conditionBuffer5 = new();
             StringBuilder conditionBuffer6 = new();
 
+            conditionBuffer1.AppendLine();
             conditionBuffer1.Append("                IF c.");
             conditionBuffer1.Append(dataPrecisionNameColumn);
             conditionBuffer1.Append(" IS NOT NULL AND c.");
@@ -43,43 +44,44 @@ namespace Dapper.Forge.Oracle.Strategies
             conditionBuffer1.Append(" || ',' || c.");
             conditionBuffer1.Append(dataScaleNameColumn);
             conditionBuffer1.AppendLine(" || ')';");
-            conditionBuffer1.AppendLine("                END IF;");
-            conditionBuffer1.AppendLine();
-            conditionBuffer1.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+            conditionBuffer1.AppendLine("                    v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
 
+            conditionBuffer2.AppendLine();
             conditionBuffer2.Append("                IF c.");
             conditionBuffer2.Append(dataPrecisionNameColumn);
             conditionBuffer2.AppendLine(" IS NOT NULL THEN");
             conditionBuffer2.Append("                    v_type := v_type || '(' || c.");
             conditionBuffer2.Append(dataPrecisionNameColumn);
             conditionBuffer2.AppendLine(" || ')';");
-            conditionBuffer2.AppendLine("                END IF;");
-            conditionBuffer2.AppendLine();
-            conditionBuffer2.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+            conditionBuffer2.AppendLine("                    v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
 
+            conditionBuffer3.AppendLine();
             conditionBuffer3.Append("                IF c.");
             conditionBuffer3.Append(dataScaleNameColumn);
             conditionBuffer3.AppendLine(" IS NOT NULL THEN");
             conditionBuffer3.Append("                    v_type := v_type || '(' || c.");
             conditionBuffer3.Append(dataScaleNameColumn);
             conditionBuffer3.AppendLine(" || ')';");
-            conditionBuffer3.AppendLine("                END IF;");
-            conditionBuffer3.AppendLine();
-            conditionBuffer3.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+            conditionBuffer3.AppendLine("                    v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
 
+            conditionBuffer4.AppendLine();
             conditionBuffer4.Append("                IF c.");
             conditionBuffer4.Append(dataLengthNameColumn);
             conditionBuffer4.AppendLine(" IS NOT NULL THEN");
             conditionBuffer4.Append("                    v_type := v_type || '(' || c.");
             conditionBuffer4.Append(dataLengthNameColumn);
             conditionBuffer4.AppendLine(" || ')';");
-            conditionBuffer4.AppendLine("                END IF;");
-            conditionBuffer4.AppendLine();
-            conditionBuffer4.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+            conditionBuffer4.AppendLine("                    v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
 
-            conditionBuffer5.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
+            conditionBuffer5.AppendLine();
+            conditionBuffer5.AppendLine("                IF 1 = 1 THEN");
+            conditionBuffer5.AppendLine("                    v_type := v_type;");
+            conditionBuffer5.AppendLine("                    v_sql := 'SELECT ''X'' FROM DUAL WHERE CAST(NULL AS ' || v_type || ') IS NULL';");
 
-            conditionBuffer6.AppendLine("                v_sql := 'SELECT ''X'' FROM DUAL WHERE TO_' || v_type || '(NULL) IS NULL';");
+            conditionBuffer6.AppendLine();
+            conditionBuffer6.AppendLine("                IF 1 = 1 THEN");
+            conditionBuffer6.AppendLine("                    v_type := v_type;");
+            conditionBuffer6.AppendLine("                    v_sql := 'SELECT ''X'' FROM DUAL WHERE TO_' || v_type || '(NULL) IS NULL';");
 
             StringBuilder[] conditionBuffers = [
                 conditionBuffer1,
@@ -91,12 +93,12 @@ namespace Dapper.Forge.Oracle.Strategies
             ];
 
             string[] vTypes = [
-                "                v_type := 'CAST({} AS ' || v_type || ')';",
-                "                v_type := 'CAST({} AS ' || v_type || ')';",
-                "                v_type := 'CAST({} AS ' || v_type || ')';",
-                "                v_type := 'CAST({} AS ' || v_type || ')';",
-                "                v_type := 'CAST({} AS ' || v_type || ')';",
-                "                v_type := 'TO_' || v_type || '({})';"
+                "                    v_type := 'CAST({} AS ' || v_type || ')';",
+                "                    v_type := 'CAST({} AS ' || v_type || ')';",
+                "                    v_type := 'CAST({} AS ' || v_type || ')';",
+                "                    v_type := 'CAST({} AS ' || v_type || ')';",
+                "                    v_type := 'CAST({} AS ' || v_type || ')';",
+                "                    v_type := 'TO_' || v_type || '({})';"
             ];
 
             StringBuilder sqlBuffer = new();
@@ -142,20 +144,21 @@ namespace Dapper.Forge.Oracle.Strategies
                 sqlBuffer.Append("                v_type := c.");
                 sqlBuffer.Append(dataTypeNameColumn);
                 sqlBuffer.AppendLine(";");
-                sqlBuffer.AppendLine();
                 sqlBuffer.Append(conditionBuffers[i]);
                 sqlBuffer.AppendLine();
-                sqlBuffer.AppendLine("                DECLARE");
-                sqlBuffer.AppendLine("                    v_dummy VARCHAR2(1);");
-                sqlBuffer.AppendLine("                BEGIN");
-                sqlBuffer.AppendLine("                    EXECUTE IMMEDIATE v_sql INTO v_dummy;");
-                sqlBuffer.AppendLine("                END;");
+                sqlBuffer.AppendLine("                    DECLARE");
+                sqlBuffer.AppendLine("                        v_dummy VARCHAR2(1);");
+                sqlBuffer.AppendLine("                    BEGIN");
+                sqlBuffer.AppendLine("                        EXECUTE IMMEDIATE v_sql INTO v_dummy;");
+                sqlBuffer.AppendLine("                    END;");
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine(vTypes[i]);
-                sqlBuffer.AppendLine("                v_ok := TRUE;");
+                sqlBuffer.AppendLine("                    v_ok := TRUE;");
+                sqlBuffer.AppendLine("                END IF;");
+                sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("            EXCEPTION");
                 sqlBuffer.AppendLine("                WHEN OTHERS THEN");
-                sqlBuffer.AppendLine("                    v_ok := FALSE;");
+                sqlBuffer.AppendLine("                    NULL;");
                 sqlBuffer.AppendLine("            END;");
                 sqlBuffer.AppendLine("        END IF;");
                 sqlBuffer.AppendLine();
@@ -187,12 +190,12 @@ namespace Dapper.Forge.Oracle.Strategies
 
         public override SqlTemplate UpsertSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildUpsertSql<TEntity>(false, true);
+            return BuildUpsertSql<TEntity>(false, false);
         }
 
         public override SqlTemplate UpdateRangeSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildUpsertSql<TEntity>(true, false);
+            return BuildUpsertSql<TEntity>(true, true);
         }
 
         public override SqlTemplate InsertRangeSqlBuilder<TEntity>() where TEntity : class
@@ -219,7 +222,7 @@ namespace Dapper.Forge.Oracle.Strategies
 
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildUpsertSql<TEntity>(true, true);
+            return BuildUpsertSql<TEntity>(true, false);
         }
     }
 }

@@ -105,8 +105,9 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.AppendLine(table);
             sqlBuffer.AppendLine("WITH (UPDLOCK, HOLDLOCK)");
             sqlBuffer.AppendLine("SET");
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
+            sqlBuffer.AppendLine("WHERE");
             sqlBuffer.Append(SqlDialectStrategy.Placeholder);
-            sqlBuffer.AppendWhereClause(SqlDialectStrategy.Placeholder, string.Empty);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("IF @@ROWCOUNT = 0");
@@ -140,7 +141,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             StringBuilder sqlBuffer = new();
             string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
 
-            AppendUpdateRange<TEntity>(sqlBuffer, sourceTable, targetTable, clause);
+            AppendUpdateRange<TEntity>(sqlBuffer, EntityInfoCache<TEntity>.UpdateProperties, sourceTable, targetTable, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
@@ -160,10 +161,9 @@ namespace Dapper.Forge.SqlServer.Strategies
 
             StringBuilder sqlBuffer = new();
 
-            AppendUpdateRange<TEntity>(sqlBuffer, sourceTable, targetTable, null);
+            AppendUpdateRange<TEntity>(sqlBuffer, EntityInfoCache<TEntity>.UpsertProperties, sourceTable, targetTable, null);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("ON");
-            sqlBuffer.Append("    ");
 
             for (int i = 0; i < upsertKeyProperties.Length; i++)
             {
@@ -172,16 +172,28 @@ namespace Dapper.Forge.SqlServer.Strategies
                 if (i > 0)
                 {
                     sqlBuffer.AppendLine();
-                    sqlBuffer.Append("    AND ");
+                    sqlBuffer.AppendLine("    AND");
                 }
 
+                sqlBuffer.AppendLine("    (");
+                sqlBuffer.Append("        ");
                 sqlBuffer.Append(targetTable);
                 sqlBuffer.Append('.');
                 sqlBuffer.Append(propertyColumn);
                 sqlBuffer.Append(" = ");
                 sqlBuffer.Append(sourceTable);
                 sqlBuffer.Append('.');
+                sqlBuffer.AppendLine(propertyColumn);
+                sqlBuffer.Append("        OR (");
+                sqlBuffer.Append(targetTable);
+                sqlBuffer.Append('.');
                 sqlBuffer.Append(propertyColumn);
+                sqlBuffer.Append(" IS NULL AND ");
+                sqlBuffer.Append(sourceTable);
+                sqlBuffer.Append('.');
+                sqlBuffer.Append(propertyColumn);
+                sqlBuffer.AppendLine(" IS NULL)");
+                sqlBuffer.Append("    )");
             }
 
             sqlBuffer.Append(SqlDialectStrategy.Terminator);

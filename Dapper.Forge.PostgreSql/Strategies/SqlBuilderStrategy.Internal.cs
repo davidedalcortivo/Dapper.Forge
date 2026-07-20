@@ -15,8 +15,8 @@ namespace Dapper.Forge.PostgreSql.Strategies
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
             string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
-            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+            ImmutableArray<PropertyInfo> upsertProperties = EntityInfoCache<TEntity>.UpsertProperties;
             ImmutableArray<PropertyInfo> upsertKeyProperties = EntityInfoCache<TEntity>.UpsertKeyProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -55,7 +55,7 @@ namespace Dapper.Forge.PostgreSql.Strategies
             }
 
             sqlBuffer.Append(") DO UPDATE SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, "EXCLUDED", null, "    ");
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, upsertProperties, "EXCLUDED", null, "    ");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }

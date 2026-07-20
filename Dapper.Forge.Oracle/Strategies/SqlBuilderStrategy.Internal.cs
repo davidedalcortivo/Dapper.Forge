@@ -11,12 +11,14 @@ namespace Dapper.Forge.Oracle.Strategies
 {
     internal sealed partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
     {
-        private SqlTemplate BuildUpsertSql<TEntity>(bool isRange, bool appendInsert) where TEntity : class
+        private SqlTemplate BuildUpsertSql<TEntity>(bool isRange, bool updateOnly) where TEntity : class
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
             string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
+            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+            ImmutableArray<PropertyInfo> upsertProperties = EntityInfoCache<TEntity>.UpsertProperties;
             ImmutableArray<PropertyInfo> upsertKeyProperties = EntityInfoCache<TEntity>.UpsertKeyProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -58,34 +60,62 @@ namespace Dapper.Forge.Oracle.Strategies
             }
 
             sqlBuffer.AppendLine();
-            sqlBuffer.AppendLine("ON");
-            sqlBuffer.Append("    ");
+            sqlBuffer.AppendLine("ON (");
 
-            for (int i = 0; i < upsertKeyProperties.Length; i++)
+            if (updateOnly)
             {
-                string propertyColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[upsertKeyProperties[i].Name]);
+                string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]);
 
-                if (i > 0)
-                {
-                    sqlBuffer.AppendLine();
-                    sqlBuffer.Append("    AND ");
-                }
-
+                sqlBuffer.Append("    ");
                 sqlBuffer.Append(targetTable);
                 sqlBuffer.Append('.');
-                sqlBuffer.Append(propertyColumn);
+                sqlBuffer.Append(idColumn);
                 sqlBuffer.Append(" = ");
                 sqlBuffer.Append(sourceTable);
                 sqlBuffer.Append('.');
-                sqlBuffer.Append(propertyColumn);
+                sqlBuffer.Append(idColumn);
+            }
+            else
+            {
+                for (int i = 0; i < upsertKeyProperties.Length; i++)
+                {
+                    string propertyColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[upsertKeyProperties[i].Name]);
+
+                    if (i > 0)
+                    {
+                        sqlBuffer.AppendLine();
+                        sqlBuffer.AppendLine("    AND");
+                    }
+
+                    sqlBuffer.AppendLine("    (");
+                    sqlBuffer.Append("        ");
+                    sqlBuffer.Append(targetTable);
+                    sqlBuffer.Append('.');
+                    sqlBuffer.Append(propertyColumn);
+                    sqlBuffer.Append(" = ");
+                    sqlBuffer.Append(sourceTable);
+                    sqlBuffer.Append('.');
+                    sqlBuffer.AppendLine(propertyColumn);
+                    sqlBuffer.Append("        OR (");
+                    sqlBuffer.Append(targetTable);
+                    sqlBuffer.Append('.');
+                    sqlBuffer.Append(propertyColumn);
+                    sqlBuffer.Append(" IS NULL AND ");
+                    sqlBuffer.Append(sourceTable);
+                    sqlBuffer.Append('.');
+                    sqlBuffer.Append(propertyColumn);
+                    sqlBuffer.AppendLine(" IS NULL)");
+                    sqlBuffer.Append("    )");
+                }
             }
 
             sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("WHEN MATCHED THEN");
             sqlBuffer.Append("    UPDATE SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, sourceTable, targetTable, "        ");
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateOnly ? updateProperties : upsertProperties, sourceTable, targetTable, "        ");
 
-            if (appendInsert)
+            if (!updateOnly)
             {
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("WHEN NOT MATCHED THEN");

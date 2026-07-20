@@ -47,7 +47,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                     if (columns is null)
                     {
                         DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
-                        columns = await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, commandTimeout, cancellationToken);
+                        columns = await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, null, commandTimeout, cancellationToken);
 
                         _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
                     }
@@ -62,13 +62,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         public virtual async Task<IReadOnlyList<TEntity>> GetAllImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.GetAllCommand(connection, predicate, sortDescriptors);
-            return await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
+            return await QueryImplAsync<TEntity>(connection, sync, command, null, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<IReadOnlyList<TEntity>> GetAllImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.GetAllCommand<TEntity>(connection, filterNode, sortDescriptors);
-            return await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
+            return await QueryImplAsync<TEntity>(connection, sync, command, null, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TEntity> GetFirstImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
@@ -128,13 +128,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         public virtual async Task<IReadOnlyList<TEntity>> GetPageImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.GetPageCommand(connection, predicate, sortDescriptors, skip, take);
-            return await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
+            return await QueryImplAsync<TEntity>(connection, sync, command, take, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<IReadOnlyList<TEntity>> GetPageImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.GetPageCommand<TEntity>(connection, filterNode, sortDescriptors, skip, take);
-            return await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
+            return await QueryImplAsync<TEntity>(connection, sync, command, take, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<int> UpdateImplAsync<TEntity>(DbConnection connection, bool sync, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
@@ -234,7 +234,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
             foreach (DbCommandInfo command in commands)
             {
-                IEnumerable<TEntity> entities = await QueryImplAsync<TEntity>(connection, sync, command, transaction, commandTimeout, cancellationToken);
+                IEnumerable<TEntity> entities = await QueryImplAsync<TEntity>(connection, sync, command, null, transaction, commandTimeout, cancellationToken);
 
                 foreach (TEntity entity in entities)
                 {

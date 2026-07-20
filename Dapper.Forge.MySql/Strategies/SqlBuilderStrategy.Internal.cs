@@ -15,8 +15,8 @@ namespace Dapper.Forge.MySql.Strategies
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
             string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
-            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+            ImmutableArray<PropertyInfo> upsertProperties = EntityInfoCache<TEntity>.UpsertProperties;
 
             StringBuilder sqlBuffer = new();
             string newTable = SqlDialectStrategy.RenderIdentifier("new");
@@ -46,7 +46,7 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.Append("AS ");
             sqlBuffer.AppendLine(newTable);
             sqlBuffer.Append("ON DUPLICATE KEY UPDATE");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateProperties, newTable, null, "    ");
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, upsertProperties, newTable, null, "    ");
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

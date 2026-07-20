@@ -16,6 +16,7 @@ namespace Dapper.Forge.Core.Caching
         public static ImmutableArray<PropertyInfo> Properties { get; }
         public static ImmutableArray<PropertyInfo> UpdateProperties { get; }
         public static ImmutableArray<PropertyInfo> InsertProperties { get; }
+        public static ImmutableArray<PropertyInfo> UpsertProperties { get; }
         public static ImmutableArray<PropertyInfo> UpsertKeyProperties { get; }
         public static ImmutableDictionary<string, string> ColumnNamesByPropertyName { get; }
         public static ImmutableDictionary<string, PropertyInfo> PropertiesByPropertyName { get; }
@@ -71,6 +72,7 @@ namespace Dapper.Forge.Core.Caching
             Properties = [.. stack];
             UpdateProperties = [.. Properties.Where(x => !(x == IdProperty || x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
             InsertProperties = [.. Properties.Where(x => !(x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
+            UpsertProperties = [.. Properties.Where(x => !(x == IdProperty || x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None) && !x.IsDefined(typeof(UpsertKeyAttribute), true))];
             UpsertKeyProperties = [.. Properties.Where(x => x.IsDefined(typeof(UpsertKeyAttribute), true))];
 
             if (UpsertKeyProperties.Length == 0)

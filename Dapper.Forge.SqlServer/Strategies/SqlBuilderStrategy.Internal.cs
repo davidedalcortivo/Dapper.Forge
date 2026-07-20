@@ -10,10 +10,9 @@ namespace Dapper.Forge.SqlServer.Strategies
 {
     internal sealed partial class SqlBuilderStrategy : BaseSqlBuilderStrategy<SqlDialectStrategy>
     {
-        private void AppendUpdateRange<TEntity>(StringBuilder sqlBuffer, string sourceTable, string targetTable, string? clause) where TEntity : class
+        private void AppendUpdateRange<TEntity>(StringBuilder sqlBuffer, IReadOnlyList<PropertyInfo> updateProperties, string sourceTable, string targetTable, string? clause) where TEntity : class
         {
             ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
-            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
 
             sqlBuffer.Append("UPDATE ");
             sqlBuffer.AppendLine(targetTable);

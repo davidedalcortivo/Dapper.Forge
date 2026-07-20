@@ -71,11 +71,9 @@ namespace Dapper.Forge.Console
         [Key]
         public int Id { get; set; }
 
-        [UpsertKey]
         [Column("int_value")]
         public int? IntValue { get; set; }
 
-        [UpsertKey]
         [Column("decimal_value")]
         public decimal? DecimalValue { get; set; }
 

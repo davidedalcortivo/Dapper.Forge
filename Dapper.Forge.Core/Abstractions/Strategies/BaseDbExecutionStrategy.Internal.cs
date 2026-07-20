@@ -7,8 +7,11 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 {
     internal abstract partial class BaseDbExecutionStrategy<TStrategy> : IDbExecutionStrategy where TStrategy : IDbCommandStrategy
     {
-        protected virtual async Task<IReadOnlyList<TEntity>> QueryImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        protected virtual async Task<IReadOnlyList<TEntity>> QueryImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, int? take, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
+            if (take == 0)
+                return [];
+
             if (sync)
                 return connection.Query<TEntity>(command.Sql, command.Parameters, transaction, true, commandTimeout).AsList();
 

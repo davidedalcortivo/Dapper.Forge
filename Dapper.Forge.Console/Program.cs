@@ -11,12 +11,10 @@ using Oracle.ManagedDataAccess.Client;
 
 
 List<SortDescriptor> sorts = [];
-sorts.Add(new("Id", "desc"));
-sorts.Add(new("StringValue", SortDirection.Ascending));
-sorts.Add(new("GuidValue", "descending"));
+sorts.Add(new("Id", "asc"));
 
 List<FilterDescriptor> filters = [];
-filters.Add(new("StringValue", "ciao", ComparisonOperator.Equal));
+filters.Add(new("IntValue", 3, ComparisonOperator.Equal));
 
 FilterGroup group = new(filters, LogicalOperator.AndAlso);
 
@@ -27,7 +25,8 @@ var bb = new List<TestTableIdentityORACLE>();
 
 #region DACHIUDERE
 for (int i = 0; i < 10000; i++)
-    aa.Add(new() {
+    aa.Add(new()
+    {
         Id = Guid.NewGuid().ToString(),
         IntValue = rnd.Next(0, 100000) switch
         {
@@ -107,16 +106,31 @@ for (int i = 0; i < 10000; i++)
     });
 #endregion
 
-oracleConnection.LoadDbCache<TestTableIdentityORACLE>();
+var aaa = mysqlConnection.GetAll<TestTableIdentityMYSQL>(sorts);
+var aaaa = mysqlConnection.GetAll<TestTableMYSQL>(sorts);
+var bbb = oracleConnection.GetAll<TestTableIdentityORACLE>(sorts);
+var bbbb = oracleConnection.GetAll<TestTableORACLE>(sorts);
+var ccc = postgresqlConnection.GetAll<TestTableIdentityPOSTGRESQL>(sorts);
+var cccc = postgresqlConnection.GetAll<TestTablePOSTGRESQL>(sorts);
+var ddd = sqlserverConnection.GetAll<TestTableIdentitySQLSERVER>(sorts);
+var dddd = sqlserverConnection.GetAll<TestTableSQLSERVER>(sorts);
 
-var qqa = oracleConnection.InsertRangeCommands(bb);
-var ww = oracleConnection.InsertRange(bb);
+aaa[0].StringValue = "AGGIORNAMENTO";
+aaaa[0].StringValue = "AGGIORNAMENTO";
+bbb[0].StringValue = "AGGIORNAMENTO";
+bbbb[0].StringValue = "AGGIORNAMENTO";
+ccc[0].StringValue = "AGGIORNAMENTO";
+cccc[0].StringValue = "AGGIORNAMENTO";
+ddd[0].StringValue = "AGGIORNAMENTO";
+dddd[0].StringValue = "AGGIORNAMENTO";
 
-var aaa = oracleConnection.GetAll<TestTableORACLE>();
-var qq = oracleConnection.DeleteRange(aaa);
-var bbb = oracleConnection.GetAll<TestTableIdentityORACLE>();
-var ee = oracleConnection.DeleteRange(bbb);
+var u_bbb = oracleConnection.Upsert<TestTableIdentityORACLE>(bbb[0]);
+var u_bbbb = oracleConnection.Upsert<TestTableORACLE>(bbbb[0]);
+var u_ccc = postgresqlConnection.Upsert(ccc[0]);
+var u_cccc = postgresqlConnection.Upsert(cccc[0]);
+var u_ddd = sqlserverConnection.Upsert(ddd[0]);
+var u_dddd = sqlserverConnection.Upsert(dddd[0]);
 
-ww = oracleConnection.InsertRange(bb);
+
 
 Console.WriteLine(string.Empty);
