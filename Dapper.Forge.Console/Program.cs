@@ -115,22 +115,33 @@ var cccc = postgresqlConnection.GetAll<TestTablePOSTGRESQL>(sorts);
 var ddd = sqlserverConnection.GetAll<TestTableIdentitySQLSERVER>(sorts);
 var dddd = sqlserverConnection.GetAll<TestTableSQLSERVER>(sorts);
 
-aaa[0].StringValue = "AGGIORNAMENTO";
-aaaa[0].StringValue = "AGGIORNAMENTO";
-bbb[0].StringValue = "AGGIORNAMENTO";
-bbbb[0].StringValue = "AGGIORNAMENTO";
-ccc[0].StringValue = "AGGIORNAMENTO";
-cccc[0].StringValue = "AGGIORNAMENTO";
-ddd[0].StringValue = "AGGIORNAMENTO";
-dddd[0].StringValue = "AGGIORNAMENTO";
+foreach (var x in aaa)
+    x.TimestampValue = null;
 
-var u_bbb = oracleConnection.Upsert<TestTableIdentityORACLE>(bbb[0]);
-var u_bbbb = oracleConnection.Upsert<TestTableORACLE>(bbbb[0]);
-var u_ccc = postgresqlConnection.Upsert(ccc[0]);
-var u_cccc = postgresqlConnection.Upsert(cccc[0]);
-var u_ddd = sqlserverConnection.Upsert(ddd[0]);
-var u_dddd = sqlserverConnection.Upsert(dddd[0]);
+foreach (var x in aaaa)
+    x.TimestampValue = null;
 
+foreach (var x in bbb)
+    x.TimestampValue = null;
+
+foreach (var x in bbbb)
+    x.TimestampValue = null;
+
+foreach (var x in ccc)
+    x.TimestampValue = null;
+
+foreach (var x in cccc)
+    x.TimestampValue = null;
+
+foreach (var x in ddd)
+    x.TimestampValue = null;
+
+foreach (var x in dddd)
+    x.TimestampValue = null;
+
+
+var _bbb = oracleConnection.UpsertRange<TestTableIdentityORACLE>(bbb);
+var _bbbb = oracleConnection.UpsertRange<TestTableORACLE>(bbbb);
 
 
 Console.WriteLine(string.Empty);

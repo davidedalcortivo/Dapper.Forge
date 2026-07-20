@@ -15,10 +15,7 @@ namespace Dapper.Forge.Oracle.Strategies
         {
             string tableName = EntityInfoCache<TEntity>.TableName;
             string schemaName = EntityInfoCache<TEntity>.SchemaName ?? SqlDialectStrategy.DefaultSchemaName;
-            PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
-            ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
-            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
-            ImmutableArray<PropertyInfo> upsertProperties = EntityInfoCache<TEntity>.UpsertProperties;
+            ImmutableArray<PropertyInfo> properties = updateOnly ? EntityInfoCache<TEntity>.UpdateProperties : EntityInfoCache<TEntity>.UpsertProperties;
             ImmutableArray<PropertyInfo> upsertKeyProperties = EntityInfoCache<TEntity>.UpsertKeyProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
@@ -48,22 +45,12 @@ namespace Dapper.Forge.Oracle.Strategies
             }
 
             sqlBuffer.Append(") ");
-            sqlBuffer.Append(sourceTable);
-
-            if (isRange)
-            {
-                ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
-
-                sqlBuffer.Append(" (");
-                sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, string.Empty, false, true);
-                sqlBuffer.Append(')');
-            }
-
-            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine(sourceTable);
             sqlBuffer.AppendLine("ON (");
 
             if (updateOnly)
             {
+                PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
                 string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]);
 
                 sqlBuffer.Append("    ");
@@ -113,10 +100,12 @@ namespace Dapper.Forge.Oracle.Strategies
             sqlBuffer.AppendLine(")");
             sqlBuffer.AppendLine("WHEN MATCHED THEN");
             sqlBuffer.Append("    UPDATE SET");
-            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, updateOnly ? updateProperties : upsertProperties, sourceTable, targetTable, "        ");
+            sqlBuffer.AppendSetColumns<TEntity>(SqlDialectStrategy, properties, sourceTable, targetTable, "        ");
 
             if (!updateOnly)
             {
+                ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
+
                 sqlBuffer.AppendLine();
                 sqlBuffer.AppendLine("WHEN NOT MATCHED THEN");
                 sqlBuffer.Append("    INSERT (");

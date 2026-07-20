@@ -225,7 +225,6 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append("        WITH (UPDLOCK, HOLDLOCK)");
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("    WHERE");
-            sqlBuffer.Append("        ");
 
             for (int i = 0; i < upsertKeyProperties.Length; i++)
             {
@@ -234,16 +233,28 @@ namespace Dapper.Forge.SqlServer.Strategies
                 if (i > 0)
                 {
                     sqlBuffer.AppendLine();
-                    sqlBuffer.Append("        AND ");
+                    sqlBuffer.AppendLine("        AND");
                 }
 
+                sqlBuffer.AppendLine("        (");
+                sqlBuffer.Append("            ");
                 sqlBuffer.Append(targetTable);
                 sqlBuffer.Append('.');
                 sqlBuffer.Append(propertyColumn);
                 sqlBuffer.Append(" = ");
                 sqlBuffer.Append(sourceTable);
                 sqlBuffer.Append('.');
+                sqlBuffer.AppendLine(propertyColumn);
+                sqlBuffer.Append("            OR (");
+                sqlBuffer.Append(targetTable);
+                sqlBuffer.Append('.');
                 sqlBuffer.Append(propertyColumn);
+                sqlBuffer.Append(" IS NULL AND ");
+                sqlBuffer.Append(sourceTable);
+                sqlBuffer.Append('.');
+                sqlBuffer.Append(propertyColumn);
+                sqlBuffer.AppendLine(" IS NULL)");
+                sqlBuffer.Append("        )");
             }
 
             sqlBuffer.AppendLine();

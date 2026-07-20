@@ -66,6 +66,9 @@ namespace Dapper.Forge.Oracle.Strategies
                             sqlBuffer.Append(SqlDialectStrategy.RenderParameter(parameterName));
 
                         parameters.Add(parameterName, parameterValue);
+
+                        sqlBuffer.Append(" AS ");
+                        sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(column.Name));
                         sqlBuffer.AppendSeparator(k, properties.Count, true);
                     }
 

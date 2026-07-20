@@ -96,7 +96,7 @@ namespace Dapper.Forge.MySql.Strategies
             if (entityArray.Length == 0)
                 return commands;
 
-            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.Properties;
+            ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
             SqlTemplate upsertRangeSql = SqlBuilderCache<TEntity, SqlBuilderStrategy>.UpsertRangeSql;
 

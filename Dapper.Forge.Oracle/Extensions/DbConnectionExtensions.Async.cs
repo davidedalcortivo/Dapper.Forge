@@ -205,6 +205,7 @@ namespace Dapper.Forge.Oracle.Extensions
         public static async Task<int> UpdateRangeAsync<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            await DbExecutionStrategy.Instance.LoadDbCacheImplAsync<TEntity>(connection, false, commandTimeout, cancellationToken);
             return await DbExecutionStrategy.Instance.UpdateRangeImplAsync(connection, false, entities, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 
@@ -232,6 +233,7 @@ namespace Dapper.Forge.Oracle.Extensions
         public static async Task<int> UpsertRangeAsync<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            await DbExecutionStrategy.Instance.LoadDbCacheImplAsync<TEntity>(connection, false, commandTimeout, cancellationToken);
             return await DbExecutionStrategy.Instance.UpsertRangeImplAsync(connection, false, entities, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 

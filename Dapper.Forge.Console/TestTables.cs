@@ -7,15 +7,12 @@ namespace Dapper.Forge.Console
     [Table("test_table")]
     public class TestTableMYSQL
     {
-        [UpsertKey]
         [Column("id")]
         public Guid Id { get; set; }
 
-        [UpsertKey]
         [Column("int_value")]
         public int? IntValue { get; set; }
 
-        [UpsertKey]
         [Column("decimal_value")]
         public decimal? DecimalValue { get; set; }
 
@@ -35,15 +32,12 @@ namespace Dapper.Forge.Console
     [Table("TEST_TABLE")]
     public class TestTableORACLE
     {
-        [UpsertKey]
         [Column("ID")]
         public string Id { get; set; } = string.Empty;
 
-        [UpsertKey]
         [Column("INT_VALUE")]
         public int? IntValue { get; set; }
 
-        [UpsertKey]
         [Column("DECIMAL_VALUE")]
         public decimal? DecimalValue { get; set; }
 
