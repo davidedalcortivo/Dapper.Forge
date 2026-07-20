@@ -17,35 +17,7 @@ namespace Dapper.Forge.MySql.Strategies
 
         public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
         {
-            string columnsTable = SqlDialectStrategy.RenderIdentifier("information_schema") + "." + SqlDialectStrategy.RenderIdentifier("columns");
-            string columnNameColumn = SqlDialectStrategy.RenderIdentifier("COLUMN_NAME");
-            string ordinalPositionColumn = SqlDialectStrategy.RenderIdentifier("ORDINAL_POSITION");
-            string tableNameColumn = SqlDialectStrategy.RenderIdentifier("TABLE_NAME");
-            string tableSchemaColumn = SqlDialectStrategy.RenderIdentifier("TABLE_SCHEMA");
-
-            StringBuilder sqlBuffer = new();
-
-            sqlBuffer.AppendLine("SELECT");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnNameColumn);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.Name)));
-            sqlBuffer.AppendLine(",");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(ordinalPositionColumn);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
-            sqlBuffer.AppendLine("FROM");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnsTable);
-            sqlBuffer.AppendWhereClause(tableSchemaColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "    AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder, string.Empty);
-            sqlBuffer.AppendLine();
-            sqlBuffer.AppendLine("ORDER BY");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(ordinalPositionColumn);
-            sqlBuffer.Append(SqlDialectStrategy.Terminator);
-
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
+            return new SqlTemplate();
         }
 
         public override SqlTemplate GetFirstSqlBuilder<TEntity>() where TEntity : class

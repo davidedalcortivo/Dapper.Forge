@@ -22,6 +22,11 @@ namespace Dapper.Forge.Core.Models
             }
         }
 
+        public SqlTemplate()
+        {
+            _segments = [];
+        }
+
         public SqlTemplate(string template, string terminator, string placeholder)
         {
             List<Segment> segments = [];

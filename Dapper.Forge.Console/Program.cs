@@ -139,6 +139,9 @@ foreach (var x in ddd)
 foreach (var x in dddd)
     x.TimestampValue = null;
 
+await sqlserverConnection.LoadDbCacheAsync<TestTableIdentitySQLSERVER>();
+await mysqlConnection.LoadDbCacheAsync<TestTableIdentityMYSQL>();
+
 
 var _bbb = oracleConnection.UpsertRange<TestTableIdentityORACLE>(bbb);
 var _bbbb = oracleConnection.UpsertRange<TestTableORACLE>(bbbb);

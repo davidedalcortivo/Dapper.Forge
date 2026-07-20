@@ -17,58 +17,7 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
         {
-            string sysTable = SqlDialectStrategy.RenderIdentifier("sys");
-            string columnsTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("columns");
-            string tablesTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("tables");
-            string schemasTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("schemas");
-            string cTable = SqlDialectStrategy.RenderIdentifier("c");
-            string tTable = SqlDialectStrategy.RenderIdentifier("t");
-            string sTable = SqlDialectStrategy.RenderIdentifier("s");
-            string columnIdColumn = cTable + "." + SqlDialectStrategy.RenderIdentifier("column_id");
-            string nameColumn = SqlDialectStrategy.RenderIdentifier("name");
-            string objectIdColumn = SqlDialectStrategy.RenderIdentifier("object_id");
-            string schemaIdColumn = SqlDialectStrategy.RenderIdentifier("schema_id");
-
-            StringBuilder sqlBuffer = new();
-
-            sqlBuffer.AppendLine("SELECT");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(cTable);
-            sqlBuffer.Append('.');
-            sqlBuffer.Append(nameColumn);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.Name)));
-            sqlBuffer.AppendLine(",");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnIdColumn);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.OrdinalPosition)));
-            sqlBuffer.AppendLine("FROM");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnsTable);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.AppendLine(cTable);
-            sqlBuffer.AppendLine("INNER JOIN");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(tablesTable);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.Append(tTable);
-            sqlBuffer.AppendOnClause(cTable + "." + objectIdColumn + " = " + tTable + "." + objectIdColumn, string.Empty);
-            sqlBuffer.AppendLine();
-            sqlBuffer.AppendLine("INNER JOIN");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(schemasTable);
-            sqlBuffer.Append(" AS ");
-            sqlBuffer.Append(sTable);
-            sqlBuffer.AppendOnClause(tTable + "." + schemaIdColumn + " = " + sTable + "." + schemaIdColumn, string.Empty);
-            sqlBuffer.AppendWhereClause(sTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "    AND " + tTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder, string.Empty);
-            sqlBuffer.AppendLine();
-            sqlBuffer.AppendLine("ORDER BY");
-            sqlBuffer.Append("    ");
-            sqlBuffer.Append(columnIdColumn);
-            sqlBuffer.Append(SqlDialectStrategy.Terminator);
-
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
+            return new SqlTemplate();
         }
 
         public override SqlTemplate GetFirstSqlBuilder<TEntity>() where TEntity : class

@@ -12,6 +12,11 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         private DbExecutionStrategy(DbCommandStrategy strategy) : base(strategy) { }
 
+        public override Task GetColumnsImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            return Task.CompletedTask;
+        }
+
         public override async Task<int> UpsertImplAsync<TEntity>(DbConnection connection, bool sync, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.UpsertCommand(connection, entity);
