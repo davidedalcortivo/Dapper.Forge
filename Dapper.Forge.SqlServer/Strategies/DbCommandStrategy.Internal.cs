@@ -3,6 +3,7 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Dapper.Forge.Core.Utilities;
 using System.Collections.Immutable;
+using System.Data.Common;
 using System.Reflection;
 using System.Text;
 
@@ -100,6 +101,28 @@ namespace Dapper.Forge.SqlServer.Strategies
             }
 
             return commands;
+        }
+
+        private DbCommandInfo BuildSafeAggregateCommand<TEntity>(DbConnection connection, SqlTemplate sqlTemplate, string propertyName, string? clause, DynamicParameters? parameters) where TEntity : class
+        {
+            ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+
+            string connectionId = SqlDialectStrategy.GetConnectionId(connection);
+            IDictionary<string, DbColumnInfo> columns = DbColumnInfoCache<TEntity>.GetDictValue(connectionId);
+
+            string columnName = columnNamesByPropertyName[propertyName];
+            string column;
+
+            if (((SqlDialectStrategy)SqlDialectStrategy).IntDataTypes.Contains(columns[columnName].DataType ?? string.Empty))
+                column = "CAST(" + SqlDialectStrategy.RenderIdentifier(columnName) + " AS BIGINT)";
+            else
+                column = SqlDialectStrategy.RenderIdentifier(columnName);
+
+            StringBuilder sqlBuffer = new();
+            sqlBuffer.AppendWhereClause(clause, string.Empty);
+
+            string sql = sqlTemplate.Render(column, sqlBuffer);
+            return new(sql, parameters);
         }
     }
 }

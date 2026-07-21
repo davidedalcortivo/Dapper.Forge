@@ -170,14 +170,22 @@ namespace Dapper.Forge.Oracle.Strategies
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("        v_json := v_json ||");
             sqlBuffer.AppendLine("            '{' ||");
-            sqlBuffer.Append("                '\"Name\":\"' || c.");
+            sqlBuffer.Append("                '\"");
+            sqlBuffer.Append(nameof(DbColumnInfo.Name));
+            sqlBuffer.Append("\": \"' || c.");
             sqlBuffer.Append(columnNameColumn);
             sqlBuffer.AppendLine(" || '\",' ||");
-            sqlBuffer.Append("                '\"DataType\":\"' || c.");
+            sqlBuffer.Append("                '\"");
+            sqlBuffer.Append(nameof(DbColumnInfo.DataType));
+            sqlBuffer.Append("\": \"' || c.");
             sqlBuffer.Append(dataTypeNameColumn);
             sqlBuffer.AppendLine(" || '\",' ||");
-            sqlBuffer.AppendLine("                '\"CastExpression\":' || CASE WHEN v_ok THEN '\"' || v_type || '\"' ELSE 'null' END || ',' ||");
-            sqlBuffer.AppendLine("                '\"IsCastable\":' || CASE WHEN v_ok THEN 'true' ELSE 'false' END ||");
+            sqlBuffer.Append("                '\"");
+            sqlBuffer.Append(nameof(DbColumnInfo.CastExpression));
+            sqlBuffer.AppendLine("\": ' || CASE WHEN v_ok THEN '\"' || v_type || '\"' ELSE 'null' END || ',' ||");
+            sqlBuffer.Append("                '\"");
+            sqlBuffer.Append(nameof(DbColumnInfo.IsCastable));
+            sqlBuffer.AppendLine("\": ' || CASE WHEN v_ok THEN 'true' ELSE 'false' END ||");
             sqlBuffer.AppendLine("            '}';");
             sqlBuffer.AppendLine("    END LOOP;");
             sqlBuffer.AppendLine();
@@ -223,6 +231,49 @@ namespace Dapper.Forge.Oracle.Strategies
         public override SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class
         {
             return BuildUpsertSql<TEntity>(true, false);
+        }
+
+        public override SqlTemplate ExistsSqlBuilder<TEntity>() where TEntity : class
+        {
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.AppendLine("    CASE");
+            sqlBuffer.AppendLine("        WHEN EXISTS (");
+            sqlBuffer.AppendLine("            SELECT");
+            sqlBuffer.Append("                1");
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "            ", null);
+            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
+            sqlBuffer.AppendLine("        )");
+            sqlBuffer.AppendLine("        THEN");
+            sqlBuffer.AppendLine("            1");
+            sqlBuffer.AppendLine("        ELSE");
+            sqlBuffer.AppendLine("            0");
+            sqlBuffer.AppendLine("    END");
+            sqlBuffer.AppendLine("FROM");
+            sqlBuffer.Append("    DUAL");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
+        }
+
+        public override SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class
+        {
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.AppendLine("    TO_CHAR(");
+            sqlBuffer.Append("        AVG(");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
+            sqlBuffer.AppendLine("),");
+            sqlBuffer.AppendLine("        'TM',");
+            sqlBuffer.AppendLine("        'NLS_NUMERIC_CHARACTERS=''.,'''");
+            sqlBuffer.Append("    )");
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
     }
 }

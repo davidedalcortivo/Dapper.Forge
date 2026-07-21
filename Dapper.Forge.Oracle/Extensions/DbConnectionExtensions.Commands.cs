@@ -377,19 +377,19 @@ namespace Dapper.Forge.Oracle.Extensions
             return DbCommandStrategy.Instance.SumCommand<TEntity>(connection, propertyName, filterNode);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MinCommand(connection, selector, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MinCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MinCommand(connection, selector, filterNode);
@@ -413,19 +413,19 @@ namespace Dapper.Forge.Oracle.Extensions
             return DbCommandStrategy.Instance.MinCommand<TEntity>(connection, propertyName, filterNode);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MaxCommand(connection, selector, (IFilterNode?)null);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MaxCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MaxCommand(connection, selector, filterNode);

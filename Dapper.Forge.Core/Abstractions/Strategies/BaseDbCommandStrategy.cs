@@ -423,13 +423,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo MinCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MinSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MinCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MinSql, selector, clause, parameters);
@@ -447,13 +447,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo MaxCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MaxSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MaxCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MaxSql, selector, clause, parameters);

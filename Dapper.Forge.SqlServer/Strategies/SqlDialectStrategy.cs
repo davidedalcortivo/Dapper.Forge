@@ -11,11 +11,13 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         public int MaxParameterCount { get; }
         public int MaxInsertRowCount { get; }
+        public HashSet<string> IntDataTypes { get; }
 
         private SqlDialectStrategy()
         {
             MaxParameterCount = 2098;
             MaxInsertRowCount = 1000;
+            IntDataTypes = new(StringComparer.OrdinalIgnoreCase) { "int", "smallint", "tinyint" };
         }
 
         public override string RenderIdentifier(string name)

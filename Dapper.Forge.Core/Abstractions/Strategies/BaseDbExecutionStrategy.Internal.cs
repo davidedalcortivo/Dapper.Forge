@@ -136,12 +136,12 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return result;
         }
 
-        protected virtual async Task<T?> ExecuteScalarImplAsync<T>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
+        protected virtual async Task<TProperty?> ExecuteScalarImplAsync<TProperty>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
         {
             if (sync)
-                return connection.ExecuteScalar<T>(command.Sql, command.Parameters, transaction, commandTimeout);
+                return connection.ExecuteScalar<TProperty>(command.Sql, command.Parameters, transaction, commandTimeout);
 
-            return await connection.ExecuteScalarAsync<T>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+            return await connection.ExecuteScalarAsync<TProperty>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
         }
     }
 }

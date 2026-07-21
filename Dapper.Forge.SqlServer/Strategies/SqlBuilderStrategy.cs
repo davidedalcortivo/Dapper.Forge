@@ -17,7 +17,66 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
         {
-            return new SqlTemplate();
+            string sysTable = SqlDialectStrategy.RenderIdentifier("sys");
+            string columnsTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("columns");
+            string typesTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("types");
+            string tablesTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("tables");
+            string schemasTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("schemas");
+            string coTable = SqlDialectStrategy.RenderIdentifier("co");
+            string tyTable = SqlDialectStrategy.RenderIdentifier("ty");
+            string taTable = SqlDialectStrategy.RenderIdentifier("ta");
+            string scTable = SqlDialectStrategy.RenderIdentifier("sc");
+            string nameColumn = SqlDialectStrategy.RenderIdentifier("name");
+            string systemTypeIdColumn = SqlDialectStrategy.RenderIdentifier("system_type_id");
+            string userTypeIdColumn = SqlDialectStrategy.RenderIdentifier("user_type_id");
+            string objectIdColumn = SqlDialectStrategy.RenderIdentifier("object_id");
+            string schemaIdColumn = SqlDialectStrategy.RenderIdentifier("schema_id");
+
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(coTable);
+            sqlBuffer.Append('.');
+            sqlBuffer.Append(nameColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.Name)));
+            sqlBuffer.AppendLine(",");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(tyTable);
+            sqlBuffer.Append('.');
+            sqlBuffer.Append(nameColumn);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(SqlDialectStrategy.RenderIdentifier(nameof(DbColumnInfo.DataType)));
+            sqlBuffer.AppendLine("FROM");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(columnsTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.AppendLine(coTable);
+            sqlBuffer.AppendLine("INNER JOIN");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(typesTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(tyTable);
+            sqlBuffer.AppendOnClause(coTable + "." + systemTypeIdColumn + " = " + tyTable + "." + systemTypeIdColumn + Environment.NewLine + "    AND " + tyTable + "." + systemTypeIdColumn + " = " + tyTable + "." + userTypeIdColumn, string.Empty);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("INNER JOIN");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(tablesTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(taTable);
+            sqlBuffer.AppendOnClause(coTable + "." + objectIdColumn + " = " + taTable + "." + objectIdColumn, string.Empty);
+            sqlBuffer.AppendLine();
+            sqlBuffer.AppendLine("INNER JOIN");
+            sqlBuffer.Append("    ");
+            sqlBuffer.Append(schemasTable);
+            sqlBuffer.Append(" AS ");
+            sqlBuffer.Append(scTable);
+            sqlBuffer.AppendOnClause(taTable + "." + schemaIdColumn + " = " + scTable + "." + schemaIdColumn, string.Empty);
+            sqlBuffer.AppendWhereClause(scTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "    AND " + taTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder, string.Empty);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
 
         public override SqlTemplate GetFirstSqlBuilder<TEntity>() where TEntity : class
@@ -232,6 +291,26 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.AppendLine("                0");
             sqlBuffer.AppendLine("        END AS BIT");
             sqlBuffer.Append("    )");
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
+        }
+
+        public override SqlTemplate CountSqlBuilder<TEntity>() where TEntity : class
+        {
+            return BuildAggregateSql<TEntity>("COUNT_BIG");
+        }
+
+        public override SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class
+        {
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.Append("    CAST(AVG(");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(") AS VARCHAR(MAX))");
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

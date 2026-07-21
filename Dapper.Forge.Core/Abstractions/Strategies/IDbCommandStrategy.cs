@@ -55,12 +55,12 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class;
         DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo MinCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo MinCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo MinCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo MinCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode? filterNode) where TEntity : class;
         DbCommandInfo MinCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo MinCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class;
-        DbCommandInfo MaxCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo MaxCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class;
+        DbCommandInfo MaxCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo MaxCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode? filterNode) where TEntity : class;
         DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class;
     }

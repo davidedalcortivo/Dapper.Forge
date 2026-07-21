@@ -139,12 +139,11 @@ foreach (var x in ddd)
 foreach (var x in dddd)
     x.TimestampValue = null;
 
-await sqlserverConnection.LoadDbCacheAsync<TestTableIdentitySQLSERVER>();
-await mysqlConnection.LoadDbCacheAsync<TestTableIdentityMYSQL>();
 
 
-var _bbb = oracleConnection.UpsertRange<TestTableIdentityORACLE>(bbb);
-var _bbbb = oracleConnection.UpsertRange<TestTableORACLE>(bbbb);
-
+var uu = mysqlConnection.Sum<TestTableIdentityMYSQL>(x => x.DecimalValue);
+var uuq = oracleConnection.Sum<TestTableIdentityORACLE>(x => x.DecimalValue);
+var uuw = postgresqlConnection.Sum<TestTableIdentityPOSTGRESQL>(x => x.DecimalValue);
+var uue = sqlserverConnection.Sum<TestTableIdentitySQLSERVER>(x => x.IntValue);
 
 Console.WriteLine(string.Empty);

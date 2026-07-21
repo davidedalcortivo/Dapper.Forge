@@ -199,37 +199,14 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public abstract SqlTemplate UpsertRangeSqlBuilder<TEntity>() where TEntity : class;
 
-        public virtual SqlTemplate ExistsSqlBuilder<TEntity>() where TEntity : class
-        {
-            StringBuilder sqlBuffer = new();
-
-            sqlBuffer.AppendLine("SELECT");
-            sqlBuffer.AppendLine("    CASE");
-            sqlBuffer.AppendLine("        WHEN EXISTS (");
-            sqlBuffer.AppendLine("            SELECT");
-            sqlBuffer.Append("                1");
-            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "            ", null);
-            sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
-            sqlBuffer.AppendLine("        )");
-            sqlBuffer.AppendLine("        THEN");
-            sqlBuffer.AppendLine("            1");
-            sqlBuffer.AppendLine("        ELSE");
-            sqlBuffer.AppendLine("            0");
-            sqlBuffer.Append("    END");
-            sqlBuffer.Append(SqlDialectStrategy.Terminator);
-
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
-        }
+        public abstract SqlTemplate ExistsSqlBuilder<TEntity>() where TEntity : class;
 
         public virtual SqlTemplate CountSqlBuilder<TEntity>() where TEntity : class
         {
             return BuildAggregateSql<TEntity>("COUNT");
         }
 
-        public virtual SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class
-        {
-            return BuildAggregateSql<TEntity>("AVG");
-        }
+        public abstract SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class;
 
         public virtual SqlTemplate SumSqlBuilder<TEntity>() where TEntity : class
         {

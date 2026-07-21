@@ -163,5 +163,20 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
         }
+
+        public override SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class
+        {
+            StringBuilder sqlBuffer = new();
+
+            sqlBuffer.AppendLine("SELECT");
+            sqlBuffer.Append("    AVG(");
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(")::text");
+            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
+            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
+            sqlBuffer.Append(SqlDialectStrategy.Terminator);
+
+            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
+        }
     }
 }

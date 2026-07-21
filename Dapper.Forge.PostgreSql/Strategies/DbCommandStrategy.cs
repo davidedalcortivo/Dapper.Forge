@@ -59,20 +59,10 @@ namespace Dapper.Forge.PostgreSql.Strategies
             string connectionId = SqlDialectStrategy.GetConnectionId(connection);
             IReadOnlyList<DbColumnInfo> columns = DbColumnInfoCache<TEntity>.GetListValue(connectionId);
 
-            if (properties.Length != columns.Count)
-                throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
-
             PropertyInfo[] sortProperties = new PropertyInfo[properties.Length];
 
             for (int i = 0; i < sortProperties.Length; i++)
-            {
-                string columnName = columns[i].Name;
-
-                if (!propertiesByColumnName.TryGetValue(columnName, out PropertyInfo? property))
-                    throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
-
-                sortProperties[i] = property;
-            }
+                sortProperties[i] = propertiesByColumnName[columns[i].Name];
 
             if (batchSize <= 0)
                 batchSize = entityArray.Length;

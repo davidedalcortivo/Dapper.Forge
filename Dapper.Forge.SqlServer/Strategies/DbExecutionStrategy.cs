@@ -1,7 +1,10 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
+using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
+using System.Collections.Immutable;
 using System.Data;
 using System.Data.Common;
+using System.Reflection;
 
 
 namespace Dapper.Forge.SqlServer.Strategies
@@ -12,9 +15,52 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         private DbExecutionStrategy(DbCommandStrategy strategy) : base(strategy) { }
 
-        public override Task GetColumnsImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public override async Task GetColumnsImplAsync<TEntity>(DbConnection connection, bool sync, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            return Task.CompletedTask;
+            string connectionId = SqlDialectStrategy.GetConnectionId(connection);
+            IDictionary<string, DbColumnInfo>? columns = DbColumnInfoCache<TEntity>.GetDictValueOrDefault(connectionId);
+
+            if (columns is null)
+            {
+                SemaphoreSlim semaphore = DbColumnInfoCache<TEntity>.GetSemaphore(connectionId);
+
+                if (sync)
+                    semaphore.Wait(cancellationToken);
+                else
+                    await semaphore.WaitAsync(cancellationToken);
+
+                try
+                {
+                    columns = DbColumnInfoCache<TEntity>.GetDictValueOrDefault(connectionId);
+
+                    if (columns is null)
+                    {
+                        ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
+                        ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+
+                        DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
+                        columns = (await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, null, commandTimeout, cancellationToken))
+                            .ToDictionary(x => x.Name, x => x, StringComparer.OrdinalIgnoreCase);
+
+                        if (properties.Length != columns.Count)
+                            throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
+
+                        foreach (PropertyInfo property in properties)
+                        {
+                            string columnName = columnNamesByPropertyName[property.Name];
+
+                            if (!columns.TryGetValue(columnName, out DbColumnInfo? _))
+                                throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
+                        }
+
+                        _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }
         }
 
         public override async Task<int> UpsertImplAsync<TEntity>(DbConnection connection, bool sync, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class

@@ -251,55 +251,55 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return await DbExecutionStrategy.Instance.ExistsImplAsync<TEntity>(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, (string?)null, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, (string?)null, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, (string?)null, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, string propertyName, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, string propertyName, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
@@ -377,76 +377,76 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this NpgsqlConnection connection, string propertyName, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this NpgsqlConnection connection, string propertyName, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this NpgsqlConnection connection, string propertyName, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this NpgsqlConnection connection, string propertyName, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this NpgsqlConnection connection, string propertyName, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this NpgsqlConnection connection, string propertyName, IFilterNode filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
     }
 }

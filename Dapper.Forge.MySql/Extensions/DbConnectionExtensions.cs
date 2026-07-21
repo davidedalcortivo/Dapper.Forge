@@ -250,55 +250,55 @@ namespace Dapper.Forge.MySql.Extensions
             return DbExecutionStrategy.Instance.ExistsImplAsync<TEntity>(connection, true, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, true, (string?)null, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync(connection, true, (string?)null, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, true, (string?)null, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync(connection, true, selector, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync(connection, true, selector, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync(connection, true, selector, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Count<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static long Count<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
@@ -376,76 +376,76 @@ namespace Dapper.Forge.MySql.Extensions
             return DbExecutionStrategy.Instance.SumImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Min<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Min<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.MinImplAsync(connection, true, selector, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Min<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Min<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.MinImplAsync(connection, true, selector, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Min<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Min<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.MinImplAsync(connection, true, selector, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Min<TEntity>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Min<TEntity, TProperty>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.MinImplAsync<TEntity>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Min<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Min<TEntity, TProperty>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.MinImplAsync(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Min<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Min<TEntity, TProperty>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.MinImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Max<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Max<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.MaxImplAsync(connection, true, selector, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Max<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Max<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.MaxImplAsync(connection, true, selector, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Max<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Max<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbExecutionStrategy.Instance.MaxImplAsync(connection, true, selector, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Max<TEntity>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Max<TEntity, TProperty>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.MaxImplAsync<TEntity>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, true, propertyName, (IFilterNode?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Max<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Max<TEntity, TProperty>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.MaxImplAsync(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, true, propertyName, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static decimal? Max<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static TProperty? Max<TEntity, TProperty>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.MaxImplAsync<TEntity>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, true, propertyName, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
     }
 }

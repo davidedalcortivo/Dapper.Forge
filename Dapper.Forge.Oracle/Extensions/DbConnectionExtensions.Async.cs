@@ -255,55 +255,55 @@ namespace Dapper.Forge.Oracle.Extensions
             return await DbExecutionStrategy.Instance.ExistsImplAsync<TEntity>(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, (string?)null, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, (string?)null, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, (string?)null, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, string propertyName, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, string propertyName, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> CountAsync<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
@@ -381,76 +381,76 @@ namespace Dapper.Forge.Oracle.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this OracleConnection connection, string propertyName, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this OracleConnection connection, string propertyName, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MinAsync<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this OracleConnection connection, string propertyName, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this OracleConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this OracleConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this OracleConnection connection, string propertyName, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this OracleConnection connection, string propertyName, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this OracleConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> MaxAsync<TEntity>(this OracleConnection connection, string propertyName, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this OracleConnection connection, string propertyName, IFilterNode filterNode, OracleTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
     }
 }
