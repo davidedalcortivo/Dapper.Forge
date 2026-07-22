@@ -20,6 +20,11 @@ namespace Dapper.Forge.PostgreSql.Strategies
             return (identifier + " = ANY(", ")");
         }
 
+        public override string IsTrue(string column)
+        {
+            return column + " = TRUE";
+        }
+
         public override string Pagination(string skipParameter, string takeParameter)
         {
             StringBuilder sqlBuffer = new();

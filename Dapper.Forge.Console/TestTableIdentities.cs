@@ -23,7 +23,7 @@ namespace Dapper.Forge.Console
         public string? StringValue { get; set; }
 
         [Column("bool_value")]
-        public bool? BoolValue { get; set; }
+        public bool BoolValue { get; set; }
 
         [Column("timestamp_value")]
         public DateTime? TimestampValue { get; set; }
@@ -50,7 +50,7 @@ namespace Dapper.Forge.Console
         public string? StringValue { get; set; }
 
         [Column("BOOL_VALUE")]
-        public int? BoolValue { get; set; }
+        public int BoolValue { get; set; }
 
         [Column("TIMESTAMP_VALUE")]
         public DateTime? TimestampValue { get; set; }
@@ -77,7 +77,7 @@ namespace Dapper.Forge.Console
         public string? StringValue { get; set; }
 
         [Column("bool_value")]
-        public bool? BoolValue { get; set; }
+        public bool BoolValue { get; set; }
 
         [Column("timestamp_value")]
         public DateTime? TimestampValue { get; set; }
@@ -102,7 +102,7 @@ namespace Dapper.Forge.Console
 
         public string? StringValue { get; set; }
 
-        public bool? BoolValue { get; set; }
+        public bool BoolValue { get; set; }
 
         public DateTime? TimestampValue { get; set; }
 

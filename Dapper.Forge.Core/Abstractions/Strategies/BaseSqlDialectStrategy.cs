@@ -93,6 +93,11 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return column + " IS NOT NULL";
         }
 
+        public virtual string IsTrue(string column)
+        {
+            return column + " = 1";
+        }
+
         public virtual string Pagination(string skipParameter, string takeParameter)
         {
             StringBuilder sqlBuffer = new();

@@ -8,6 +8,7 @@ using Microsoft.Data.SqlClient;
 using MySqlConnector;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
+using System.Xml.Linq;
 
 
 List<SortDescriptor> sorts = [];
@@ -88,7 +89,7 @@ for (int i = 0; i < 10000; i++)
 
         BoolValue = rnd.Next(0, 100) switch
         {
-            < 20 => null,
+            < 20 => 0,
             _ => rnd.Next(0, 2) == 1 ? 1 : 0
         },
 
@@ -106,44 +107,13 @@ for (int i = 0; i < 10000; i++)
     });
 #endregion
 
-var aaa = mysqlConnection.GetAll<TestTableIdentityMYSQL>(sorts);
-var aaaa = mysqlConnection.GetAll<TestTableMYSQL>(sorts);
-var bbb = oracleConnection.GetAll<TestTableIdentityORACLE>(sorts);
-var bbbb = oracleConnection.GetAll<TestTableORACLE>(sorts);
-var ccc = postgresqlConnection.GetAll<TestTableIdentityPOSTGRESQL>(sorts);
-var cccc = postgresqlConnection.GetAll<TestTablePOSTGRESQL>(sorts);
-var ddd = sqlserverConnection.GetAll<TestTableIdentitySQLSERVER>(sorts);
-var dddd = sqlserverConnection.GetAll<TestTableSQLSERVER>(sorts);
 
-foreach (var x in aaa)
-    x.TimestampValue = null;
+var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(x => !x.BoolValue && x.OtherBoolValue);
+var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(x => x.BoolValue == 1);
+var ccc = postgresqlConnection.GetAllCommand<TestTableIdentityPOSTGRESQL>(x => !x.BoolValue && !x.BoolValue);
+var ddd = sqlserverConnection.GetAllCommand<TestTableIdentitySQLSERVER>(x => !(x.BoolValue && x.Id > 10));
 
-foreach (var x in aaaa)
-    x.TimestampValue = null;
-
-foreach (var x in bbb)
-    x.TimestampValue = null;
-
-foreach (var x in bbbb)
-    x.TimestampValue = null;
-
-foreach (var x in ccc)
-    x.TimestampValue = null;
-
-foreach (var x in cccc)
-    x.TimestampValue = null;
-
-foreach (var x in ddd)
-    x.TimestampValue = null;
-
-foreach (var x in dddd)
-    x.TimestampValue = null;
-
-
-
-var uu = mysqlConnection.Sum<TestTableIdentityMYSQL>(x => x.DecimalValue);
-var uuq = oracleConnection.Sum<TestTableIdentityORACLE>(x => x.DecimalValue);
-var uuw = postgresqlConnection.Sum<TestTableIdentityPOSTGRESQL>(x => x.DecimalValue);
-var uue = sqlserverConnection.Sum<TestTableIdentitySQLSERVER>(x => x.IntValue);
-
-Console.WriteLine(string.Empty);
+Console.WriteLine(aaa.Sql);
+Console.WriteLine(bbb.Sql);
+Console.WriteLine(ccc.Sql);
+Console.WriteLine(ddd.Sql);

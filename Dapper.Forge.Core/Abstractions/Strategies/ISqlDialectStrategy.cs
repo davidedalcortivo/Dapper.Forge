@@ -19,6 +19,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         (string, string) In(string identifier);
         string IsNull(string column);
         string IsNotNull(string column);
+        string IsTrue(string column);
         string Pagination(string skipParameter, string takeParameter);
         string GetConnectionId(DbConnection connection);
         void Initialize(DbConnection connection);
