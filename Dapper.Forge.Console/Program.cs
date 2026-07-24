@@ -8,7 +8,6 @@ using Microsoft.Data.SqlClient;
 using MySqlConnector;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
-using System.Xml.Linq;
 
 
 List<SortDescriptor> sorts = [];
@@ -18,7 +17,6 @@ List<FilterDescriptor> filters = [];
 filters.Add(new("IntValue", 3, ComparisonOperator.Equal));
 
 FilterGroup group = new(filters, LogicalOperator.AndAlso);
-
 
 var rnd = new Random();
 var aa = new List<TestTableORACLE>();
@@ -107,11 +105,23 @@ for (int i = 0; i < 10000; i++)
     });
 #endregion
 
+int?[] ids = [1, null, 2];
+string search = null;
 
-var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(x => !x.BoolValue && x.OtherBoolValue);
-var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(x => x.BoolValue == 1);
-var ccc = postgresqlConnection.GetAllCommand<TestTableIdentityPOSTGRESQL>(x => !x.BoolValue && !x.BoolValue);
-var ddd = sqlserverConnection.GetAllCommand<TestTableIdentitySQLSERVER>(x => !(x.BoolValue && x.Id > 10));
+var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(x => ids.Contains((int?)x.Id));
+var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(
+x => x.StringValue.StartsWith(
+    search!,
+    StringComparison.OrdinalIgnoreCase));
+var ccc = postgresqlConnection.GetAllCommand<TestTableIdentityPOSTGRESQL>(
+
+x => x.StringValue.EndsWith(
+    search!,
+    StringComparison.OrdinalIgnoreCase));
+var ddd = sqlserverConnection.GetAllCommand<TestTableIdentitySQLSERVER>(
+x => x.StringValue.StartsWith(
+    search!,
+    StringComparison.OrdinalIgnoreCase));
 
 Console.WriteLine(aaa.Sql);
 Console.WriteLine(bbb.Sql);

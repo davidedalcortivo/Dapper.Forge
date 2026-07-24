@@ -285,19 +285,45 @@ namespace Dapper.Forge.Core.Utilities
         {
             if (IsStringEquals(m))
             {
-                Expression a = m.Arguments[0];
-                Expression b = m.Arguments[1];
+                Expression a;
+                Expression b;
+
+                if (m.Object is not null)
+                {
+                    a = m.Object;
+                    b = m.Arguments[0];
+                }
+                else
+                {
+                    a = m.Arguments[0];
+                    b = m.Arguments[1];
+                }
 
                 bool ignoreCase = ResolveIgnoreCase(m);
 
                 bool aNull = IsNull(a);
                 bool bNull = IsNull(b);
 
-                if (aNull && bNull) { _ctx.SqlBuffer.Append("(1 = 1)"); return m; }
-                if (aNull ^ bNull) { _ctx.SqlBuffer.Append("(1 = 0)"); return m; }
+                if (aNull && bNull)
+                {
+                    _ctx.SqlBuffer.Append("(1 = 1)");
+                    return m;
+                }
 
-                string left = ExtractSql(a, ignoreCase);
-                string right = ExtractSql(b, ignoreCase);
+                string left = aNull ? string.Empty : ExtractSql(a, ignoreCase);
+                string right = bNull ? string.Empty : ExtractSql(b, ignoreCase);
+
+                if (aNull)
+                {
+                    _ctx.SqlBuffer.Append("(" + _ctx.SqlDialectStrategy.IsNull(right) + ")");
+                    return m;
+                }
+
+                if (bNull)
+                {
+                    _ctx.SqlBuffer.Append("(" + _ctx.SqlDialectStrategy.IsNull(left) + ")");
+                    return m;
+                }
 
                 _ctx.SqlBuffer.Append($"({left} = {right})");
                 return m;
@@ -353,8 +379,24 @@ namespace Dapper.Forge.Core.Utilities
             switch (be.NodeType)
             {
                 case ExpressionType.Equal:
-                    if (aNull && bNull) { _ctx.SqlBuffer.Append("(1 = 1)"); return be; }
-                    if (aNull ^ bNull) { _ctx.SqlBuffer.Append("(1 = 0)"); return be; }
+                    if (aNull && bNull)
+                    {
+                        _ctx.SqlBuffer.Append("(1 = 1)");
+                        return be;
+                    }
+
+                    if (aNull)
+                    {
+                        _ctx.SqlBuffer.Append("(" + _ctx.SqlDialectStrategy.IsNull(b) + ")");
+                        return be;
+                    }
+
+                    if (bNull)
+                    {
+                        _ctx.SqlBuffer.Append("(" + _ctx.SqlDialectStrategy.IsNull(a) + ")");
+                        return be;
+                    }
+
                     _ctx.SqlBuffer.Append($"({a} = {b})");
                     return be;
 
@@ -426,17 +468,26 @@ namespace Dapper.Forge.Core.Utilities
             }
 
             List<string> parts = [];
+            int conditionCount = 0;
 
             if (hasNull)
+            {
                 parts.Add("(" + _ctx.SqlDialectStrategy.IsNull(colSql) + ")");
+                conditionCount++;
+            }
 
             if (values.Count > 0)
             {
                 string p = _ctx.AddParameter(values.ToArray());
                 parts.Add("(" + _ctx.SqlDialectStrategy.In(colSql, p) + ")");
+                conditionCount++;
             }
 
-            _ctx.SqlBuffer.Append("(" + string.Join(" OR ", parts) + ")");
+            if (conditionCount > 1)
+                _ctx.SqlBuffer.Append("(" + string.Join(" OR ", parts) + ")");
+            else
+                _ctx.SqlBuffer.Append(string.Join(" OR ", parts));
+
             return m;
         }
     }
