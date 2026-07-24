@@ -1,5 +1,4 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Abstractions.Strategies;
+﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using System.Collections;
@@ -23,9 +22,9 @@ namespace Dapper.Forge.Core.Utilities
         public static (string, DynamicParameters?) Translate(ISqlDialectStrategy sqlDialectStrategy, Expression<Func<TEntity, bool>> expression, DynamicParameters? parameters = null)
         {
             SqlTranslationContext ctx = new(sqlDialectStrategy, parameters);
-            ExpressionTranslator<TEntity> visitor = new(ctx);
+            ExpressionTranslator<TEntity> translator = new(ctx);
 
-            visitor.Visit(expression);
+            translator.Visit(expression);
 
             return (ctx.SqlBuffer.ToString(), ctx.Parameters);
         }

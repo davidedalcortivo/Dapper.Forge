@@ -13,10 +13,7 @@ using Oracle.ManagedDataAccess.Client;
 List<SortDescriptor> sorts = [];
 sorts.Add(new("Id", "asc"));
 
-List<FilterDescriptor> filters = [];
-filters.Add(new("IntValue", 3, ComparisonOperator.Equal));
 
-FilterGroup group = new(filters, LogicalOperator.AndAlso);
 
 var rnd = new Random();
 var aa = new List<TestTableORACLE>();
@@ -108,9 +105,7 @@ for (int i = 0; i < 10000; i++)
 string[] ids = ["1", null, "2", "3"];
 string? search = "ciao";
 
-var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(x =>
-    x.Id.ToString().Contains("1") ||
-    x.StringValue!.ToLower().Contains("mar"));
+var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(x => x.StringValue == null);
 var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(x => x.StringValue!
     .ToLower()
     .ToUpper()

@@ -104,7 +104,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, propertyName, clause, parameters);
         }
 
-        public override DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public override DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             string propertyName = PropertyHelper.GetPropertyName(selector);
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
@@ -117,7 +117,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, propertyName, clause, parameters);
         }
 
-        public override DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
+        public override DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, propertyName, clause, parameters);
@@ -130,7 +130,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, propertyName, clause, parameters);
         }
 
-        public override DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public override DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             string propertyName = PropertyHelper.GetPropertyName(selector);
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
@@ -143,7 +143,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, propertyName, clause, parameters);
         }
 
-        public override DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
+        public override DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, propertyName, clause, parameters);

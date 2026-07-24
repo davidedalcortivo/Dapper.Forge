@@ -1,6 +1,6 @@
 ﻿namespace Dapper.Forge.Core.Abstractions.Models
 {
-    public interface IFilterNode
+    public interface IFilterNode<TEntity> where TEntity : class
     {
 
     }

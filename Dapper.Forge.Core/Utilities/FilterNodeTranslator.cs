@@ -1,50 +1,64 @@
 ﻿using Dapper.Forge.Core.Abstractions.Models;
 using Dapper.Forge.Core.Abstractions.Strategies;
+using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using System.Collections;
+using System.Collections.Immutable;
 
 
 namespace Dapper.Forge.Core.Utilities
 {
-    internal static class FilterNodeTranslator
+    internal sealed class FilterNodeTranslator<TEntity> where TEntity : class
     {
-        public static (string, DynamicParameters?) Translate(ISqlDialectStrategy sqlDialectStrategy, IFilterNode node, DynamicParameters? parameters = null)
+        private readonly ImmutableDictionary<string, string> _columnNamesByPropertyName;
+        private readonly SqlTranslationContext _ctx;
+
+        private FilterNodeTranslator(SqlTranslationContext ctx)
+        {
+            _columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+            _ctx = ctx;
+        }
+
+        public static (string, DynamicParameters?) Translate(ISqlDialectStrategy sqlDialectStrategy, IFilterNode<TEntity> node, DynamicParameters? parameters = null)
         {
             SqlTranslationContext ctx = new(sqlDialectStrategy, parameters);
-            TranslateNode(node, ctx);
+            FilterNodeTranslator<TEntity> translator = new(ctx);
+
+            translator.TranslateNode(node);
+
             return (ctx.SqlBuffer.ToString(), ctx.Parameters);
         }
 
-        private static void TranslateNode(IFilterNode node, SqlTranslationContext ctx)
+        private void TranslateNode(IFilterNode<TEntity> node)
         {
             switch (node)
             {
-                case FilterDescriptor f:
-                    TranslateDescriptor(f, ctx);
+                case FilterDescriptor<TEntity> f:
+                    TranslateDescriptor(f);
                     break;
-                case FilterGroup g:
-                    TranslateGroup(g, ctx);
+                case FilterGroup<TEntity> g:
+                    TranslateGroup(g);
                     break;
                 default:
-                    throw new NotSupportedException($"Unsupported filter type '{node.GetType()}'.");
+                    throw new NotSupportedException($"Unsupported filter node '{node.GetType()}'.");
             }
         }
 
-        private static void TranslateDescriptor(FilterDescriptor f, SqlTranslationContext ctx)
+        private void TranslateDescriptor(FilterDescriptor<TEntity> f)
         {
-            string left = f.PropertyName;
+            string left = _ctx.SqlDialectStrategy.RenderIdentifier(_columnNamesByPropertyName[f.PropertyName]);
             string sql;
 
             if (f.Value is null)
             {
                 sql = f.ComparisonOperator switch
                 {
-                    ComparisonOperator.Equal => $"{left} IS NULL",
-                    ComparisonOperator.NotEqual => $"{left} IS NOT NULL",
+                    ComparisonOperator.Equal => _ctx.SqlDialectStrategy.IsNull(left),
+                    ComparisonOperator.NotEqual => _ctx.SqlDialectStrategy.IsNotNull(left),
                     _ => "1 = 0"
                 };
             }
-            else if (f.ComparisonOperator == ComparisonOperator.Contains && f.Value is IEnumerable enumerable && f.Value is not string)
+            else if (f.ComparisonOperator is ComparisonOperator.In && f.Value is IEnumerable enumerable && f.Value is not string)
             {
                 List<object?> values = [];
                 bool hasNull = false;
@@ -64,25 +78,47 @@ namespace Dapper.Forge.Core.Utilities
                     List<string> parts = [];
 
                     if (hasNull)
-                        parts.Add($"{left} IS NULL");
+                        parts.Add(_ctx.SqlDialectStrategy.IsNull(left));
 
                     if (values.Count > 0)
                     {
-                        string p = ctx.AddParameter(values.ToArray());
-                        parts.Add($"{left} IN {p}");
+                        string p = _ctx.AddParameter(values.ToArray());
+                        parts.Add(_ctx.SqlDialectStrategy.In(left, p));
                     }
 
                     sql = $"({string.Join(" OR ", parts)})";
                 }
             }
+            else if ((f.ComparisonOperator is ComparisonOperator.Contains or ComparisonOperator.StartsWith or ComparisonOperator.EndsWith) && f.Value is string value)
+            {
+                string right = _ctx.SqlDialectStrategy.EscapeLike(value);
+                right = _ctx.AddParameter(right);
+
+                if (f.IgnoreCase)
+                {
+                    left = _ctx.SqlDialectStrategy.ToLower(left);
+                    right = _ctx.SqlDialectStrategy.ToLower(right);
+                }
+
+                right = f.ComparisonOperator switch
+                {
+                    ComparisonOperator.Contains => _ctx.SqlDialectStrategy.Concat("'%'", right, "'%'"),
+                    ComparisonOperator.StartsWith => _ctx.SqlDialectStrategy.Concat(right, "'%'"),
+                    ComparisonOperator.EndsWith => _ctx.SqlDialectStrategy.Concat("'%'", right),
+
+                    _ => throw new NotSupportedException($"Operator '{f.ComparisonOperator}' cannot be applied to property '{f.PropertyName}' and value '{f.Value}'.")
+                };
+
+                sql = $"({_ctx.SqlDialectStrategy.Like(left, right)})";
+            }
             else
             {
-                string right = ctx.AddParameter(f.Value);
+                string right = _ctx.AddParameter(f.Value);
 
                 if (f.IgnoreCase && f.Value is string)
                 {
-                    left = $"LOWER({left})";
-                    right = $"LOWER({right})";
+                    left = _ctx.SqlDialectStrategy.ToLower(left);
+                    right = _ctx.SqlDialectStrategy.ToLower(right);
                 }
 
                 sql = f.ComparisonOperator switch
@@ -94,46 +130,43 @@ namespace Dapper.Forge.Core.Utilities
                     ComparisonOperator.LessThan => $"{left} < {right}",
                     ComparisonOperator.LessThanOrEqual => $"{left} <= {right}",
 
-                    ComparisonOperator.Contains => $"{left} LIKE '%' || {right} || '%' ESCAPE '\\'",
-                    ComparisonOperator.StartsWith => $"{left} LIKE {right} || '%' ESCAPE '\\'",
-                    ComparisonOperator.EndsWith => $"{left} LIKE '%' || {right} ESCAPE '\\'",
-
-                    _ => throw new NotSupportedException($"Unsupported operator '{f.ComparisonOperator}'.")
+                    _ => throw new NotSupportedException($"Operator '{f.ComparisonOperator}' cannot be applied to property '{f.PropertyName}' and value '{f.Value}'.")
                 };
             }
 
             if (f.Not)
                 sql = $"NOT ({sql})";
 
-            ctx.SqlBuffer.Append(sql);
+            _ctx.SqlBuffer.Append(sql);
         }
 
-        private static void TranslateGroup(FilterGroup g, SqlTranslationContext ctx)
+        private void TranslateGroup(FilterGroup<TEntity> g)
         {
             if (g.FilterNodes.Count == 0)
             {
-                ctx.SqlBuffer.Append("(1 = 1)");
+                _ctx.SqlBuffer.Append("(1 = 1)");
                 return;
             }
 
             string logical = g.LogicalOperator == LogicalOperator.AndAlso ? "AND" : "OR";
 
-            ctx.SqlBuffer.Append('(');
+            _ctx.Push();
+            _ctx.SqlBuffer.Append('(');
 
             for (int i = 0; i < g.FilterNodes.Count; i++)
             {
-                TranslateNode(g.FilterNodes[i], ctx);
+                TranslateNode(g.FilterNodes[i]);
                 if (i < g.FilterNodes.Count - 1)
-                    ctx.SqlBuffer.Append($" {logical} ");
+                    _ctx.SqlBuffer.Append($" {logical} ");
             }
 
-            ctx.SqlBuffer.Append(')');
+            _ctx.SqlBuffer.Append(')');
+            string sql = _ctx.Pop();
 
             if (g.Not)
-            {
-                ctx.SqlBuffer.Insert(0, "NOT (");
-                ctx.SqlBuffer.Append(')');
-            }
+                sql = $"NOT ({sql})";
+
+            _ctx.SqlBuffer.Append(sql);
         }
     }
 }

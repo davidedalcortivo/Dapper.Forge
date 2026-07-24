@@ -19,7 +19,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetAllImplAsync<TEntity>(connection, false, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetAllImplAsync(connection, false, (IFilterNode<TEntity>?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -28,16 +28,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.GetAllImplAsync(connection, false, predicate, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetAllImplAsync<TEntity>(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetAllImplAsync(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity> GetFirstAsync<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetFirstImplAsync<TEntity>(connection, false, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetFirstImplAsync(connection, false, (IFilterNode<TEntity>?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity> GetFirstAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -46,16 +46,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.GetFirstImplAsync(connection, false, predicate, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<TEntity> GetFirstAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TEntity> GetFirstAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetFirstImplAsync<TEntity>(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetFirstImplAsync(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity?> GetFirstOrDefaultAsync<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync<TEntity>(connection, false, (IFilterNode?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync(connection, false, (IFilterNode<TEntity>?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity?> GetFirstOrDefaultAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -64,16 +64,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync(connection, false, predicate, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<TEntity?> GetFirstOrDefaultAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TEntity?> GetFirstOrDefaultAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync<TEntity>(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity> GetSingleAsync<TEntity>(this MySqlConnection connection, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetSingleImplAsync<TEntity>(connection, false, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetSingleImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity> GetSingleAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -82,16 +82,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.GetSingleImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<TEntity> GetSingleAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TEntity> GetSingleAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetSingleImplAsync<TEntity>(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetSingleImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity?> GetSingleOrDefaultAsync<TEntity>(this MySqlConnection connection, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync<TEntity>(connection, false, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity?> GetSingleOrDefaultAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -100,10 +100,10 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<TEntity?> GetSingleOrDefaultAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TEntity?> GetSingleOrDefaultAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync<TEntity>(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TEntity?> GetByIdAsync<TEntity>(this MySqlConnection connection, object id, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -115,7 +115,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<IReadOnlyList<TEntity>> GetPageAsync<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetPageImplAsync<TEntity>(connection, false, (IFilterNode?)null, sortDescriptors, skip, take, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetPageImplAsync(connection, false, (IFilterNode<TEntity>?)null, sortDescriptors, skip, take, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<IReadOnlyList<TEntity>> GetPageAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -124,10 +124,10 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.GetPageImplAsync(connection, false, predicate, sortDescriptors, skip, take, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<IReadOnlyList<TEntity>> GetPageAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<IReadOnlyList<TEntity>> GetPageAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.GetPageImplAsync<TEntity>(connection, false, filterNode, sortDescriptors, skip, take, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.GetPageImplAsync(connection, false, filterNode, sortDescriptors, skip, take, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<int> UpdateAsync<TEntity>(this MySqlConnection connection, TEntity entity, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -139,7 +139,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<int> UpdateAsync<TEntity>(this MySqlConnection connection, object param, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.UpdateImplAsync<TEntity>(connection, false, param, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<int> UpdateAsync<TEntity>(this MySqlConnection connection, object param, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -148,10 +148,10 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> UpdateAsync<TEntity>(this MySqlConnection connection, object param, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> UpdateAsync<TEntity>(this MySqlConnection connection, object param, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.UpdateImplAsync<TEntity>(connection, false, param, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<int> InsertAsync<TEntity>(this MySqlConnection connection, TEntity entity, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -175,7 +175,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<int> DeleteAsync<TEntity>(this MySqlConnection connection, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.DeleteImplAsync<TEntity>(connection, false, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.DeleteImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<int> DeleteAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -184,10 +184,10 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.DeleteImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> DeleteAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> DeleteAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.DeleteImplAsync<TEntity>(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.DeleteImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<int> UpsertAsync<TEntity>(this MySqlConnection connection, TEntity entity, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -235,7 +235,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<bool> ExistsAsync<TEntity>(this MySqlConnection connection, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.ExistsImplAsync<TEntity>(connection, false, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.ExistsImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<bool> ExistsAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -244,16 +244,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.ExistsImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<bool> ExistsAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<bool> ExistsAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.ExistsImplAsync<TEntity>(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.ExistsImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, (string?)null, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, (string?)null, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -262,16 +262,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, (string?)null, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, (string?)null, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, (string?)null, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -280,7 +280,7 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
@@ -289,7 +289,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -298,16 +298,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<long> CountAsync<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.CountImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<decimal?> AvgAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<decimal?> AvgAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -316,7 +316,7 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> AvgAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<decimal?> AvgAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
@@ -325,7 +325,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<decimal?> AvgAsync<TEntity>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.AvgImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<decimal?> AvgAsync<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -334,16 +334,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> AvgAsync<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<decimal?> AvgAsync<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.AvgImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<decimal?> SumAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<decimal?> SumAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -352,7 +352,7 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> SumAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<decimal?> SumAsync<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
@@ -361,7 +361,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<decimal?> SumAsync<TEntity>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.SumImplAsync<TEntity>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<decimal?> SumAsync<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -370,16 +370,16 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<decimal?> SumAsync<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<decimal?> SumAsync<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.SumImplAsync<TEntity>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -388,7 +388,7 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
@@ -397,7 +397,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -406,7 +406,7 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
@@ -415,7 +415,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -424,7 +424,7 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
@@ -433,7 +433,7 @@ namespace Dapper.Forge.MySql.Extensions
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this MySqlConnection connection, string propertyName, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
@@ -442,7 +442,7 @@ namespace Dapper.Forge.MySql.Extensions
             return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this MySqlConnection connection, string propertyName, IFilterNode filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);

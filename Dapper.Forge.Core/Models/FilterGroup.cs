@@ -3,13 +3,13 @@
 
 namespace Dapper.Forge.Core.Models
 {
-    public sealed class FilterGroup : IFilterNode
+    public sealed class FilterGroup<TEntity> : IFilterNode<TEntity> where TEntity : class
     {
-        public List<IFilterNode> FilterNodes { get; }
+        public List<IFilterNode<TEntity>> FilterNodes { get; }
         public LogicalOperator LogicalOperator { get; }
         public bool Not { get; }
 
-        public FilterGroup(IEnumerable<IFilterNode> filterNodes, LogicalOperator logicalOperator, bool not = false)
+        public FilterGroup(IEnumerable<IFilterNode<TEntity>> filterNodes, LogicalOperator logicalOperator, bool not = false)
         {
             FilterNodes = [];
             FilterNodes.AddRange(filterNodes);

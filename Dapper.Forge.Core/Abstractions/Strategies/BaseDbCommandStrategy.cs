@@ -52,7 +52,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, null, null);
         }
 
-        public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, null, null);
@@ -64,7 +64,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
@@ -76,7 +76,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
@@ -88,7 +88,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildGetPageCommand<TEntity>(clause, parameters, null, null, null);
         }
 
-        public virtual DbCommandInfo GetSingleCommand<TEntity>(DbConnection connection, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo GetSingleCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, null, null, null);
@@ -100,7 +100,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildGetPageCommand<TEntity>(clause, parameters, null, null, null);
         }
 
-        public virtual DbCommandInfo GetSingleOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo GetSingleOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, null, null, null);
@@ -125,7 +125,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, skip, take);
         }
 
-        public virtual DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, IFilterNode? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
+        public virtual DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, skip, take);
@@ -156,7 +156,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildUpdateCommand<TEntity>(paramProperties, x => paramPropertyGetters[x](param), clause, parameters);
         }
 
-        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             PropertyInfo[] paramProperties = ParamPropertyCache.Get(param);
             ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.Get(param);
@@ -225,7 +225,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildDeleteCommand<TEntity>(clause, parameters);
         }
 
-        public virtual DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildDeleteCommand<TEntity>(clause, parameters);
@@ -345,7 +345,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildExistsCommand<TEntity>(clause, parameters);
         }
 
-        public virtual DbCommandInfo ExistsCommand<TEntity>(DbConnection connection, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo ExistsCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildExistsCommand<TEntity>(clause, parameters);
@@ -357,7 +357,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.CountSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>>? selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>>? selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.CountSql, selector, clause, parameters);
@@ -369,7 +369,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, string? propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, string? propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, propertyName, clause, parameters);
@@ -381,7 +381,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.AvgSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.AvgSql, selector, clause, parameters);
@@ -393,7 +393,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, propertyName, clause, parameters);
@@ -405,7 +405,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.SumSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.SumSql, selector, clause, parameters);
@@ -417,7 +417,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, propertyName, clause, parameters);
@@ -429,7 +429,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MinSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo MinCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MinCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MinSql, selector, clause, parameters);
@@ -441,7 +441,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, propertyName, clause, parameters);
@@ -453,7 +453,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MaxSql, selector, clause, parameters);
         }
 
-        public virtual DbCommandInfo MaxCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MaxCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MaxSql, selector, clause, parameters);
@@ -465,7 +465,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, propertyName, clause, parameters);
         }
 
-        public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode? filterNode) where TEntity : class
+        public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
             return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, propertyName, clause, parameters);
