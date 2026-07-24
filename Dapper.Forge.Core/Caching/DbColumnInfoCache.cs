@@ -24,7 +24,7 @@ namespace Dapper.Forge.Core.Caching
         public static IReadOnlyList<DbColumnInfo> GetListValue(string connectionId)
         {
             IReadOnlyList<DbColumnInfo> columns = _listCache.GetValueOrDefault(connectionId) ??
-                throw new InvalidOperationException("Database cache is not initialized for entity '" + typeof(TEntity).Name + "' and connection '" + connectionId + "'. Call LoadDbCache before performing this operation.");
+                throw new InvalidOperationException($"Database cache is not initialized for entity '{typeof(TEntity).Name}' and connection '{connectionId}'. Call LoadDbCache before performing this operation.");
             
             return columns;
         }
@@ -32,7 +32,7 @@ namespace Dapper.Forge.Core.Caching
         public static IDictionary<string, DbColumnInfo> GetDictValue(string connectionId)
         {
             IDictionary<string, DbColumnInfo> columns = _dictCache.GetValueOrDefault(connectionId) ??
-                throw new InvalidOperationException("Database cache is not initialized for entity '" + typeof(TEntity).Name + "' and connection '" + connectionId + "'. Call LoadDbCache before performing this operation.");
+                throw new InvalidOperationException($"Database cache is not initialized for entity '{typeof(TEntity).Name}' and connection '{connectionId}'. Call LoadDbCache before performing this operation.");
 
             return columns;
         }

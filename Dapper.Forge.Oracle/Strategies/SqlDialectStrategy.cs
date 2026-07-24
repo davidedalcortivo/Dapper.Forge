@@ -20,13 +20,18 @@ namespace Dapper.Forge.Oracle.Strategies
 
         public override string RenderParameter(string name)
         {
-            return ":" + name;
+            return $":{name}";
+        }
+
+        public override string CastAsString(string sql)
+        {
+            return $"TO_CHAR({sql})";
         }
 
         public override string GetConnectionId(DbConnection connection)
         {
             OracleConnectionStringBuilder builder = new(connection.ConnectionString);
-            return "oracle://" + builder.DataSource + "/" + builder.UserID;
+            return $"oracle://{builder.DataSource}/{builder.UserID}";
         }
     }
 }

@@ -105,23 +105,22 @@ for (int i = 0; i < 10000; i++)
     });
 #endregion
 
-int?[] ids = [1, null, 2];
-string search = null;
+string[] ids = ["1", null, "2", "3"];
+string? search = "ciao";
 
-var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(x => ids.Contains((int?)x.Id));
-var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(
-x => x.StringValue.StartsWith(
-    search!,
-    StringComparison.OrdinalIgnoreCase));
-var ccc = postgresqlConnection.GetAllCommand<TestTableIdentityPOSTGRESQL>(
-
-x => x.StringValue.EndsWith(
-    search!,
-    StringComparison.OrdinalIgnoreCase));
-var ddd = sqlserverConnection.GetAllCommand<TestTableIdentitySQLSERVER>(
-x => x.StringValue.StartsWith(
-    search!,
-    StringComparison.OrdinalIgnoreCase));
+var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(x =>
+    x.Id.ToString().Contains("1") ||
+    x.StringValue!.ToLower().Contains("mar"));
+var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(x => x.StringValue!
+    .ToLower()
+    .ToUpper()
+    .Contains("MAR"));
+var ccc = postgresqlConnection.GetAllCommand<TestTableIdentityPOSTGRESQL>(x =>
+    ids.Contains(
+        x.GuidValue!
+         .ToString()
+         .ToUpper()));
+var ddd = sqlserverConnection.GetAllCommand<TestTableIdentitySQLSERVER>(x => !x.Id.ToString().Contains("1"));
 
 Console.WriteLine(aaa.Sql);
 Console.WriteLine(bbb.Sql);

@@ -12,17 +12,17 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
         public override string In(string identifier, string parameter)
         {
-            return identifier + " = ANY(" + parameter + ")";
+            return $"{identifier} = ANY({parameter})";
         }
 
         public override (string, string) In(string identifier)
         {
-            return (identifier + " = ANY(", ")");
+            return ($"{identifier} = ANY(", ")");
         }
 
         public override string IsTrue(string column)
         {
-            return column + " = TRUE";
+            return $"{column} = TRUE";
         }
 
         public override string Pagination(string skipParameter, string takeParameter)
@@ -40,10 +40,15 @@ namespace Dapper.Forge.PostgreSql.Strategies
             return sqlBuffer.ToString();
         }
 
+        public override string CastAsString(string sql)
+        {
+            return $"{sql}::text";
+        }
+
         public override string GetConnectionId(DbConnection connection)
         {
             NpgsqlConnectionStringBuilder builder = new(connection.ConnectionString);
-            return "postgresql://" + builder.Host + ":" + builder.Port + "/" + builder.Database;
+            return $"postgresql://{builder.Host}:{builder.Port}/{builder.Database}";
         }
     }
 }

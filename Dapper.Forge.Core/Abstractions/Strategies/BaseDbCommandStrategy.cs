@@ -141,7 +141,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             DynamicParameters parameters = new();
             string idParameterName = idProperty.Name;
 
-            string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName]) + " = " + SqlDialectStrategy.RenderParameter(idParameterName);
+            string clause = $"{SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName])} = {SqlDialectStrategy.RenderParameter(idParameterName)}";
             parameters.Add(idParameterName, propertyGettersByPropertyName[idParameterName](entity));
 
             return BuildUpdateCommand<TEntity>(updateProperties, x => propertyGettersByPropertyName[x](entity), clause, parameters);
@@ -197,7 +197,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             DynamicParameters parameters = new();
             string idParameterName = idProperty.Name;
 
-            string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName]) + " = " + SqlDialectStrategy.RenderParameter(idParameterName);
+            string clause = $"{SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName])} = {SqlDialectStrategy.RenderParameter(idParameterName)}";
             parameters.Add(idParameterName, propertyGettersByPropertyName[idParameterName](entity));
 
             return BuildDeleteCommand<TEntity>(clause, parameters);
@@ -213,7 +213,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             DynamicParameters parameters = new();
             string idParameterName = idProperty.Name;
 
-            string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName]) + " = " + SqlDialectStrategy.RenderParameter(idParameterName);
+            string clause = $"{SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idParameterName])} = {SqlDialectStrategy.RenderParameter(idParameterName)}";
             parameters.Add(idParameterName, id);
 
             return BuildDeleteCommand<TEntity>(clause, parameters);

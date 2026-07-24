@@ -12,12 +12,12 @@ namespace Dapper.Forge.MySql.Strategies
 
         public override string RenderIdentifier(string name)
         {
-            return "`" + name + "`";
+            return $"`{name}`";
         }
 
         public override string Concat(params string[] parts)
         {
-            return "CONCAT(" + string.Join(", ", parts) + ")";
+            return $"CONCAT({string.Join(", ", parts)})";
         }
 
         public override string Pagination(string skipParameter, string takeParameter)
@@ -35,10 +35,15 @@ namespace Dapper.Forge.MySql.Strategies
             return sqlBuffer.ToString();
         }
 
+        public override string CastAsString(string sql)
+        {
+            return $"CAST({sql} AS CHAR)";
+        }
+
         public override string GetConnectionId(DbConnection connection)
         {
             MySqlConnectionStringBuilder builder = new(connection.ConnectionString);
-            return "mysql://" + builder.Server + ":" + builder.Port + "/" + builder.Database;
+            return $"mysql://{builder.Server}:{builder.Port}/{builder.Database}";
         }
     }
 }

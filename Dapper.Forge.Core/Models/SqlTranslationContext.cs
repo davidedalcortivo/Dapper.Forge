@@ -38,7 +38,7 @@ namespace Dapper.Forge.Core.Models
         {
             Parameters ??= new();
 
-            string name = "__p" + ParamIndex;
+            string name = $"__p{ParamIndex}";
             Parameters.Add(name, value);
             ParamIndex++;
 

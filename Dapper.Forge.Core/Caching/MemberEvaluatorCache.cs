@@ -46,7 +46,7 @@ namespace Dapper.Forge.Core.Caching
                 }
                 catch
                 {
-                    return _ => throw new NotSupportedException($"Non è stato possibile compilare {expr}");
+                    return _ => throw new NotSupportedException($"Unable to compile expression '{expr}'.");
                 }
             });
 

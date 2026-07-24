@@ -18,7 +18,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             Type idType = id.GetType();
 
             if (idProperty.PropertyType != idType)
-                throw new ArgumentException("The type of the provided id '" + idType + "' does not match the type of the id property '" + idProperty.PropertyType + "' for the entity '" + typeof(TEntity).Name + "'.");
+                throw new ArgumentException($"The type of the provided id '{idType}' does not match the type of the id property '{idProperty.PropertyType}' for the entity '{typeof(TEntity).Name}'.");
         }
 
         protected virtual (string?, DynamicParameters?) Translate<TEntity>(ISqlDialectStrategy sqlDialectStrategy, Expression<Func<TEntity, bool>>? predicate, DynamicParameters? parameters) where TEntity : class
@@ -155,7 +155,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 int end = Math.Min(i + _batchSize, idArray.Length);
                 StringBuilder sqlBuffer = new();
 
-                string parameterName = idProperty.Name + "Array" + j;
+                string parameterName = $"{idProperty.Name}Array{j}";
                 sqlBuffer.Append(sqlDialectStrategy.RenderParameter(parameterName));
                 parameters.Add(parameterName, idArray[i..end]);
 

@@ -45,7 +45,7 @@ namespace Dapper.Forge.Core.Caching
                     if (property.IsDefined(typeof(KeyAttribute), true))
                     {
                         if (keyAttributeCount++ > 1)
-                            throw new InvalidOperationException("Multiple properties in the entity '" + entityType.Name + "' are marked with the [Key] attribute. Only one property can be marked as the key.");
+                            throw new InvalidOperationException($"Multiple properties in the entity '{entityType.Name}' are marked with the [Key] attribute. Only one property can be marked as the key.");
 
                         IdProperty = property;
                     }
@@ -60,7 +60,7 @@ namespace Dapper.Forge.Core.Caching
             if (IdProperty is null)
             {
                 if (idNamedProperty is null)
-                    throw new InvalidOperationException("No property in the entity '" + entityType.Name + "' is marked with the [Key] attribute or named 'Id'. One property must be marked as the key or named 'Id' to be used as the identifier for the entity.");
+                    throw new InvalidOperationException($"No property in the entity '{entityType.Name}' is marked with the [Key] attribute or named 'Id'. One property must be marked as the key or named 'Id' to be used as the identifier for the entity.");
 
                 IdProperty = idNamedProperty;
             }

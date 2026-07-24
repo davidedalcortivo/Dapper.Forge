@@ -30,11 +30,6 @@ namespace Dapper.Forge.Core.Utilities
             return (ctx.SqlBuffer.ToString(), ctx.Parameters);
         }
 
-        public (string, DynamicParameters?) Translate(ISqlDialectStrategy sqlDialectStrategy, IFilterNode node, DynamicParameters? parameters = null)
-        {
-            throw new NotImplementedException();
-        }
-
         private string ExtractSql(Expression expr, bool lower = false)
         {
             _ctx.Push();
@@ -108,7 +103,7 @@ namespace Dapper.Forge.Core.Utilities
             }
 
             if (!TryEval(node, out object? value))
-                throw new NotSupportedException($"Impossibile valutare {node}");
+                throw new NotSupportedException($"Unable to evaluate expression '{node}'.");
 
             _ctx.SqlBuffer.Append(_ctx.AddParameter(value));
             return node;
@@ -146,15 +141,6 @@ namespace Dapper.Forge.Core.Utilities
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
-            if (node.NodeType == ExpressionType.Coalesce)
-            {
-                if (node.Left.Type == typeof(string) && TryEval(node.Right, out object? value) && value is string str && str == string.Empty)
-                {
-                    Visit(node.Left);
-                    return node;
-                }
-            }
-
             if (node.Left is MethodCallExpression mLeft && IsStringCompare(mLeft))
                 return VisitCompareBinary(node, mLeft);
 
@@ -208,7 +194,7 @@ namespace Dapper.Forge.Core.Utilities
                 ExpressionType.LessThanOrEqual => "<=",
                 ExpressionType.AndAlso => "AND",
                 ExpressionType.OrElse => "OR",
-                _ => throw new NotSupportedException($"Operatore non supportato: {node.NodeType}")
+                _ => throw new NotSupportedException($"Unsupported operator '{node.NodeType}'.")
             };
 
             _ctx.SqlBuffer.Append($" {op} ");
@@ -224,13 +210,30 @@ namespace Dapper.Forge.Core.Utilities
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
+            if (node.Method.Name == nameof(ToString) && node.Object is not null && node.Arguments.Count == 0)
+                return VisitToString(node);
+
+            if (node.Method.DeclaringType == typeof(string) && node.Object is not null && node.Arguments.Count == 0)
+            {
+                if (node.Method.Name == nameof(string.ToLower) || node.Method.Name == nameof(string.ToLowerInvariant))
+                    return VisitToLower(node);
+
+                if (node.Method.Name == nameof(string.ToUpper) || node.Method.Name == nameof(string.ToUpperInvariant))
+                    return VisitToUpper(node);
+            }
+
             if (node.Method.DeclaringType == typeof(string))
                 return VisitStringMethod(node);
 
-            if (node.Method.Name == "Contains")
-                return VisitCollectionContains(node);
+            if (node.Method.Name == nameof(Enumerable.Contains))
+            {
+                Type sourceType = node.Object?.Type ?? node.Arguments[0].Type;
 
-            throw new NotSupportedException($"Metodo non supportato: {node.Method.Name}");
+                if (typeof(IEnumerable).IsAssignableFrom(sourceType))
+                    return VisitCollectionContains(node);
+            }
+
+            throw new NotSupportedException($"Unsupported method '{node.Method.Name}'.");
         }
 
         protected override Expression VisitLambda<T>(Expression<T> node)
@@ -290,11 +293,17 @@ namespace Dapper.Forge.Core.Utilities
 
                 if (m.Object is not null)
                 {
+                    if (m.Arguments.Count is not (1 or 2))
+                        throw new NotSupportedException($"Unsupported Equals overload '{m}'.");
+
                     a = m.Object;
                     b = m.Arguments[0];
                 }
                 else
                 {
+                    if (m.Arguments.Count is not (2 or 3))
+                        throw new NotSupportedException($"Unsupported Equals overload '{m}'.");
+
                     a = m.Arguments[0];
                     b = m.Arguments[1];
                 }
@@ -315,13 +324,13 @@ namespace Dapper.Forge.Core.Utilities
 
                 if (aNull)
                 {
-                    _ctx.SqlBuffer.Append("(" + _ctx.SqlDialectStrategy.IsNull(right) + ")");
+                    _ctx.SqlBuffer.Append($"({_ctx.SqlDialectStrategy.IsNull(right)})");
                     return m;
                 }
 
                 if (bNull)
                 {
-                    _ctx.SqlBuffer.Append("(" + _ctx.SqlDialectStrategy.IsNull(left) + ")");
+                    _ctx.SqlBuffer.Append($"({_ctx.SqlDialectStrategy.IsNull(left)})");
                     return m;
                 }
 
@@ -331,10 +340,13 @@ namespace Dapper.Forge.Core.Utilities
 
             if (m.Method.Name is "Contains" or "StartsWith" or "EndsWith")
             {
+                if (m.Arguments.Count is not (1 or 2))
+                    throw new NotSupportedException($"Unsupported {m.Method.Name} overload '{m}'.");
+
                 bool ignoreCase = ResolveIgnoreCase(m);
 
                 if (!TryEval(m.Arguments[0], out object? raw))
-                    throw new NotSupportedException("Argomento LIKE non valutabile.");
+                    throw new NotSupportedException("LIKE argument must be evaluable.");
 
                 if (raw is null)
                 {
@@ -353,20 +365,44 @@ namespace Dapper.Forge.Core.Utilities
                     "Contains" => _ctx.SqlDialectStrategy.Concat("'%'", pp, "'%'"),
                     "StartsWith" => _ctx.SqlDialectStrategy.Concat(pp, "'%'"),
                     "EndsWith" => _ctx.SqlDialectStrategy.Concat("'%'", pp),
-                    _ => throw new NotSupportedException()
+                    _ => throw new NotSupportedException($"Unsupported method '{m.Method.Name}'.")
                 };
 
                 _ctx.SqlBuffer.Append($"({_ctx.SqlDialectStrategy.Like(col, pat)})");
                 return m;
             }
 
-            throw new NotSupportedException($"Metodo string non supportato: {m.Method.Name}");
+            throw new NotSupportedException($"Unsupported string method '{m.Method.Name}'.");
+        }
+
+        private MethodCallExpression VisitToString(MethodCallExpression m)
+        {
+            string sql = ExtractSql(m.Object!);
+            _ctx.SqlBuffer.Append(_ctx.SqlDialectStrategy.CastAsString(sql));
+
+            return m;
+        }
+
+        private MethodCallExpression VisitToLower(MethodCallExpression m)
+        {
+            string sql = ExtractSql(m.Object!);
+            _ctx.SqlBuffer.Append(_ctx.SqlDialectStrategy.ToLower(sql));
+
+            return m;
+        }
+
+        private MethodCallExpression VisitToUpper(MethodCallExpression m)
+        {
+            string sql = ExtractSql(m.Object!);
+            _ctx.SqlBuffer.Append(_ctx.SqlDialectStrategy.ToUpper(sql));
+
+            return m;
         }
 
         private BinaryExpression VisitCompareBinary(BinaryExpression be, MethodCallExpression m)
         {
             if (be.Right is not ConstantExpression ce || (int?)ce.Value != 0)
-                throw new NotSupportedException("string.Compare deve essere confrontato con 0.");
+                throw new NotSupportedException("string.Compare must be compared against 0.");
 
             bool ignoreCase = ResolveIgnoreCase(m);
 
@@ -387,13 +423,13 @@ namespace Dapper.Forge.Core.Utilities
 
                     if (aNull)
                     {
-                        _ctx.SqlBuffer.Append("(" + _ctx.SqlDialectStrategy.IsNull(b) + ")");
+                        _ctx.SqlBuffer.Append($"({_ctx.SqlDialectStrategy.IsNull(b)})");
                         return be;
                     }
 
                     if (bNull)
                     {
-                        _ctx.SqlBuffer.Append("(" + _ctx.SqlDialectStrategy.IsNull(a) + ")");
+                        _ctx.SqlBuffer.Append($"({_ctx.SqlDialectStrategy.IsNull(a)})");
                         return be;
                     }
 
@@ -429,7 +465,7 @@ namespace Dapper.Forge.Core.Utilities
                     return be;
 
                 default:
-                    throw new NotSupportedException();
+                    throw new NotSupportedException($"Unsupported operator '{be.NodeType}'.");
             }
         }
 
@@ -447,7 +483,7 @@ namespace Dapper.Forge.Core.Utilities
             }
 
             if (raw is not IEnumerable coll)
-                throw new NotSupportedException("Contains richiede IEnumerable.");
+                throw new NotSupportedException("Contains requires an IEnumerable source.");
 
             List<object?> values = [];
             bool hasNull = false;
@@ -472,19 +508,19 @@ namespace Dapper.Forge.Core.Utilities
 
             if (hasNull)
             {
-                parts.Add("(" + _ctx.SqlDialectStrategy.IsNull(colSql) + ")");
+                parts.Add($"({_ctx.SqlDialectStrategy.IsNull(colSql)})");
                 conditionCount++;
             }
 
             if (values.Count > 0)
             {
                 string p = _ctx.AddParameter(values.ToArray());
-                parts.Add("(" + _ctx.SqlDialectStrategy.In(colSql, p) + ")");
+                parts.Add($"({_ctx.SqlDialectStrategy.In(colSql, p)})");
                 conditionCount++;
             }
 
             if (conditionCount > 1)
-                _ctx.SqlBuffer.Append("(" + string.Join(" OR ", parts) + ")");
+                _ctx.SqlBuffer.Append($"({string.Join(" OR ", parts)})");
             else
                 _ctx.SqlBuffer.Append(string.Join(" OR ", parts));
 

@@ -114,7 +114,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             string column;
 
             if (((SqlDialectStrategy)SqlDialectStrategy).IntDataTypes.Contains(columns[columnName].DataType ?? string.Empty))
-                column = "CAST(" + SqlDialectStrategy.RenderIdentifier(columnName) + " AS BIGINT)";
+                column = $"CAST({SqlDialectStrategy.RenderIdentifier(columnName)} AS BIGINT)";
             else
                 column = SqlDialectStrategy.RenderIdentifier(columnName);
 

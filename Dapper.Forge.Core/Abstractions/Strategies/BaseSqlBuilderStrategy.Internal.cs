@@ -7,16 +7,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 {
     internal abstract partial class BaseSqlBuilderStrategy<TStrategy> : ISqlBuilderStrategy where TStrategy : ISqlDialectStrategy
     {
-        protected virtual SqlTemplate BuildAggregateSql<TEntity>(string aggregateName) where TEntity : class
+        protected virtual SqlTemplate BuildAggregateSql<TEntity>(string aggregate) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
 
             sqlBuffer.AppendLine("SELECT");
             sqlBuffer.Append("    ");
-            sqlBuffer.Append(aggregateName);
-            sqlBuffer.Append('(');
-            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
-            sqlBuffer.Append(')');
+            sqlBuffer.Append(aggregate);
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
             sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);

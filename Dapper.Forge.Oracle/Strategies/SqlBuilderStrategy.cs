@@ -130,7 +130,7 @@ namespace Dapper.Forge.Oracle.Strategies
             sqlBuffer.AppendLine("        FROM");
             sqlBuffer.Append("            ");
             sqlBuffer.Append(allTabColumnsTable);
-            sqlBuffer.AppendWhereClause(ownerColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "            AND " + tableNameColumn + " = " + SqlDialectStrategy.Placeholder, "        ");
+            sqlBuffer.AppendWhereClause($"{ownerColumn} = {SqlDialectStrategy.Placeholder}" + Environment.NewLine + $"            AND {tableNameColumn} = {SqlDialectStrategy.Placeholder}", "        ");
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("    )");
             sqlBuffer.AppendLine("    LOOP");

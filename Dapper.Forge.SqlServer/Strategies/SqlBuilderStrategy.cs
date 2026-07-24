@@ -18,10 +18,10 @@ namespace Dapper.Forge.SqlServer.Strategies
         public override SqlTemplate GetColumnsSqlBuilder<TEntity>()
         {
             string sysTable = SqlDialectStrategy.RenderIdentifier("sys");
-            string columnsTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("columns");
-            string typesTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("types");
-            string tablesTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("tables");
-            string schemasTable = sysTable + "." + SqlDialectStrategy.RenderIdentifier("schemas");
+            string columnsTable = $"{sysTable}.{SqlDialectStrategy.RenderIdentifier("columns")}";
+            string typesTable = $"{sysTable}.{SqlDialectStrategy.RenderIdentifier("types")}";
+            string tablesTable = $"{sysTable}.{SqlDialectStrategy.RenderIdentifier("tables")}";
+            string schemasTable = $"{sysTable}.{SqlDialectStrategy.RenderIdentifier("schemas")}";
             string coTable = SqlDialectStrategy.RenderIdentifier("co");
             string tyTable = SqlDialectStrategy.RenderIdentifier("ty");
             string taTable = SqlDialectStrategy.RenderIdentifier("ta");
@@ -31,6 +31,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             string userTypeIdColumn = SqlDialectStrategy.RenderIdentifier("user_type_id");
             string objectIdColumn = SqlDialectStrategy.RenderIdentifier("object_id");
             string schemaIdColumn = SqlDialectStrategy.RenderIdentifier("schema_id");
+            string newLine = Environment.NewLine;
 
             StringBuilder sqlBuffer = new();
 
@@ -58,22 +59,22 @@ namespace Dapper.Forge.SqlServer.Strategies
             sqlBuffer.Append(typesTable);
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(tyTable);
-            sqlBuffer.AppendOnClause(coTable + "." + systemTypeIdColumn + " = " + tyTable + "." + systemTypeIdColumn + Environment.NewLine + "    AND " + tyTable + "." + systemTypeIdColumn + " = " + tyTable + "." + userTypeIdColumn, string.Empty);
+            sqlBuffer.AppendOnClause($"{coTable}.{systemTypeIdColumn} = {tyTable}.{systemTypeIdColumn}" + newLine + $"    AND {tyTable}.{systemTypeIdColumn} = {tyTable}.{userTypeIdColumn}", string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("INNER JOIN");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(tablesTable);
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(taTable);
-            sqlBuffer.AppendOnClause(coTable + "." + objectIdColumn + " = " + taTable + "." + objectIdColumn, string.Empty);
+            sqlBuffer.AppendOnClause($"{coTable}.{objectIdColumn} = {taTable}.{objectIdColumn}", string.Empty);
             sqlBuffer.AppendLine();
             sqlBuffer.AppendLine("INNER JOIN");
             sqlBuffer.Append("    ");
             sqlBuffer.Append(schemasTable);
             sqlBuffer.Append(" AS ");
             sqlBuffer.Append(scTable);
-            sqlBuffer.AppendOnClause(taTable + "." + schemaIdColumn + " = " + scTable + "." + schemaIdColumn, string.Empty);
-            sqlBuffer.AppendWhereClause(scTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder + Environment.NewLine + "    AND " + taTable + "." + nameColumn + " = " + SqlDialectStrategy.Placeholder, string.Empty);
+            sqlBuffer.AppendOnClause($"{taTable}.{schemaIdColumn} = {scTable}.{schemaIdColumn}", string.Empty);
+            sqlBuffer.AppendWhereClause($"{scTable}.{nameColumn} = {SqlDialectStrategy.Placeholder}" + newLine + $"    AND {taTable}.{nameColumn} = {SqlDialectStrategy.Placeholder}", string.Empty);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
@@ -147,7 +148,7 @@ namespace Dapper.Forge.SqlServer.Strategies
             string targetTable = SqlDialectStrategy.RenderIdentifier("Target");
 
             StringBuilder sqlBuffer = new();
-            string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
+            string clause = $"{targetTable}.{idColumn} = {sourceTable}.{idColumn}";
 
             AppendUpdateRange<TEntity>(sqlBuffer, EntityInfoCache<TEntity>.UpdateProperties, sourceTable, targetTable, clause);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
@@ -298,22 +299,7 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         public override SqlTemplate CountSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildAggregateSql<TEntity>("COUNT_BIG");
-        }
-
-        public override SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class
-        {
-            StringBuilder sqlBuffer = new();
-
-            sqlBuffer.AppendLine("SELECT");
-            sqlBuffer.Append("    CAST(AVG(");
-            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
-            sqlBuffer.Append(") AS VARCHAR(MAX))");
-            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
-            sqlBuffer.Append(SqlDialectStrategy.Terminator);
-
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
+            return BuildAggregateSql<TEntity>($"COUNT_BIG({SqlDialectStrategy.Placeholder})");
         }
     }
 }

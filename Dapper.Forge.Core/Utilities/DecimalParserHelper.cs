@@ -200,11 +200,11 @@ namespace Dapper.Forge.Core.Utilities
                 EnsureDecimalIntegerPartOverflow(integerPart, isNegative);
                 EnsureDecimalFractionalPartOverflow(integerPart, fractionalPart, isNegative);
 
-                s = fractionalPart.Length > 0 ? integerPart + "." + fractionalPart : integerPart;
+                s = fractionalPart.Length > 0 ? $"{integerPart}.{fractionalPart}" : integerPart;
             }
             else
             {
-                s = string.Concat(integerPart, fractionalPart.Length > 0 ? "." + fractionalPart : string.Empty);
+                s = string.Concat(integerPart, fractionalPart.Length > 0 ? $".{fractionalPart}" : string.Empty);
             }
 
             if (isNegative)

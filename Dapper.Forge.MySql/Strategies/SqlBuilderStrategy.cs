@@ -55,7 +55,7 @@ namespace Dapper.Forge.MySql.Strategies
             string idColumn = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]);
             string sourceTable = SqlDialectStrategy.RenderIdentifier("source");
             string targetTable = SqlDialectStrategy.RenderIdentifier("target");
-            string clause = targetTable + "." + idColumn + " = " + sourceTable + "." + idColumn;
+            string clause = $"{targetTable}.{idColumn} = {sourceTable}.{idColumn}";
 
             StringBuilder sqlBuffer = new();
 
@@ -97,21 +97,6 @@ namespace Dapper.Forge.MySql.Strategies
             sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, "        ", null);
             sqlBuffer.AppendLine(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append("    )");
-            sqlBuffer.Append(SqlDialectStrategy.Terminator);
-
-            return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);
-        }
-
-        public override SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class
-        {
-            StringBuilder sqlBuffer = new();
-
-            sqlBuffer.AppendLine("SELECT");
-            sqlBuffer.Append("    CAST(AVG(");
-            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
-            sqlBuffer.Append(") AS CHAR)");
-            sqlBuffer.AppendFromTable<TEntity>(SqlDialectStrategy, string.Empty, null);
-            sqlBuffer.Append(SqlDialectStrategy.Placeholder);
             sqlBuffer.Append(SqlDialectStrategy.Terminator);
 
             return new(sqlBuffer.ToString(), SqlDialectStrategy.Terminator, SqlDialectStrategy.Placeholder);

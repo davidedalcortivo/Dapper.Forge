@@ -26,7 +26,7 @@ namespace Dapper.Forge.Core.Utilities
                     TranslateGroup(g, ctx);
                     break;
                 default:
-                    throw new NotSupportedException($"Tipo di filtro non supportato: {node.GetType()}");
+                    throw new NotSupportedException($"Unsupported filter type '{node.GetType()}'.");
             }
         }
 
@@ -72,7 +72,7 @@ namespace Dapper.Forge.Core.Utilities
                         parts.Add($"{left} IN {p}");
                     }
 
-                    sql = "(" + string.Join(" OR ", parts) + ")";
+                    sql = $"({string.Join(" OR ", parts)})";
                 }
             }
             else
@@ -98,7 +98,7 @@ namespace Dapper.Forge.Core.Utilities
                     ComparisonOperator.StartsWith => $"{left} LIKE {right} || '%' ESCAPE '\\'",
                     ComparisonOperator.EndsWith => $"{left} LIKE '%' || {right} ESCAPE '\\'",
 
-                    _ => throw new NotSupportedException($"Operatore non supportato: {f.ComparisonOperator}")
+                    _ => throw new NotSupportedException($"Unsupported operator '{f.ComparisonOperator}'.")
                 };
             }
 

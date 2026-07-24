@@ -60,7 +60,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
-            string clause = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]) + " = " + SqlDialectStrategy.Placeholder;
+            string clause = $"{SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name])} = {SqlDialectStrategy.Placeholder}";
 
             sqlBuffer.Append("SELECT");
             sqlBuffer.AppendColumns<TEntity>(SqlDialectStrategy, properties, null, "    ", true, false);
@@ -203,24 +203,27 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual SqlTemplate CountSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildAggregateSql<TEntity>("COUNT");
+            return BuildAggregateSql<TEntity>($"COUNT({SqlDialectStrategy.Placeholder})");
         }
 
-        public abstract SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class;
+        public virtual SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class
+        {
+            return BuildAggregateSql<TEntity>($"AVG({SqlDialectStrategy.CastAsString(SqlDialectStrategy.Placeholder)})");
+        }
 
         public virtual SqlTemplate SumSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildAggregateSql<TEntity>("SUM");
+            return BuildAggregateSql<TEntity>($"SUM({SqlDialectStrategy.Placeholder})");
         }
 
         public virtual SqlTemplate MinSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildAggregateSql<TEntity>("MIN");
+            return BuildAggregateSql<TEntity>($"MIN({SqlDialectStrategy.Placeholder})");
         }
 
         public virtual SqlTemplate MaxSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildAggregateSql<TEntity>("MAX");
+            return BuildAggregateSql<TEntity>($"MAX({SqlDialectStrategy.Placeholder})");
         }
     }
 }
