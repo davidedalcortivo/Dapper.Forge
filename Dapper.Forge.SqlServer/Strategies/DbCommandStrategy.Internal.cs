@@ -12,13 +12,13 @@ namespace Dapper.Forge.SqlServer.Strategies
 {
     internal sealed partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
     {
-        protected override DbCommandInfo BuildGetFirstCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor>? sortDescriptors, int take) where TEntity : class
+        protected override DbCommandInfo BuildGetFirstCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int take) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
             parameters ??= new();
 
             sqlBuffer.AppendWhereClause(clause, string.Empty);
-            sqlBuffer.AppendSort<TEntity>(SqlDialectStrategy, sortDescriptors, true);
+            sqlBuffer.AppendSort(SqlDialectStrategy, sortDescriptors, true);
 
             string takeName = "Take";
             parameters.Add(takeName, take);

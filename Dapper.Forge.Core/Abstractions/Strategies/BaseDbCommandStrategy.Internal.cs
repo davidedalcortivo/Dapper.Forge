@@ -42,13 +42,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return (clause, parameters);
         }
 
-        protected virtual DbCommandInfo BuildGetFirstCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor>? sortDescriptors, int take) where TEntity : class
+        protected virtual DbCommandInfo BuildGetFirstCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int take) where TEntity : class
         {
             StringBuilder sqlBuffer = new();
             parameters ??= new();
 
             sqlBuffer.AppendWhereClause(clause, string.Empty);
-            sqlBuffer.AppendSort<TEntity>(SqlDialectStrategy, sortDescriptors, true);
+            sqlBuffer.AppendSort(SqlDialectStrategy, sortDescriptors, true);
 
             string takeName = "Take";
             parameters.Add(takeName, take);
@@ -57,13 +57,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        protected virtual DbCommandInfo BuildGetPageCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
+        protected virtual DbCommandInfo BuildGetPageCommand<TEntity>(string? clause, DynamicParameters? parameters, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int? skip, int? take) where TEntity : class
         {
             bool useSkip = skip is not null && skip >= 0;
             bool useTake = take is not null && take >= 0;
 
             if (!useSkip && useTake)
-                return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, take!.Value);
+                return BuildGetFirstCommand(clause, parameters, sortDescriptors, take!.Value);
 
             StringBuilder sqlBuffer = new();
             sqlBuffer.AppendWhereClause(clause, string.Empty);
@@ -73,7 +73,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
                 string skipName = "Skip";
                 string takeName = "Take";
 
-                sqlBuffer.AppendSort<TEntity>(SqlDialectStrategy, sortDescriptors, true);
+                sqlBuffer.AppendSort(SqlDialectStrategy, sortDescriptors, true);
                 sqlBuffer.Append(SqlDialectStrategy.Pagination(SqlDialectStrategy.RenderParameter(skipName), SqlDialectStrategy.RenderParameter(takeName)));
 
                 parameters ??= new();
@@ -86,7 +86,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             }
             else
             {
-                sqlBuffer.AppendSort<TEntity>(SqlDialectStrategy, sortDescriptors, false);
+                sqlBuffer.AppendSort(SqlDialectStrategy, sortDescriptors, false);
             }
 
             string sql = SqlBuilderCache<TEntity, TStrategy>.GetAllSql.Render(sqlBuffer);

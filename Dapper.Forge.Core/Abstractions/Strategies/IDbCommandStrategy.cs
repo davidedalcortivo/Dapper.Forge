@@ -13,19 +13,19 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         void LoadRuntimeCache<TEntity>(DbConnection connection) where TEntity : class;
         DbCommandInfo GetColumnsCommand<TEntity>(DbConnection connection) where TEntity : class;
-        DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
-        DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
-        DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
-        DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
-        DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
-        DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class;
+        DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class;
+        DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class;
+        DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class;
+        DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class;
+        DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class;
+        DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class;
         DbCommandInfo GetSingleCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo GetSingleCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class;
         DbCommandInfo GetSingleOrDefaultCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo GetSingleOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class;
         DbCommandInfo GetByIdCommand<TEntity>(DbConnection connection, object id) where TEntity : class;
-        DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class;
-        DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class;
+        DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int? skip, int? take) where TEntity : class;
+        DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int? skip, int? take) where TEntity : class;
         DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class;
         DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, IFilterNode<TEntity>? filterNode) where TEntity : class;

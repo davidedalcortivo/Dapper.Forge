@@ -12,34 +12,34 @@ namespace Dapper.Forge.Core.Models
     {
         public string PropertyName { get; }
         public object? Value { get; }
-        public ComparisonOperator ComparisonOperator { get; }
-        public bool Not { get; }
-        public bool IgnoreCase { get; }
+        public ComparisonOperator ComparisonOperator { get; set; }
+        public bool Not { get; set; }
+        public bool IgnoreCase { get; set; }
 
-        public FilterDescriptor(string propertyName, object? value, ComparisonOperator comparisonOperator, bool not = false, bool ignoreCase = false)
-        {
-            propertyName = ResolvePropertyName(propertyName, value);
-
-            PropertyName = propertyName;
-            Value = value;
-            ComparisonOperator = comparisonOperator;
-            Not = not;
-            IgnoreCase = ignoreCase;
-        }
-
-        public FilterDescriptor(Expression<Func<TEntity, object?>> selector, ComparisonOperator comparisonOperator, object? value, bool not = false, bool ignoreCase = false)
+        public FilterDescriptor(Expression<Func<TEntity, object?>> selector, object? value, ComparisonOperator comparisonOperator = ComparisonOperator.Equal, bool not = false, bool ignoreCase = false)
         {
             string propertyName = PropertyHelper.GetPropertyName(selector);
-            propertyName = ResolvePropertyName(propertyName, value);
+            PropertyInfo property = ValidatePropertyAndValue(propertyName, value);
 
-            PropertyName = propertyName;
+            PropertyName = property.Name;
             Value = value;
             ComparisonOperator = comparisonOperator;
             Not = not;
             IgnoreCase = ignoreCase;
         }
 
-        private static string ResolvePropertyName(string propertyName, object? value)
+        public FilterDescriptor(string propertyName, object? value, ComparisonOperator comparisonOperator = ComparisonOperator.Equal, bool not = false, bool ignoreCase = false)
+        {
+            PropertyInfo property = ValidatePropertyAndValue(propertyName, value);
+
+            PropertyName = property.Name;
+            Value = value;
+            ComparisonOperator = comparisonOperator;
+            Not = not;
+            IgnoreCase = ignoreCase;
+        }
+
+        private static PropertyInfo ValidatePropertyAndValue(string propertyName, object? value)
         {
             ImmutableDictionary<string, PropertyInfo> propertiesByPropertyName = EntityInfoCache<TEntity>.PropertiesByPropertyName;
 
@@ -52,7 +52,7 @@ namespace Dapper.Forge.Core.Models
             if (valueType is not null && !propertyType.IsAssignableFrom(valueType))
                 throw new ArgumentException($"The type of the provided value '{valueType}' does not match the type of the property '{propertyType}' for the entity '{typeof(TEntity).Name}'.");
 
-            return property.Name;
+            return property;
         }
     }
 

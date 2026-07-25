@@ -149,9 +149,9 @@ namespace Dapper.Forge.Core.Utilities
             return sqlBuffer;
         }
 
-        public static StringBuilder AppendSort<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy sqlDialectStrategy, IEnumerable<SortDescriptor>? sortDescriptors, bool forceSorting) where TEntity : class
+        public static StringBuilder AppendSort<TEntity>(this StringBuilder sqlBuffer, ISqlDialectStrategy sqlDialectStrategy, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, bool forceSorting) where TEntity : class
         {
-            List<SortDescriptor> sortDescriptorList = sortDescriptors is null ? [] : sortDescriptors.AsList();
+            List<SortDescriptor<TEntity>> sortDescriptorList = sortDescriptors is null ? [] : sortDescriptors.AsList();
 
             if (forceSorting && sortDescriptorList.Count == 0)
                 sortDescriptorList.Add(new(EntityInfoCache<TEntity>.IdProperty.Name));
@@ -165,7 +165,7 @@ namespace Dapper.Forge.Core.Utilities
 
                 for (int i = 0; i < sortDescriptorList.Count; i++)
                 {
-                    SortDescriptor sortDescriptor = sortDescriptorList[i];
+                    SortDescriptor<TEntity> sortDescriptor = sortDescriptorList[i];
 
                     string columnName = columnNamesByPropertyName[sortDescriptor.PropertyName];
                     string sortDirection = sortDescriptor.SortDirection == SortDirection.Ascending ? "ASC" : "DESC";

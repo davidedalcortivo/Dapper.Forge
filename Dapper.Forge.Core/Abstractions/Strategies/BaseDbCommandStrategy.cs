@@ -46,40 +46,40 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, null, null);
+            return BuildGetPageCommand(clause, parameters, sortDescriptors, null, null);
         }
 
-        public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetAllCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, null, null);
+            return BuildGetPageCommand(clause, parameters, sortDescriptors, null, null);
         }
 
-        public virtual DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
+            return BuildGetFirstCommand(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
+            return BuildGetFirstCommand(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
+            return BuildGetFirstCommand(clause, parameters, sortDescriptors, 1);
         }
 
-        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors) where TEntity : class
+        public virtual DbCommandInfo GetFirstOrDefaultCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildGetFirstCommand<TEntity>(clause, parameters, sortDescriptors, 1);
+            return BuildGetFirstCommand(clause, parameters, sortDescriptors, 1);
         }
 
         public virtual DbCommandInfo GetSingleCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
@@ -119,16 +119,16 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        public virtual DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
+        public virtual DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int? skip, int? take) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, skip, take);
+            return BuildGetPageCommand(clause, parameters, sortDescriptors, skip, take);
         }
 
-        public virtual DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor>? sortDescriptors, int? skip, int? take) where TEntity : class
+        public virtual DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int? skip, int? take) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildGetPageCommand<TEntity>(clause, parameters, sortDescriptors, skip, take);
+            return BuildGetPageCommand(clause, parameters, sortDescriptors, skip, take);
         }
 
         public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class

@@ -1,9 +1,7 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
-using System.Collections.Immutable;
 using System.Data.Common;
-using System.Reflection;
 
 
 namespace Dapper.Forge.PostgreSql.Strategies
@@ -34,24 +32,10 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
                     if (columns is null)
                     {
-                        ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
-                        ImmutableDictionary<string, PropertyInfo> propertiesByColumnName = EntityInfoCache<TEntity>.PropertiesByColumnName;
-
                         DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
                         columns = await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, null, commandTimeout, cancellationToken);
 
-                        if (properties.Length != columns.Count)
-                            throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
-
-                        foreach (DbColumnInfo column in columns)
-                        {
-                            string columnName = column.Name;
-
-                            if (!propertiesByColumnName.TryGetValue(columnName, out PropertyInfo? _))
-                                throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
-                        }
-
-                        _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
+                        DbColumnInfoCache<TEntity>.Add(connectionId, columns);
                     }
                 }
                 finally

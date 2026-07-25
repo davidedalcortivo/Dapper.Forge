@@ -1,10 +1,8 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
-using System.Collections.Immutable;
 using System.Data;
 using System.Data.Common;
-using System.Reflection;
 
 
 namespace Dapper.Forge.SqlServer.Strategies
@@ -35,25 +33,11 @@ namespace Dapper.Forge.SqlServer.Strategies
 
                     if (columns is null)
                     {
-                        ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
-                        ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
-
                         DbCommandInfo command = dbCommandStrategy.GetColumnsCommand<TEntity>(connection);
                         columns = (await QueryImplAsync<DbColumnInfo>(connection, sync, command, null, null, commandTimeout, cancellationToken))
                             .ToDictionary(x => x.Name, x => x, StringComparer.OrdinalIgnoreCase);
 
-                        if (properties.Length != columns.Count)
-                            throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
-
-                        foreach (PropertyInfo property in properties)
-                        {
-                            string columnName = columnNamesByPropertyName[property.Name];
-
-                            if (!columns.TryGetValue(columnName, out DbColumnInfo? _))
-                                throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
-                        }
-
-                        _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
+                        DbColumnInfoCache<TEntity>.Add(connectionId, columns);
                     }
                 }
                 finally

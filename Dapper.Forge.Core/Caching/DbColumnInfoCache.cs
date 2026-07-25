@@ -1,6 +1,7 @@
 ﻿using Dapper.Forge.Core.Models;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Reflection;
 
 
 namespace Dapper.Forge.Core.Caching
@@ -37,14 +38,42 @@ namespace Dapper.Forge.Core.Caching
             return columns;
         }
 
-        public static bool TryAdd(string connectionId, IReadOnlyList<DbColumnInfo> columns)
+        public static void Add(string connectionId, IReadOnlyList<DbColumnInfo> columns)
         {
-            return _listCache.TryAdd(connectionId, columns);
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
+            ImmutableDictionary<string, PropertyInfo> propertiesByColumnName = EntityInfoCache<TEntity>.PropertiesByColumnName;
+
+            if (properties.Length != columns.Count)
+                throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
+
+            foreach (DbColumnInfo column in columns)
+            {
+                string columnName = column.Name;
+
+                if (!propertiesByColumnName.TryGetValue(columnName, out PropertyInfo? _))
+                    throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
+            }
+
+            _ = _listCache.TryAdd(connectionId, columns);
         }
 
-        public static bool TryAdd(string connectionId, IDictionary<string, DbColumnInfo> columns)
+        public static void Add(string connectionId, IDictionary<string, DbColumnInfo> columns)
         {
-            return _dictCache.TryAdd(connectionId, columns);
+            ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
+            ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+
+            if (properties.Length != columns.Count)
+                throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
+
+            foreach (PropertyInfo property in properties)
+            {
+                string columnName = columnNamesByPropertyName[property.Name];
+
+                if (!columns.TryGetValue(columnName, out DbColumnInfo? _))
+                    throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
+            }
+
+            _ = _dictCache.TryAdd(connectionId, columns);
         }
 
         public static SemaphoreSlim GetSemaphore(string connectionId)

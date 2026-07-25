@@ -15,55 +15,55 @@ namespace Dapper.Forge.Oracle.Extensions
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
         }
 
-        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetAllCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetAllCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetAllCommand<TEntity>(this OracleConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetAllCommand(connection, filterNode, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstCommand<TEntity>(this OracleConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstCommand(connection, filterNode, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this OracleConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, filterNode, sortDescriptors);
@@ -111,19 +111,19 @@ namespace Dapper.Forge.Oracle.Extensions
             return DbCommandStrategy.Instance.GetByIdCommand<TEntity>(connection, id);
         }
 
-        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetPageCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors, skip, take);
         }
 
-        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetPageCommand(connection, predicate, sortDescriptors, skip, take);
         }
 
-        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        public static DbCommandInfo GetPageCommand<TEntity>(this OracleConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetPageCommand(connection, filterNode, sortDescriptors, skip, take);

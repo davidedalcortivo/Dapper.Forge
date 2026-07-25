@@ -10,10 +10,8 @@ using Npgsql;
 using Oracle.ManagedDataAccess.Client;
 
 
-List<SortDescriptor> sorts = [];
-sorts.Add(new("Id", "asc"));
-
-
+List<SortDescriptor<TestTableIdentityMYSQL>> sorts = [];
+sorts.Add(new("Id", SortDirection.Ascending));
 
 var rnd = new Random();
 var aa = new List<TestTableORACLE>();

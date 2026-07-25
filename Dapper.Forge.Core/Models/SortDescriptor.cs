@@ -1,41 +1,42 @@
-﻿using Dapper.Forge.Core.Utilities;
+﻿using Dapper.Forge.Core.Caching;
+using Dapper.Forge.Core.Utilities;
+using System.Collections.Immutable;
 using System.Linq.Expressions;
+using System.Reflection;
 
 
 namespace Dapper.Forge.Core.Models
 {
-    public sealed class SortDescriptor
+    public sealed class SortDescriptor<TEntity> where TEntity : class
     {
         public string PropertyName { get; }
-        public SortDirection SortDirection { get; }
+        public SortDirection SortDirection { get; set; }
 
-        public SortDescriptor(string propertyName)
+        public SortDescriptor(Expression<Func<TEntity, object?>> selector, SortDirection sortDirection = SortDirection.Ascending)
         {
-            PropertyName = propertyName;
-            SortDirection = SortDirection.Ascending;
-        }
+            string propertyName = PropertyHelper.GetPropertyName(selector);
+            PropertyInfo property = ValidateProperty(propertyName);
 
-        public SortDescriptor(string propertyName, SortDirection sortDirection)
-        {
-            PropertyName = propertyName;
+            PropertyName = property.Name;
             SortDirection = sortDirection;
         }
 
-        public SortDescriptor(string propertyName, string sortDirection)
+        public SortDescriptor(string propertyName, SortDirection sortDirection = SortDirection.Ascending)
         {
-            PropertyName = propertyName;
-            SortDirection = sortDirection.Equals("desc", StringComparison.OrdinalIgnoreCase) ||
-                sortDirection.Equals("descending", StringComparison.OrdinalIgnoreCase) ? SortDirection.Descending : SortDirection.Ascending;
+            PropertyInfo property = ValidateProperty(propertyName);
+
+            PropertyName = property.Name;
+            SortDirection = sortDirection;
         }
 
-        public static SortDescriptor For<TEntity>(Expression<Func<TEntity, object?>> selector, SortDirection sortDirection) where TEntity : class
+        private static PropertyInfo ValidateProperty(string propertyName)
         {
-            return new(PropertyHelper.GetPropertyName(selector), sortDirection);
-        }
+            ImmutableDictionary<string, PropertyInfo> propertiesByPropertyName = EntityInfoCache<TEntity>.PropertiesByPropertyName;
 
-        public static SortDescriptor For<TEntity>(Expression<Func<TEntity, object?>> selector, string sortDirection) where TEntity : class
-        {
-            return new(PropertyHelper.GetPropertyName(selector), sortDirection);
+            if (!propertiesByPropertyName.TryGetValue(propertyName, out PropertyInfo? property))
+                throw new ArgumentException($"The property '{propertyName}' does not exist on entity '{typeof(TEntity).Name}'.");
+
+            return property;
         }
     }
 

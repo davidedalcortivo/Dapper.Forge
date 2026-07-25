@@ -3,10 +3,8 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
-using System.Collections.Immutable;
 using System.Data;
 using System.Data.Common;
-using System.Reflection;
 using System.Text.Json;
 
 
@@ -40,9 +38,6 @@ namespace Dapper.Forge.Oracle.Strategies
 
                     if (columns is null)
                     {
-                        ImmutableArray<PropertyInfo> properties = EntityInfoCache<TEntity>.Properties;
-                        ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
-
                         OracleConnection _connection = (OracleConnection)connection;
                         bool ownsConnection = _connection.State == ConnectionState.Closed;
 
@@ -81,22 +76,10 @@ namespace Dapper.Forge.Oracle.Strategies
                                 _ = await oracleCommand.ExecuteNonQueryAsync(cancellationToken);
 
                             string json = ((OracleClob)resultParameter.Value).Value;
-
                             columns = (JsonSerializer.Deserialize<List<DbColumnInfo>>(json, _jsonOptions) ?? [])
                                 .ToDictionary(x => x.Name, x => x, StringComparer.OrdinalIgnoreCase);
 
-                            if (properties.Length != columns.Count)
-                                throw new InvalidOperationException($"Database table schema mismatch for entity '{typeof(TEntity).Name}'. Expected {properties.Length} mapped properties but found {columns.Count} database columns.");
-
-                            foreach (PropertyInfo property in properties)
-                            {
-                                string columnName = columnNamesByPropertyName[property.Name];
-
-                                if (!columns.TryGetValue(columnName, out DbColumnInfo? _))
-                                    throw new InvalidOperationException($"Database column mapping mismatch for entity '{typeof(TEntity).Name}'. Database column '{columnName}' is not mapped to any entity property.");
-                            }
-
-                            _ = DbColumnInfoCache<TEntity>.TryAdd(connectionId, columns);
+                            DbColumnInfoCache<TEntity>.Add(connectionId, columns);
                         }
                         finally
                         {
