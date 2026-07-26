@@ -49,6 +49,8 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         public override async Task<int> UpsertImplAsync<TEntity>(DbConnection connection, bool sync, TEntity entity, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
+            EnsureTransaction(connection, transaction);
+
             DbCommandInfo command = dbCommandStrategy.UpsertCommand(connection, entity);
             int result = 0;
 

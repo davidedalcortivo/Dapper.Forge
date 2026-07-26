@@ -1,15 +1,17 @@
 ﻿using Dapper.Forge.Core.Abstractions.Strategies;
 using System.Text;
+using System.Text.RegularExpressions;
 
 
 namespace Dapper.Forge.Core.Models
 {
-    internal sealed class SqlTranslationContext
+    internal sealed partial class SqlTranslationContext
     {
+        private const string _parameterPrefix = "__p";
         private readonly Stack<StringBuilder> _stack;
 
         public ISqlDialectStrategy SqlDialectStrategy { get; }
-        public int ParamIndex { get; set; }
+        public int ParameterIndex { get; set; }
         public StringBuilder SqlBuffer { get; private set; }
         public DynamicParameters? Parameters { get; private set; }
 
@@ -38,11 +40,14 @@ namespace Dapper.Forge.Core.Models
         {
             Parameters ??= new();
 
-            string name = $"__p{ParamIndex}";
+            string name = _parameterPrefix + ParameterIndex;
             Parameters.Add(name, value);
-            ParamIndex++;
+            ParameterIndex++;
 
             return SqlDialectStrategy.RenderParameter(name);
         }
+
+        [GeneratedRegex($"^{_parameterPrefix}\\d+$", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        public static partial Regex ParameterRegex();
     }
 }

@@ -40,6 +40,9 @@ namespace Dapper.Forge.Core.Caching
                     .Where(x => !x.IsDefined(typeof(NotMappedAttribute), true))
                     .Reverse())
                 {
+                    if (SqlTranslationContext.ParameterRegex().IsMatch(property.Name))
+                        throw new InvalidOperationException($"The property '{property.Name}' uses a reserved parameter name.");
+
                     if (!seenPropertyNames.Add(property.Name))
                         continue;
 
@@ -70,6 +73,12 @@ namespace Dapper.Forge.Core.Caching
             TableName = tableAttribute?.Name ?? entityType.Name;
             SchemaName = tableAttribute?.Schema;
 
+            if (!IdentifierHelper.CharsetRegex().IsMatch(TableName))
+                throw new InvalidOperationException($"The table name '{TableName}' contains invalid characters.");
+
+            if (SchemaName is not null && !IdentifierHelper.CharsetRegex().IsMatch(SchemaName))
+                throw new InvalidOperationException($"The schema name '{SchemaName}' contains invalid characters.");
+
             Properties = [.. stack];
             UpdateProperties = [.. Properties.Where(x => !(x == IdProperty || x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
             InsertProperties = [.. Properties.Where(x => !(x.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption > DatabaseGeneratedOption.None))];
@@ -87,6 +96,9 @@ namespace Dapper.Forge.Core.Caching
             foreach (PropertyInfo property in Properties)
             {
                 string columnName = property.GetCustomAttribute<ColumnAttribute>()?.Name ?? property.Name;
+
+                if (!IdentifierHelper.CharsetRegex().IsMatch(columnName))
+                    throw new InvalidOperationException($"The column name '{columnName}' contains invalid characters.");
 
                 columnNamesByPropertyNameBuilder[property.Name] = columnName;
                 propertiesByPropertyNameBuilder[property.Name] = property;

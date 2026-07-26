@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using Dapper.Forge.Core.Utilities;
+using System.Data.Common;
 
 
 namespace Dapper.Forge.SqlServer.Strategies
@@ -8,6 +9,9 @@ namespace Dapper.Forge.SqlServer.Strategies
         protected override void InitializeImpl(DbConnection connection)
         {
             DefaultSchemaName = "dbo";
+
+            if (!IdentifierHelper.CharsetRegex().IsMatch(DefaultSchemaName))
+                throw new InvalidOperationException($"The default schema name '{DefaultSchemaName}' contains invalid characters.");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Dapper.Forge.Core.Utilities;
+﻿using Dapper.Forge.Core.Models;
+using Dapper.Forge.Core.Utilities;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
@@ -42,6 +43,9 @@ namespace Dapper.Forge.Core.Caching
                     .Where(x => !x.IsDefined(typeof(NotMappedAttribute), true))
                     .Reverse())
                 {
+                    if (SqlTranslationContext.ParameterRegex().IsMatch(property.Name))
+                        throw new InvalidOperationException($"The property '{property.Name}' uses a reserved parameter name.");
+
                     if (!seenPropertyNames.Add(property.Name))
                         continue;
 

@@ -7,8 +7,16 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 {
     internal abstract partial class BaseDbExecutionStrategy<TStrategy> : IDbExecutionStrategy where TStrategy : IDbCommandStrategy
     {
+        protected virtual void EnsureTransaction(DbConnection connection, DbTransaction? transaction)
+        {
+            if (transaction is not null && transaction.Connection != connection)
+                throw new ArgumentException("The provided transaction does not belong to the current connection.");
+        }
+
         protected virtual async Task<IReadOnlyList<TEntity>> QueryImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, int? take, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
+            EnsureTransaction(connection, transaction);
+
             if (take == 0)
                 return [];
 
@@ -20,6 +28,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual async Task<TEntity> QueryFirstImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
+            EnsureTransaction(connection, transaction);
+
             if (sync)
                 return connection.QueryFirst<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
 
@@ -28,6 +38,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual async Task<TEntity?> QueryFirstOrDefaultImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
+            EnsureTransaction(connection, transaction);
+
             if (sync)
                 return connection.QueryFirstOrDefault<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
 
@@ -36,6 +48,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual async Task<TEntity> QuerySingleImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
+            EnsureTransaction(connection, transaction);
+
             if (sync)
                 return connection.QuerySingle<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
 
@@ -44,6 +58,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual async Task<TEntity?> QuerySingleOrDefaultImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
+            EnsureTransaction(connection, transaction);
+
             if (sync)
                 return connection.QuerySingleOrDefault<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
 
@@ -52,6 +68,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual async Task<int> ExecuteImplAsync(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
         {
+            EnsureTransaction(connection, transaction);
+
             if (sync)
                 return connection.Execute(command.Sql, command.Parameters, transaction, commandTimeout);
 
@@ -60,6 +78,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual async Task<int> ExecuteRangeImplAsync(DbConnection connection, bool sync, IReadOnlyList<DbCommandInfo> commands, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
         {
+            EnsureTransaction(connection, transaction);
+
             int result = 0;
 
             if (commands.Count == 0)
@@ -138,6 +158,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         protected virtual async Task<TProperty?> ExecuteScalarImplAsync<TProperty>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
         {
+            EnsureTransaction(connection, transaction);
+
             if (sync)
                 return connection.ExecuteScalar<TProperty>(command.Sql, command.Parameters, transaction, commandTimeout);
 
