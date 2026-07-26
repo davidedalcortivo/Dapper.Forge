@@ -21,13 +21,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.GetAllCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetAllCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetAllCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetAllCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetAllCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetAllCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetAllCommand(connection, filterNode, sortDescriptors);
@@ -39,13 +39,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.GetFirstCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstCommand(connection, filterNode, sortDescriptors);
@@ -57,13 +57,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, predicate, sortDescriptors);
         }
 
-        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, filterNode, sortDescriptors);
@@ -75,13 +75,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.GetSingleCommand(connection, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo GetSingleCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo GetSingleCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetSingleCommand(connection, predicate);
         }
 
-        public static DbCommandInfo GetSingleCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo GetSingleCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetSingleCommand(connection, filterNode);
@@ -93,13 +93,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.GetSingleOrDefaultCommand(connection, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetSingleOrDefaultCommand(connection, predicate);
         }
 
-        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetSingleOrDefaultCommand(connection, filterNode);
@@ -117,13 +117,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.GetPageCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors, skip, take);
         }
 
-        public static DbCommandInfo GetPageCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        public static DbCommandInfo GetPageCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetPageCommand(connection, predicate, sortDescriptors, skip, take);
         }
 
-        public static DbCommandInfo GetPageCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        public static DbCommandInfo GetPageCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.GetPageCommand(connection, filterNode, sortDescriptors, skip, take);
@@ -141,13 +141,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.UpdateCommand(connection, param, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object param, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.UpdateCommand(connection, param, predicate);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object param, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object param, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.UpdateCommand(connection, param, filterNode);
@@ -177,13 +177,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.DeleteCommand(connection, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo DeleteCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo DeleteCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.DeleteCommand(connection, predicate);
         }
 
-        public static DbCommandInfo DeleteCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo DeleteCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.DeleteCommand(connection, filterNode);
@@ -237,13 +237,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.ExistsCommand(connection, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo ExistsCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo ExistsCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.ExistsCommand(connection, predicate);
         }
 
-        public static DbCommandInfo ExistsCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo ExistsCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.ExistsCommand(connection, filterNode);
@@ -252,19 +252,19 @@ namespace Dapper.Forge.PostgreSql.Extensions
         public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.CountCommand(connection, (string?)null, (IFilterNode<TEntity>?)null);
+            return DbCommandStrategy.Instance.CountCommand(connection, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.CountCommand(connection, (string?)null, predicate);
+            return DbCommandStrategy.Instance.CountCommand(connection, predicate);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.CountCommand(connection, (string?)null, filterNode);
+            return DbCommandStrategy.Instance.CountCommand(connection, filterNode);
         }
 
         public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector) where TEntity : class
@@ -273,13 +273,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.CountCommand(connection, selector, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.CountCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.CountCommand(connection, selector, filterNode);
@@ -291,13 +291,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.CountCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.CountCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo CountCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.CountCommand(connection, propertyName, filterNode);
@@ -309,13 +309,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.AvgCommand(connection, selector, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.AvgCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.AvgCommand(connection, selector, filterNode);
@@ -327,13 +327,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.AvgCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.AvgCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo AvgCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo AvgCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.AvgCommand(connection, propertyName, filterNode);
@@ -345,13 +345,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.SumCommand(connection, selector, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.SumCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this NpgsqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.SumCommand(connection, selector, filterNode);
@@ -363,13 +363,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.SumCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.SumCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo SumCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo SumCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.SumCommand(connection, propertyName, filterNode);
@@ -381,13 +381,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.MinCommand(connection, selector, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo MinCommand<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MinCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo MinCommand<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MinCommand(connection, selector, filterNode);
@@ -399,13 +399,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.MinCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MinCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MinCommand(connection, propertyName, filterNode);
@@ -417,13 +417,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.MaxCommand(connection, selector, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MaxCommand(connection, selector, predicate);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this NpgsqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MaxCommand(connection, selector, filterNode);
@@ -435,13 +435,13 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.MaxCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity>(this NpgsqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MaxCommand(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity> filterNode) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity>(this NpgsqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return DbCommandStrategy.Instance.MaxCommand(connection, propertyName, filterNode);

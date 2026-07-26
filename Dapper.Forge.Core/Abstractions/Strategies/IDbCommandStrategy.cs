@@ -43,10 +43,12 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class;
         DbCommandInfo ExistsCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo ExistsCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class;
-        DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>>? selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>>? selector, IFilterNode<TEntity>? filterNode) where TEntity : class;
-        DbCommandInfo CountCommand<TEntity>(DbConnection connection, string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo CountCommand<TEntity>(DbConnection connection, string? propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class;
+        DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo CountCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class;
+        DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class;
+        DbCommandInfo CountCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo CountCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class;
         DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
         DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class;
         DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;

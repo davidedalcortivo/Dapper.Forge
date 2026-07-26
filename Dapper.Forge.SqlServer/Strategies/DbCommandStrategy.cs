@@ -20,6 +20,8 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         public override DbCommandInfo UpsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableArray<PropertyInfo> upsertProperties = EntityInfoCache<TEntity>.UpsertProperties;
@@ -99,54 +101,50 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         public override DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            string propertyName = PropertyHelper.GetPropertyName(selector);
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, propertyName, clause, parameters);
+            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public override DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
-            string propertyName = PropertyHelper.GetPropertyName(selector);
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, propertyName, clause, parameters);
+            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public override DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, propertyName, clause, parameters);
+            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public override DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, propertyName, clause, parameters);
+            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.AvgSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public override DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            string propertyName = PropertyHelper.GetPropertyName(selector);
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, propertyName, clause, parameters);
+            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public override DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
-            string propertyName = PropertyHelper.GetPropertyName(selector);
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, propertyName, clause, parameters);
+            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public override DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, propertyName, clause, parameters);
+            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public override DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, propertyName, clause, parameters);
+            return BuildSafeAggregateCommand<TEntity>(connection, SqlBuilderCache<TEntity, SqlBuilderStrategy>.SumSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
     }
 }

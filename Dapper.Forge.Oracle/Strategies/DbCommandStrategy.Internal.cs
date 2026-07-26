@@ -14,6 +14,8 @@ namespace Dapper.Forge.Oracle.Strategies
     {
         private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, IReadOnlyList<PropertyInfo> properties, int batchSize, SqlTemplate sqlTemplate, string indentation) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entities);
+
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 

@@ -38,6 +38,8 @@ namespace Dapper.Forge.SqlServer.Strategies
 
         private List<DbCommandInfo> BuildUpsertRangeCommands<TEntity>(IEnumerable<TEntity> entities, int batchSize, int chunkSize, SqlTemplate sqlTemplate, bool updateOnly) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entities);
+
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
@@ -103,14 +105,14 @@ namespace Dapper.Forge.SqlServer.Strategies
             return commands;
         }
 
-        private DbCommandInfo BuildSafeAggregateCommand<TEntity>(DbConnection connection, SqlTemplate sqlTemplate, string propertyName, string? clause, DynamicParameters? parameters) where TEntity : class
+        private DbCommandInfo BuildSafeAggregateCommand<TEntity>(DbConnection connection, SqlTemplate sqlTemplate, PropertyInfo property, string? clause, DynamicParameters? parameters) where TEntity : class
         {
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             string connectionId = SqlDialectStrategy.GetConnectionId(connection);
             IDictionary<string, DbColumnInfo> columns = DbColumnInfoCache<TEntity>.GetDictValue(connectionId);
 
-            string columnName = columnNamesByPropertyName[propertyName];
+            string columnName = columnNamesByPropertyName[property.Name];
             string column;
 
             if (((SqlDialectStrategy)SqlDialectStrategy).IntDataTypes.Contains(columns[columnName].DataType ?? string.Empty))

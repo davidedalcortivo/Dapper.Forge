@@ -26,6 +26,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual void LoadRuntimeCache<TEntity>(DbConnection connection) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(connection);
+
             SqlDialectStrategy.Initialize(connection);
             SqlBuilderCache<TEntity, TStrategy>.Initialize(sqlBuilderStrategy);
         }
@@ -133,6 +135,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             ImmutableArray<PropertyInfo> updateProperties = EntityInfoCache<TEntity>.UpdateProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
@@ -167,6 +171,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual DbCommandInfo InsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
@@ -190,6 +196,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
@@ -235,6 +243,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(DbConnection connection, IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(ids);
+
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             List<object> idList = [];
 
@@ -251,6 +261,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entities);
+
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
@@ -316,6 +328,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entities);
+
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             Func<TEntity, object?> propertyGetter = EntityInfoCache<TEntity>.PropertyGettersByPropertyName[idProperty.Name];
             List<object> idList = [.. entities.Select(x => propertyGetter(x)!)];
@@ -325,6 +339,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(DbConnection connection, IEnumerable ids, int batchSize, int chunkSize) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(ids);
+
             PropertyInfo idProperty = EntityInfoCache<TEntity>.IdProperty;
             List<object> idList = [];
 
@@ -351,124 +367,136 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildExistsCommand<TEntity>(clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>>? selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.CountSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, null, clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>>? selector, IFilterNode<TEntity>? filterNode) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.CountSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, null, clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, string? propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
-        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, string? propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, PropertyHelper.GetProperty(selector), clause, parameters);
+        }
+
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
+        }
+
+        public virtual DbCommandInfo CountCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.CountSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.AvgSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.AvgSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public virtual DbCommandInfo AvgCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.AvgSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.SumSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.SumSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public virtual DbCommandInfo SumCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.SumSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public virtual DbCommandInfo MinCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MinSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public virtual DbCommandInfo MinCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MinSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public virtual DbCommandInfo MinCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MinSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public virtual DbCommandInfo MaxCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MaxSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public virtual DbCommandInfo MaxCommand<TEntity, TProperty>(DbConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand(SqlBuilderCache<TEntity, TStrategy>.MaxSql, selector, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, PropertyHelper.GetProperty(selector), clause, parameters);
         }
 
         public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
 
         public virtual DbCommandInfo MaxCommand<TEntity>(DbConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, propertyName, clause, parameters);
+            return BuildAggregateCommand<TEntity>(SqlBuilderCache<TEntity, TStrategy>.MaxSql, PropertyHelper.GetProperty<TEntity>(propertyName), clause, parameters);
         }
     }
 }

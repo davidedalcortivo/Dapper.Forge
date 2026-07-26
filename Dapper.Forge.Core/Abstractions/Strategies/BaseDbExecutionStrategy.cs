@@ -163,6 +163,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual async Task<IReadOnlyList<TEntity?>> GetByIdRangeImplAsync<TEntity>(DbConnection connection, bool sync, IEnumerable ids, bool preserveDuplicates, bool preserveNulls, int batchSize, int chunkSize, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(ids);
+
             List<object?> idList = [];
             HashSet<object?> idSet = [];
 
@@ -270,25 +272,37 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return await ExecuteScalarImplAsync<bool>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
-        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, object?>>? selector, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            DbCommandInfo command = dbCommandStrategy.CountCommand(connection, predicate);
+            return await ExecuteScalarImplAsync<long>(connection, sync, command, transaction, commandTimeout, cancellationToken);
+        }
+
+        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        {
+            DbCommandInfo command = dbCommandStrategy.CountCommand(connection, filterNode);
+            return await ExecuteScalarImplAsync<long>(connection, sync, command, transaction, commandTimeout, cancellationToken);
+        }
+
+        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.CountCommand(connection, selector, predicate);
             return await ExecuteScalarImplAsync<long>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
-        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, object?>>? selector, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, Expression<Func<TEntity, object?>> selector, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.CountCommand(connection, selector, filterNode);
             return await ExecuteScalarImplAsync<long>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
-        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, string? propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.CountCommand(connection, propertyName, predicate);
             return await ExecuteScalarImplAsync<long>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
-        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, string? propertyName, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public virtual async Task<long> CountImplAsync<TEntity>(DbConnection connection, bool sync, string propertyName, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
             DbCommandInfo command = dbCommandStrategy.CountCommand(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<long>(connection, sync, command, transaction, commandTimeout, cancellationToken);

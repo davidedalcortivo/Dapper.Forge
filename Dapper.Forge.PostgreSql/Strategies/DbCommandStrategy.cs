@@ -18,6 +18,8 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
         public override DbCommandInfo UpsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entity);
+
             ImmutableArray<PropertyInfo> insertProperties = EntityInfoCache<TEntity>.InsertProperties;
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
             ImmutableDictionary<string, Func<TEntity, object?>> propertyGettersByPropertyName = EntityInfoCache<TEntity>.PropertyGettersByPropertyName;
@@ -41,6 +43,8 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
         public override IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entities);
+
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 
@@ -104,6 +108,8 @@ namespace Dapper.Forge.PostgreSql.Strategies
 
         public override IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(DbConnection connection, IEnumerable<TEntity> entities, int batchSize, int chunkSize) where TEntity : class
         {
+            ArgumentNullException.ThrowIfNull(entities);
+
             TEntity[] entityArray = entities as TEntity[] ?? [.. entities];
             List<DbCommandInfo> commands = [];
 

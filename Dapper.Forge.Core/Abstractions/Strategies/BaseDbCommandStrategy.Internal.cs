@@ -14,7 +14,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
     {
         protected virtual void EnsureIdType<TEntity>(PropertyInfo idProperty, object? id) where TEntity : class
         {
-            ArgumentNullException.ThrowIfNull(id, nameof(id));
+            ArgumentNullException.ThrowIfNull(id);
             Type idPropertyType = idProperty.PropertyType;
             Type idType = id.GetType();
 
@@ -197,22 +197,26 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return new(sql, parameters);
         }
 
-        protected virtual DbCommandInfo BuildAggregateCommand<TEntity>(SqlTemplate sqlTemplate, string? propertyName, string? clause, DynamicParameters? parameters) where TEntity : class
+        protected virtual DbCommandInfo BuildAggregateCommand<TEntity>(SqlTemplate sqlTemplate, PropertyInfo? property, string? clause, DynamicParameters? parameters) where TEntity : class
         {
-            ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+            string column;
+
+            if (property is null)
+            {
+                column = "*";
+            }
+            else
+            {
+                ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
+                column = SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[property.Name]);
+            }
 
             StringBuilder sqlBuffer = new();
-            string column = propertyName is null ? "*" : SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[propertyName]);
 
             sqlBuffer.AppendWhereClause(clause, string.Empty);
 
             string sql = sqlTemplate.Render(column, sqlBuffer);
             return new(sql, parameters);
-        }
-
-        protected virtual DbCommandInfo BuildAggregateCommand<TEntity, TSelector>(SqlTemplate sqlTemplate, Expression<Func<TEntity, TSelector>>? selector, string? clause, DynamicParameters? parameters) where TEntity : class
-        {
-            return BuildAggregateCommand<TEntity>(sqlTemplate, selector is null ? null : PropertyHelper.GetPropertyName(selector), clause, parameters);
         }
     }
 }
