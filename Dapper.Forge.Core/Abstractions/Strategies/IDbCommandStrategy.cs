@@ -27,8 +27,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int? skip, int? take) where TEntity : class;
         DbCommandInfo GetPageCommand<TEntity>(DbConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors, int? skip, int? take) where TEntity : class;
         DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class;
-        DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
-        DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, IFilterNode<TEntity>? filterNode) where TEntity : class;
+        DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object values, Expression<Func<TEntity, bool>>? predicate) where TEntity : class;
+        DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object values, IFilterNode<TEntity>? filterNode) where TEntity : class;
         DbCommandInfo InsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class;
         DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class;
         DbCommandInfo DeleteCommand<TEntity>(DbConnection connection, object id) where TEntity : class;

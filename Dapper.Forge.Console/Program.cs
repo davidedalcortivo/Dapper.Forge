@@ -104,7 +104,7 @@ for (int i = 0; i < 10000; i++)
 string[] ids = ["1", null, "2", "3"];
 string? search = "ciao";
 
-var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(x => x.StringValue == null);
+var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL?>(x => x.StringValue == null);
 var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(x => x.StringValue!
     .ToLower()
     .ToUpper()

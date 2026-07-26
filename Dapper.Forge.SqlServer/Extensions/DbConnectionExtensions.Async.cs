@@ -139,22 +139,22 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, entity, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object param, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object values, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object param, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object values, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, predicate, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object param, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object values, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<int> InsertAsync<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class

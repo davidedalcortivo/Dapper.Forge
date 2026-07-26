@@ -35,10 +35,16 @@ namespace Dapper.Forge.Core.Utilities
 
         public static void EnsureValue<TEntity>(PropertyInfo property, object? value)
         {
-            Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-            Type? valueType = value?.GetType();
+            if (value is not null)
+                EnsureValueType<TEntity>(property, value.GetType());
+        }
 
-            if (valueType is not null && !propertyType.IsAssignableFrom(valueType))
+        public static void EnsureValueType<TEntity>(PropertyInfo property, Type valueType)
+        {
+            Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+            valueType = Nullable.GetUnderlyingType(valueType) ?? valueType;
+
+            if (!propertyType.IsAssignableFrom(valueType))
                 throw new ArgumentException($"The type of the provided value '{valueType}' does not match the type of the property '{propertyType}' for the entity '{typeof(TEntity).Name}'.");
         }
 

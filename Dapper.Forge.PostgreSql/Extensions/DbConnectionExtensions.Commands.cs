@@ -135,22 +135,22 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return DbCommandStrategy.Instance.UpdateCommand(connection, entity);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object param) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object values) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.UpdateCommand(connection, param, (IFilterNode<TEntity>?)null);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, values, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object values, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.UpdateCommand(connection, param, predicate);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, values, predicate);
         }
 
-        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object param, IFilterNode<TEntity>? filterNode) where TEntity : class
+        public static DbCommandInfo UpdateCommand<TEntity>(this NpgsqlConnection connection, object values, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.UpdateCommand(connection, param, filterNode);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, values, filterNode);
         }
 
         public static DbCommandInfo InsertCommand<TEntity>(this NpgsqlConnection connection, TEntity entity) where TEntity : class

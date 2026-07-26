@@ -136,22 +136,22 @@ namespace Dapper.Forge.MySql.Extensions
             return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, entity, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Update<TEntity>(this MySqlConnection connection, object param, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static int Update<TEntity>(this MySqlConnection connection, object values, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, param, (IFilterNode<TEntity>?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, values, (IFilterNode<TEntity>?)null, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Update<TEntity>(this MySqlConnection connection, object param, Expression<Func<TEntity, bool>>? predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static int Update<TEntity>(this MySqlConnection connection, object values, Expression<Func<TEntity, bool>>? predicate, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, param, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, values, predicate, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public static int Update<TEntity>(this MySqlConnection connection, object param, IFilterNode<TEntity>? filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
+        public static int Update<TEntity>(this MySqlConnection connection, object values, IFilterNode<TEntity>? filterNode, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, param, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
+            return DbExecutionStrategy.Instance.UpdateImplAsync(connection, true, values, filterNode, transaction, commandTimeout, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public static int Insert<TEntity>(this MySqlConnection connection, TEntity entity, MySqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class

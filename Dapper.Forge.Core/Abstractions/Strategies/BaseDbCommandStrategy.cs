@@ -151,22 +151,22 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return BuildUpdateCommand<TEntity>(updateProperties, x => propertyGettersByPropertyName[x](entity), clause, parameters);
         }
 
-        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object values, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
-            PropertyInfo[] paramProperties = ParamPropertyCache.Get(param);
-            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.Get(param);
+            PropertyInfo[] paramProperties = ValuesPropertyCache<TEntity>.Get(values);
+            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ValuesGetterCache<TEntity>.Get(values);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, predicate, null);
-            return BuildUpdateCommand<TEntity>(paramProperties, x => paramPropertyGetters[x](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(paramProperties, x => paramPropertyGetters[x](values), clause, parameters);
         }
 
-        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object param, IFilterNode<TEntity>? filterNode) where TEntity : class
+        public virtual DbCommandInfo UpdateCommand<TEntity>(DbConnection connection, object values, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
-            PropertyInfo[] paramProperties = ParamPropertyCache.Get(param);
-            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ParamGetterCache.Get(param);
+            PropertyInfo[] paramProperties = ValuesPropertyCache<TEntity>.Get(values);
+            ImmutableDictionary<string, Func<object, object?>> paramPropertyGetters = ValuesGetterCache<TEntity>.Get(values);
 
             (string? clause, DynamicParameters? parameters) = Translate(SqlDialectStrategy, filterNode, null);
-            return BuildUpdateCommand<TEntity>(paramProperties, x => paramPropertyGetters[x](param), clause, parameters);
+            return BuildUpdateCommand<TEntity>(paramProperties, x => paramPropertyGetters[x](values), clause, parameters);
         }
 
         public virtual DbCommandInfo InsertCommand<TEntity>(DbConnection connection, TEntity entity) where TEntity : class

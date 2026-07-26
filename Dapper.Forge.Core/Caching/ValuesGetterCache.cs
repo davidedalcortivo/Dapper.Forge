@@ -6,18 +6,20 @@ using System.Reflection;
 
 namespace Dapper.Forge.Core.Caching
 {
-    internal static class ParamGetterCache
+    internal static class ValuesGetterCache<TEntity> where TEntity : class
     {
         private static readonly ConcurrentDictionary<Type, ImmutableDictionary<string, Func<object, object?>>> _cache = new();
 
-        public static ImmutableDictionary<string, Func<object, object?>> Get(object param)
+        public static ImmutableDictionary<string, Func<object, object?>> Get(object values)
         {
-            return _cache.GetOrAdd(param.GetType(), Create);
+            ArgumentNullException.ThrowIfNull(values);
+
+            return _cache.GetOrAdd(values.GetType(), Create);
         }
 
         private static ImmutableDictionary<string, Func<object, object?>> Create(Type type)
         {
-            PropertyInfo[] properties = ParamPropertyCache.Get(type);
+            PropertyInfo[] properties = ValuesPropertyCache<TEntity>.Get(type);
             ImmutableDictionary<string, Func<object, object?>>.Builder builder = ImmutableDictionary.CreateBuilder<string, Func<object, object?>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (PropertyInfo property in properties)

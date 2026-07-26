@@ -113,15 +113,15 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
-        public virtual async Task<int> UpdateImplAsync<TEntity>(DbConnection connection, bool sync, object param, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public virtual async Task<int> UpdateImplAsync<TEntity>(DbConnection connection, bool sync, object values, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.UpdateCommand(connection, param, predicate);
+            DbCommandInfo command = dbCommandStrategy.UpdateCommand(connection, values, predicate);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
-        public virtual async Task<int> UpdateImplAsync<TEntity>(DbConnection connection, bool sync, object param, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
+        public virtual async Task<int> UpdateImplAsync<TEntity>(DbConnection connection, bool sync, object values, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.UpdateCommand(connection, param, filterNode);
+            DbCommandInfo command = dbCommandStrategy.UpdateCommand(connection, values, filterNode);
             return await ExecuteImplAsync(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 

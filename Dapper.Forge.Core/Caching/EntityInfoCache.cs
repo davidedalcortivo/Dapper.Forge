@@ -22,6 +22,7 @@ namespace Dapper.Forge.Core.Caching
         public static ImmutableDictionary<string, PropertyInfo> PropertiesByPropertyName { get; }
         public static ImmutableDictionary<string, PropertyInfo> PropertiesByColumnName { get; }
         public static ImmutableDictionary<string, Func<TEntity, object?>> PropertyGettersByPropertyName { get; }
+        public static ImmutableDictionary<string, PropertyInfo> UpdatePropertiesByPropertyName { get; }
 
         static EntityInfoCache()
         {
@@ -101,6 +102,7 @@ namespace Dapper.Forge.Core.Caching
             PropertiesByPropertyName = propertiesByPropertyNameBuilder.ToImmutable();
             PropertiesByColumnName = propertiesByColumnNameBuilder.ToImmutable();
             PropertyGettersByPropertyName = propertyGettersByPropertyNameBuilder.ToImmutable();
+            UpdatePropertiesByPropertyName = UpdateProperties.ToImmutableDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

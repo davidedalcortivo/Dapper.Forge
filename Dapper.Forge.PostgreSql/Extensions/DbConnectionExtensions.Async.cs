@@ -136,22 +136,22 @@ namespace Dapper.Forge.PostgreSql.Extensions
             return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, entity, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> UpdateAsync<TEntity>(this NpgsqlConnection connection, object param, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> UpdateAsync<TEntity>(this NpgsqlConnection connection, object values, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> UpdateAsync<TEntity>(this NpgsqlConnection connection, object param, Expression<Func<TEntity, bool>>? predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> UpdateAsync<TEntity>(this NpgsqlConnection connection, object values, Expression<Func<TEntity, bool>>? predicate, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, predicate, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, predicate, transaction, commandTimeout, cancellationToken);
         }
 
-        public static async Task<int> UpdateAsync<TEntity>(this NpgsqlConnection connection, object param, IFilterNode<TEntity>? filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
+        public static async Task<int> UpdateAsync<TEntity>(this NpgsqlConnection connection, object values, IFilterNode<TEntity>? filterNode, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, param, filterNode, transaction, commandTimeout, cancellationToken);
+            return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
         public static async Task<int> InsertAsync<TEntity>(this NpgsqlConnection connection, TEntity entity, NpgsqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
