@@ -101,20 +101,71 @@ for (int i = 0; i < 10000; i++)
     });
 #endregion
 
-string[] ids = ["1", null, "2", "3"];
+int?[] ids = [];
 string? search = "ciao";
 
-var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL?>(x => x.StringValue == null);
-var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(x => x.StringValue!
-    .ToLower()
-    .ToUpper()
-    .Contains("MAR"));
-var ccc = postgresqlConnection.GetAllCommand<TestTableIdentityPOSTGRESQL>(x =>
-    ids.Contains(
-        x.GuidValue!
-         .ToString()
-         .ToUpper()));
-var ddd = sqlserverConnection.GetAllCommand<TestTableIdentitySQLSERVER>(x => !x.Id.ToString().Contains("1"));
+string?[] names =
+[
+    "Davide",
+    "Marco",
+    null
+];
+
+var filter =
+new FilterGroup<TestTableIdentityMYSQL>
+(
+    [
+        new FilterDescriptor<TestTableIdentityMYSQL>(
+            x => x.BoolValue,
+            true),
+
+        new FilterDescriptor<TestTableIdentityMYSQL>(
+            x => x.StringValue,
+            "dav",
+            ComparisonOperator.Contains,
+            ignoreCase: true),
+
+        new FilterGroup<TestTableIdentityMYSQL>
+        (
+            [
+                new FilterDescriptor<TestTableIdentityMYSQL>(
+                    x => x.IntValue,
+                    18,
+                    ComparisonOperator.GreaterThanOrEqual, not: true),
+
+                new FilterDescriptor<TestTableIdentityMYSQL>(
+                    x => x.IntValue,
+                    65,
+                    ComparisonOperator.LessThanOrEqual, not: true)
+            ], not: true
+        ),
+
+        new FilterDescriptor<TestTableIdentityMYSQL>(
+            x => x.Id,
+            new[] { 1, 2, 3, 4, 5 },
+            ComparisonOperator.In)
+    ], not: true
+);
+
+
+var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(filter);
+
+var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(x => x.StringValue == null);
+
+var ccc = postgresqlConnection.GetAllCommand<TestTableIdentityPOSTGRESQL>(x => x.StringValue != null);
+
+var ddd = sqlserverConnection.GetAllCommand<TestTableIdentitySQLSERVER>(
+x =>
+(
+    x.BoolValue &&
+    x.IntValue >= 18
+)
+&&
+(
+    names.Contains(x.StringValue)
+    ||
+    !!!x.StringValue!.StartsWith("Adm")
+));
 
 Console.WriteLine(aaa.Sql);
 Console.WriteLine(bbb.Sql);

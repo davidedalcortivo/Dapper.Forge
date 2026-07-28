@@ -4,6 +4,7 @@ using Dapper.Forge.Core.Caching;
 using Dapper.Forge.Core.Models;
 using System.Collections;
 using System.Collections.Immutable;
+using System.Data.SqlTypes;
 
 
 namespace Dapper.Forge.Core.Utilities
@@ -46,6 +47,7 @@ namespace Dapper.Forge.Core.Utilities
 
         private void TranslateDescriptor(FilterDescriptor<TEntity> f)
         {
+            bool parenthesize = true;
             string left = _ctx.SqlDialectStrategy.RenderIdentifier(_columnNamesByPropertyName[f.PropertyName]);
             string sql;
 
@@ -76,17 +78,27 @@ namespace Dapper.Forge.Core.Utilities
                 else
                 {
                     List<string> parts = [];
+                    int conditionCount = 0;
 
                     if (hasNull)
-                        parts.Add(_ctx.SqlDialectStrategy.IsNull(left));
+                    {
+                        parts.Add($"({_ctx.SqlDialectStrategy.IsNull(left)})");
+                        conditionCount++;
+                    }
 
                     if (values.Count > 0)
                     {
                         string p = _ctx.AddParameter(values.ToArray());
-                        parts.Add(_ctx.SqlDialectStrategy.In(left, p));
+                        parts.Add($"({_ctx.SqlDialectStrategy.In(left, p)})");
+                        conditionCount++;
                     }
 
-                    sql = $"({string.Join(" OR ", parts)})";
+                    if (conditionCount > 1)
+                        sql = $"({string.Join(" OR ", parts)})";
+                    else
+                        sql = string.Join(" OR ", parts);
+
+                    parenthesize = false;
                 }
             }
             else if ((f.ComparisonOperator is ComparisonOperator.Contains or ComparisonOperator.StartsWith or ComparisonOperator.EndsWith) && f.Value is string value)
@@ -109,7 +121,7 @@ namespace Dapper.Forge.Core.Utilities
                     _ => throw new NotSupportedException($"Operator '{f.ComparisonOperator}' cannot be applied to property '{f.PropertyName}' and value '{f.Value}'.")
                 };
 
-                sql = $"({_ctx.SqlDialectStrategy.Like(left, right)})";
+                sql = _ctx.SqlDialectStrategy.Like(left, right);
             }
             else
             {
@@ -134,8 +146,11 @@ namespace Dapper.Forge.Core.Utilities
                 };
             }
 
+            if (parenthesize)
+                sql = $"({sql})";
+
             if (f.Not)
-                sql = $"NOT ({sql})";
+                sql = $"NOT {sql}";
 
             _ctx.SqlBuffer.Append(sql);
         }
@@ -164,7 +179,7 @@ namespace Dapper.Forge.Core.Utilities
             string sql = _ctx.Pop();
 
             if (g.Not)
-                sql = $"NOT ({sql})";
+                sql = $"NOT {sql}";
 
             _ctx.SqlBuffer.Append(sql);
         }

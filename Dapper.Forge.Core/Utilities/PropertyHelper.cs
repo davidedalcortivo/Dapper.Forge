@@ -1,4 +1,5 @@
 ﻿using Dapper.Forge.Core.Caching;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -36,7 +37,20 @@ namespace Dapper.Forge.Core.Utilities
         public static void EnsureValue<TEntity>(PropertyInfo property, object? value)
         {
             if (value is not null)
-                EnsureValueType<TEntity>(property, value.GetType());
+            {
+                if (value is IEnumerable enumerable && value is not string)
+                {
+                    foreach (object? _value in enumerable)
+                    {
+                        if (_value is not null)
+                            EnsureValueType<TEntity>(property, _value.GetType());
+                    }
+                }
+                else
+                {
+                    EnsureValueType<TEntity>(property, value.GetType());
+                }
+            }
         }
 
         public static void EnsureValueType<TEntity>(PropertyInfo property, Type valueType)

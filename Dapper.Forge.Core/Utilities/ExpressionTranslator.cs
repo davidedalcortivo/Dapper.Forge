@@ -126,9 +126,19 @@ namespace Dapper.Forge.Core.Utilities
 
             if (node.NodeType == ExpressionType.Not)
             {
-                _ctx.SqlBuffer.Append("NOT (");
-                Visit(node.Operand);
-                _ctx.SqlBuffer.Append(')');
+                _ctx.SqlBuffer.Append("NOT ");
+
+                if (node.Operand is UnaryExpression { NodeType: ExpressionType.Not })
+                {
+                    _ctx.SqlBuffer.Append('(');
+                    Visit(node.Operand);
+                    _ctx.SqlBuffer.Append(')');
+                }
+                else
+                {
+                    Visit(node.Operand);
+                }
+
                 return node;
             }
 
