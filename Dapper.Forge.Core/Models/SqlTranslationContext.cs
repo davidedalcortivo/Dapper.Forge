@@ -7,7 +7,7 @@ namespace Dapper.Forge.Core.Models
 {
     internal sealed partial class SqlTranslationContext
     {
-        private const string _parameterPrefix = "__p";
+        private const string _parameterPrefix = "p";
         private readonly Stack<StringBuilder> _stack;
 
         public ISqlDialectStrategy SqlDialectStrategy { get; }

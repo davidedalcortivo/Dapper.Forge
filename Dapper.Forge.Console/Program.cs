@@ -9,20 +9,40 @@ using MySqlConnector;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
 
+List<SortDescriptor<TestTableMYSQL>> sortsa = [];
+sortsa.Add(new("Id", SortDirection.Ascending));
 
-List<SortDescriptor<TestTableIdentityMYSQL>> sorts = [];
-sorts.Add(new("Id", SortDirection.Ascending));
+List<SortDescriptor<TestTableIdentityMYSQL>> sortsb = [];
+sortsb.Add(new("Id", SortDirection.Ascending));
+
+List<SortDescriptor<TestTableORACLE>> sortsc = [];
+sortsc.Add(new("Id", SortDirection.Ascending));
+
+List<SortDescriptor<TestTableIdentityORACLE>> sortsd = [];
+sortsd.Add(new("Id", SortDirection.Ascending));
+
+List<SortDescriptor<TestTablePOSTGRESQL>> sortse = [];
+sortse.Add(new("Id", SortDirection.Ascending));
+
+List<SortDescriptor<TestTableIdentityPOSTGRESQL>> sortsf = [];
+sortsf.Add(new("Id", SortDirection.Ascending));
+
+List<SortDescriptor<TestTableSQLSERVER>> sortsg = [];
+sortsg.Add(new("Id", SortDirection.Ascending));
+
+List<SortDescriptor<TestTableIdentitySQLSERVER>> sortsh = [];
+sortsh.Add(new("Id", SortDirection.Ascending));
 
 
 var rnd = new Random();
-var aa = new List<TestTableORACLE>();
-var bb = new List<TestTableIdentityORACLE>();
+var aa = new List<TestTableSQLSERVER>();
+var bb = new List<TestTableIdentitySQLSERVER>();
 
 #region DACHIUDERE
 for (int i = 0; i < 10000; i++)
     aa.Add(new()
     {
-        Id = Guid.NewGuid().ToString(),
+        Id = Guid.NewGuid(),
         IntValue = rnd.Next(0, 100000) switch
         {
             < 20000 => null,
@@ -44,7 +64,7 @@ for (int i = 0; i < 10000; i++)
         BoolValue = rnd.Next(0, 100) switch
         {
             < 20 => null,
-            _ => rnd.Next(0, 2) == 1 ? 1 : 0
+            _ => rnd.Next(0, 2) == 1
         },
 
         TimestampValue = rnd.Next(0, 100) switch
@@ -56,7 +76,7 @@ for (int i = 0; i < 10000; i++)
         GuidValue = rnd.Next(0, 100) switch
         {
             < 20 => null,
-            _ => Guid.NewGuid().ToString()
+            _ => Guid.NewGuid()
         }
     });
 
@@ -83,8 +103,8 @@ for (int i = 0; i < 10000; i++)
 
         BoolValue = rnd.Next(0, 100) switch
         {
-            < 20 => 0,
-            _ => rnd.Next(0, 2) == 1 ? 1 : 0
+            < 20 => null,
+            _ => rnd.Next(0, 2) == 1
         },
 
         TimestampValue = rnd.Next(0, 100) switch
@@ -96,78 +116,30 @@ for (int i = 0; i < 10000; i++)
         GuidValue = rnd.Next(0, 100) switch
         {
             < 20 => null,
-            _ => Guid.NewGuid().ToString()
+            _ => Guid.NewGuid()
         }
     });
 #endregion
 
-int?[] ids = [];
-string? search = "ciao";
 
-string?[] names =
-[
-    "Davide",
-    "Marco",
-    null
-];
-
-var filter =
-new FilterGroup<TestTableIdentityMYSQL>
-(
-    [
-        new FilterDescriptor<TestTableIdentityMYSQL>(
-            x => x.BoolValue,
-            true),
-
-        new FilterDescriptor<TestTableIdentityMYSQL>(
-            x => x.StringValue,
-            "dav",
-            ComparisonOperator.Contains,
-            ignoreCase: true),
-
-        new FilterGroup<TestTableIdentityMYSQL>
-        (
-            [
-                new FilterDescriptor<TestTableIdentityMYSQL>(
-                    x => x.IntValue,
-                    18,
-                    ComparisonOperator.GreaterThanOrEqual, not: true),
-
-                new FilterDescriptor<TestTableIdentityMYSQL>(
-                    x => x.IntValue,
-                    65,
-                    ComparisonOperator.LessThanOrEqual, not: true)
-            ], not: true
-        ),
-
-        new FilterDescriptor<TestTableIdentityMYSQL>(
-            x => x.Id,
-            new[] { 1, 2, 3, 4, 5 },
-            ComparisonOperator.In)
-    ], not: true
-);
+FilterDescriptor<TestTableMYSQL> filtera = new(x => x.IntValue, null);
+FilterDescriptor<TestTableIdentityMYSQL> filterb = new(x => x.IntValue, null);
+FilterDescriptor<TestTableORACLE> filterc = new(x => x.IntValue, null);
+FilterDescriptor<TestTableIdentityORACLE> filterd = new(x => x.IntValue, null);
+FilterDescriptor<TestTablePOSTGRESQL> filtere = new(x => x.IntValue, null);
+FilterDescriptor<TestTableIdentityPOSTGRESQL> filterf = new(x => x.IntValue, null);
+FilterDescriptor<TestTableSQLSERVER> filterg = new(x => x.IntValue, null);
+FilterDescriptor<TestTableIdentitySQLSERVER> filterh = new(x => x.IntValue, null);
 
 
-var aaa = mysqlConnection.GetAllCommand<TestTableIdentityMYSQL>(filter);
 
-var bbb = oracleConnection.GetAllCommand<TestTableIdentityORACLE>(x => x.StringValue == null);
+var u_aaa = await mysqlConnection.MaxAsync<TestTableMYSQL, int?>("IntValue", x => x.IntValue < 50000);
+var u_aaaa = await mysqlConnection.MaxAsync<TestTableIdentityMYSQL, int?>(x => x.IntValue, x => x.IntValue != null);
+var u_bbb = await oracleConnection.MaxAsync<TestTableORACLE, int?>(x => x.BoolValue, filterc);
+var u_bbbb = await oracleConnection.MaxAsync<TestTableIdentityORACLE, int?>("IntValue", x => x.IntValue < 50000);
+var u_ccc = await postgresqlConnection.MaxAsync<TestTablePOSTGRESQL, int?>(x => x.IntValue);
+var u_cccc = await postgresqlConnection.MaxAsync<TestTableIdentityPOSTGRESQL, int?>(x => x.IntValue);
+var u_ddd = await sqlserverConnection.MaxAsync<TestTableSQLSERVER, int?>(x => x.IntValue);
+var u_dddd = await sqlserverConnection.MaxAsync<TestTableIdentitySQLSERVER, int?>(x => x.IntValue);
 
-var ccc = postgresqlConnection.GetAllCommand<TestTableIdentityPOSTGRESQL>(x => x.StringValue != null);
-
-var ddd = sqlserverConnection.GetAllCommand<TestTableIdentitySQLSERVER>(
-x =>
-(
-    x.BoolValue &&
-    x.IntValue >= 18
-)
-&&
-(
-    names.Contains(x.StringValue)
-    ||
-    !!!x.StringValue!.StartsWith("Adm")
-));
-
-Console.WriteLine(aaa.Sql);
-Console.WriteLine(bbb.Sql);
-Console.WriteLine(ccc.Sql);
-Console.WriteLine(ddd.Sql);
+Console.WriteLine("fine");

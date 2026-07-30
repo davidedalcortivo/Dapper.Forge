@@ -208,7 +208,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual SqlTemplate AvgSqlBuilder<TEntity>() where TEntity : class
         {
-            return BuildAggregateSql<TEntity>($"AVG({SqlDialectStrategy.CastAsString(SqlDialectStrategy.Placeholder)})");
+            return BuildAggregateSql<TEntity>(SqlDialectStrategy.CastAsString($"AVG({SqlDialectStrategy.Placeholder})"));
         }
 
         public virtual SqlTemplate SumSqlBuilder<TEntity>() where TEntity : class
