@@ -133,13 +133,13 @@ FilterDescriptor<TestTableIdentitySQLSERVER> filterh = new(x => x.IntValue, null
 
 
 
-var u_aaa = await mysqlConnection.MaxAsync<TestTableMYSQL, int?>("IntValue", x => x.IntValue < 50000);
-var u_aaaa = await mysqlConnection.MaxAsync<TestTableIdentityMYSQL, int?>(x => x.IntValue, x => x.IntValue != null);
-var u_bbb = await oracleConnection.MaxAsync<TestTableORACLE, int?>(x => x.BoolValue, filterc);
-var u_bbbb = await oracleConnection.MaxAsync<TestTableIdentityORACLE, int?>("IntValue", x => x.IntValue < 50000);
-var u_ccc = await postgresqlConnection.MaxAsync<TestTablePOSTGRESQL, int?>(x => x.IntValue);
-var u_cccc = await postgresqlConnection.MaxAsync<TestTableIdentityPOSTGRESQL, int?>(x => x.IntValue);
-var u_ddd = await sqlserverConnection.MaxAsync<TestTableSQLSERVER, int?>(x => x.IntValue);
-var u_dddd = await sqlserverConnection.MaxAsync<TestTableIdentitySQLSERVER, int?>(x => x.IntValue);
+var u_aaa = await mysqlConnection.MinAsync<TestTableMYSQL, int?>("IntValue", x => x.IntValue < 0);
+var u_aaaa = await mysqlConnection.MinAsync<TestTableIdentityMYSQL, int?>(x => x.IntValue, x => x.IntValue != null);
+var u_bbb = await oracleConnection.MinAsync((TestTableORACLE x) => x.BoolValue);
+var u_bbbb = await oracleConnection.MinAsync<TestTableIdentityORACLE, int>("IntValue", x => x.IntValue < 50000);
+var u_ccc = await postgresqlConnection.MinAsync<TestTablePOSTGRESQL, int?>(x => x.IntValue);
+var u_cccc = await postgresqlConnection.MinAsync<TestTableIdentityPOSTGRESQL, int?>(x => x.IntValue);
+var u_ddd = await sqlserverConnection.MinAsync<TestTableSQLSERVER, int?>(x => x.IntValue);
+var u_dddd = await sqlserverConnection.MinAsync<TestTableIdentitySQLSERVER, int?>(x => x.IntValue);
 
 Console.WriteLine("fine");

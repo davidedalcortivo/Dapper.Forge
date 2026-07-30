@@ -41,9 +41,9 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             EnsureTransaction(connection, transaction);
 
             if (sync)
-                return connection.QueryFirstOrDefault<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
+                return connection.QueryFirstOrDefault<TEntity?>(command.Sql, command.Parameters, transaction, commandTimeout);
 
-            return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+            return await connection.QueryFirstOrDefaultAsync<TEntity?>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
         }
 
         protected virtual async Task<TEntity> QuerySingleImplAsync<TEntity>(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
@@ -61,9 +61,9 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             EnsureTransaction(connection, transaction);
 
             if (sync)
-                return connection.QuerySingleOrDefault<TEntity>(command.Sql, command.Parameters, transaction, commandTimeout);
+                return connection.QuerySingleOrDefault<TEntity?>(command.Sql, command.Parameters, transaction, commandTimeout);
 
-            return await connection.QuerySingleOrDefaultAsync<TEntity>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+            return await connection.QuerySingleOrDefaultAsync<TEntity?>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
         }
 
         protected virtual async Task<int> ExecuteImplAsync(DbConnection connection, bool sync, DbCommandInfo command, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken)
@@ -161,9 +161,9 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             EnsureTransaction(connection, transaction);
 
             if (sync)
-                return connection.ExecuteScalar<TProperty>(command.Sql, command.Parameters, transaction, commandTimeout);
+                return connection.ExecuteScalar<TProperty?>(command.Sql, command.Parameters, transaction, commandTimeout);
 
-            return await connection.ExecuteScalarAsync<TProperty>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
+            return await connection.ExecuteScalarAsync<TProperty?>(new CommandDefinition(command.Sql, command.Parameters, transaction, commandTimeout, cancellationToken: cancellationToken));
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Dapper.Forge.Core.Utilities
                 body = unaryExpression.Operand;
 
             if (body is not MemberExpression memberExpression)
-                throw new ArgumentException("The provided expression is not valid. Expected a simple member access expression.", nameof(selector));
+                throw new ArgumentException("The provided selector is not valid. Expected a simple member access expression.");
 
             return GetProperty<TEntity>(memberExpression.Member.Name);
         }
@@ -59,7 +59,7 @@ namespace Dapper.Forge.Core.Utilities
             valueType = Nullable.GetUnderlyingType(valueType) ?? valueType;
 
             if (!propertyType.IsAssignableFrom(valueType))
-                throw new ArgumentException($"The type of the provided value '{valueType}' does not match the type of the property '{propertyType}' for the entity '{typeof(TEntity).Name}'.");
+                throw new ArgumentException($"The type of the provided value '{valueType}' does not match the type of the property '{property.Name}' ('{propertyType}') for the entity '{typeof(TEntity).Name}'.");
         }
 
         public static Func<T, object?> BuildGetterExpression<T>(PropertyInfo property) where T : class

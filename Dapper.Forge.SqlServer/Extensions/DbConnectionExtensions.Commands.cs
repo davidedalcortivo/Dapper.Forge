@@ -406,22 +406,22 @@ namespace Dapper.Forge.SqlServer.Extensions
             return DbCommandStrategy.Instance.MinCommand(connection, selector, filterNode);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this SqlConnection connection, string propertyName) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this SqlConnection connection, string propertyName) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.MinCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
+            return DbCommandStrategy.Instance.MinCommand<TEntity, TProperty>(connection, propertyName, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.MinCommand(connection, propertyName, predicate);
+            return DbCommandStrategy.Instance.MinCommand<TEntity, TProperty>(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo MinCommand<TEntity>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.MinCommand(connection, propertyName, filterNode);
+            return DbCommandStrategy.Instance.MinCommand<TEntity, TProperty>(connection, propertyName, filterNode);
         }
 
         public static DbCommandInfo MaxCommand<TEntity, TProperty>(this SqlConnection connection, Expression<Func<TEntity, TProperty?>> selector) where TEntity : class
@@ -442,22 +442,22 @@ namespace Dapper.Forge.SqlServer.Extensions
             return DbCommandStrategy.Instance.MaxCommand(connection, selector, filterNode);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this SqlConnection connection, string propertyName) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this SqlConnection connection, string propertyName) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.MaxCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
+            return DbCommandStrategy.Instance.MaxCommand<TEntity, TProperty>(connection, propertyName, (IFilterNode<TEntity>?)null);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.MaxCommand(connection, propertyName, predicate);
+            return DbCommandStrategy.Instance.MaxCommand<TEntity, TProperty>(connection, propertyName, predicate);
         }
 
-        public static DbCommandInfo MaxCommand<TEntity>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
-            return DbCommandStrategy.Instance.MaxCommand(connection, propertyName, filterNode);
+            return DbCommandStrategy.Instance.MaxCommand<TEntity, TProperty>(connection, propertyName, filterNode);
         }
     }
 }

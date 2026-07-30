@@ -19,7 +19,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             Type idType = id.GetType();
 
             if (idPropertyType != idType)
-                throw new ArgumentException($"The type of the provided id '{idType}' does not match the type of the id property '{idPropertyType}' for the entity '{typeof(TEntity).Name}'.");
+                throw new ArgumentException($"The type of the provided id '{idType}' does not match the type of the id property ('{idPropertyType}') for the entity '{typeof(TEntity).Name}'.");
         }
 
         protected virtual (string?, DynamicParameters?) Translate<TEntity>(ISqlDialectStrategy sqlDialectStrategy, Expression<Func<TEntity, bool>>? predicate, DynamicParameters? parameters) where TEntity : class

@@ -370,13 +370,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual async Task<TProperty?> MinImplAsync<TEntity, TProperty>(DbConnection connection, bool sync, string propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MinCommand(connection, propertyName, predicate);
+            DbCommandInfo command = dbCommandStrategy.MinCommand<TEntity, TProperty>(connection, propertyName, predicate);
             return await ExecuteScalarImplAsync<TProperty?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TProperty?> MinImplAsync<TEntity, TProperty>(DbConnection connection, bool sync, string propertyName, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MinCommand(connection, propertyName, filterNode);
+            DbCommandInfo command = dbCommandStrategy.MinCommand<TEntity, TProperty>(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<TProperty?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
@@ -394,13 +394,13 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
         public virtual async Task<TProperty?> MaxImplAsync<TEntity, TProperty>(DbConnection connection, bool sync, string propertyName, Expression<Func<TEntity, bool>>? predicate, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MaxCommand(connection, propertyName, predicate);
+            DbCommandInfo command = dbCommandStrategy.MaxCommand<TEntity, TProperty>(connection, propertyName, predicate);
             return await ExecuteScalarImplAsync<TProperty?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
 
         public virtual async Task<TProperty?> MaxImplAsync<TEntity, TProperty>(DbConnection connection, bool sync, string propertyName, IFilterNode<TEntity>? filterNode, DbTransaction? transaction, int? commandTimeout, CancellationToken cancellationToken) where TEntity : class
         {
-            DbCommandInfo command = dbCommandStrategy.MaxCommand(connection, propertyName, filterNode);
+            DbCommandInfo command = dbCommandStrategy.MaxCommand<TEntity, TProperty>(connection, propertyName, filterNode);
             return await ExecuteScalarImplAsync<TProperty?>(connection, sync, command, transaction, commandTimeout, cancellationToken);
         }
     }
