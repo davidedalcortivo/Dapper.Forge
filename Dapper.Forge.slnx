@@ -1,8 +1,7 @@
 <Solution>
-  <Project Path="Dapper.Forge.Console/Dapper.Forge.Console.csproj" Id="0e490788-0fc3-46a0-92b4-2302d9b64fcb" />
-  <Project Path="Dapper.Forge.Core/Dapper.Forge.Core.csproj" Id="c7e7aed1-64a5-4a0e-a590-cf4163da8a16" />
-  <Project Path="Dapper.Forge.MySql/Dapper.Forge.MySql.csproj" Id="c282fbf3-4680-4a93-a17f-6907fa4e6025" />
-  <Project Path="Dapper.Forge.Oracle/Dapper.Forge.Oracle.csproj" Id="97d7e035-5028-4ef5-8df4-b3dc8a7d16f3" />
-  <Project Path="Dapper.Forge.PostgreSql/Dapper.Forge.PostgreSql.csproj" />
-  <Project Path="Dapper.Forge.SqlServer/Dapper.Forge.SqlServer.csproj" Id="e9ca708e-db95-4f95-825c-1ca8118996e4" />
+  <Project Path="src/Dapper.Forge.Core/Dapper.Forge.Core.csproj" Id="2e090746-104c-48d1-a656-544f4b968cd5" />
+  <Project Path="src/Dapper.Forge.MySql/Dapper.Forge.MySql.csproj" Id="bb5137ec-e261-4142-890b-f864d3ae4d6b" />
+  <Project Path="src/Dapper.Forge.Oracle/Dapper.Forge.Oracle.csproj" Id="f43c00b8-4feb-4401-9bde-7901fb54c2ac" />
+  <Project Path="src/Dapper.Forge.PostgreSql/Dapper.Forge.PostgreSql.csproj" Id="08f5d437-c884-44ff-b63d-c2f8d30d6c9b" />
+  <Project Path="src/Dapper.Forge.SqlServer/Dapper.Forge.SqlServer.csproj" Id="35d4498f-a011-41c6-96ed-a401fb2143ba" />
 </Solution>
