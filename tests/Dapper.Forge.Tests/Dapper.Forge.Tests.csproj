@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="10.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Dapper.Forge.Core\Dapper.Forge.Core.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Dapper.Forge.MySql\Dapper.Forge.MySql.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Dapper.Forge.Oracle\Dapper.Forge.Oracle.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Dapper.Forge.PostgreSql\Dapper.Forge.PostgreSql.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Dapper.Forge.SqlServer\Dapper.Forge.SqlServer.csproj">
+      <privateAssets>all</privateAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
