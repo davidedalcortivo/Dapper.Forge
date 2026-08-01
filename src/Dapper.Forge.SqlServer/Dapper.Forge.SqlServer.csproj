@@ -11,9 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dapper.Forge.Core\Dapper.Forge.Core.csproj">
-      <privateAssets>all</privateAssets>
-    </ProjectReference>
+    <ProjectReference Include="..\Dapper.Forge.Core\Dapper.Forge.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -23,21 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dapper.Forge.Core\Dapper.Forge.Core.csproj">
-      <privateAssets>all</privateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Dapper.Forge.MySql\Dapper.Forge.MySql.csproj">
-      <privateAssets>all</privateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Dapper.Forge.Oracle\Dapper.Forge.Oracle.csproj">
-      <privateAssets>all</privateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Dapper.Forge.PostgreSql\Dapper.Forge.PostgreSql.csproj">
-      <privateAssets>all</privateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Dapper.Forge.SqlServer\Dapper.Forge.SqlServer.csproj">
-      <privateAssets>all</privateAssets>
-    </ProjectReference>
+    <ProjectReference Include="..\..\src\Dapper.Forge.MySql\Dapper.Forge.MySql.csproj" />
+    <ProjectReference Include="..\..\src\Dapper.Forge.Oracle\Dapper.Forge.Oracle.csproj" />
+    <ProjectReference Include="..\..\src\Dapper.Forge.PostgreSql\Dapper.Forge.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\src\Dapper.Forge.SqlServer\Dapper.Forge.SqlServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
