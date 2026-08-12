@@ -501,7 +501,8 @@ namespace Dapper.Forge.MySql.Extensions
         }
 
         /// <summary>
-        /// Builds the command that updates every column of <paramref name="entity"/>'s row, except its identifier.
+        /// Builds the command that updates every column of <paramref name="entity"/>'s row, except its identifier
+        /// and any database-generated property.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
@@ -783,7 +784,8 @@ namespace Dapper.Forge.MySql.Extensions
         }
 
         /// <summary>
-        /// Builds the commands that update every column, except the identifier, of each of the specified entities' rows.
+        /// Builds the commands that update every column, except the identifier and any database-generated
+        /// property, of each of the specified entities' rows.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the commands.</param>

@@ -581,7 +581,8 @@ namespace Dapper.Forge.MySql.Extensions
         }
 
         /// <summary>
-        /// Updates every column of <paramref name="entity"/>'s row, except its identifier, asynchronously.
+        /// Updates every column of <paramref name="entity"/>'s row, except its identifier and any
+        /// database-generated property, asynchronously.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection to execute the update on.</param>
@@ -928,7 +929,8 @@ namespace Dapper.Forge.MySql.Extensions
         }
 
         /// <summary>
-        /// Updates every column, except the identifier, of each of the specified entities' rows, asynchronously.
+        /// Updates every column, except the identifier and any database-generated property, of each of the
+        /// specified entities' rows, asynchronously.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection to execute the update on.</param>
