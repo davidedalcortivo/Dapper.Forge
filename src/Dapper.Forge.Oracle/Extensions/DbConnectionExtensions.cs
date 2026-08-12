@@ -19,7 +19,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
         /// <remarks>
         /// Unlike the other providers this library supports, Oracle needs to know each column's actual data type to
-        /// build safe <c>CAST</c> expressions for its bulk update, insert-range, and upsert-range commands. The
+        /// build safe <c>CAST</c> expressions for its update-range, insert-range, and upsert-range commands. The
         /// first call for a given <typeparamref name="TEntity"/> and connection queries Oracle's data dictionary
         /// and caches the result; later calls for the same combination return immediately without hitting the
         /// database again. If <paramref name="connection"/> is closed when this runs, it is opened and closed for
@@ -772,7 +772,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <returns>The number of rows affected.</returns>
         /// <remarks>
         /// This executes a <c>MERGE</c> statement. An existing row is matched using the properties marked with
-        /// <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if none are
+        /// <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if none are
         /// marked — treating two <see langword="null"/> values in a key property as equal. On a match, every
         /// property is updated except the identifier, any database-generated property, and the key properties
         /// themselves; otherwise, a new row is inserted using every property that is not database-generated.
@@ -996,7 +996,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <returns>The total number of rows affected across all round trips.</returns>
         /// <remarks>
         /// Each round trip executes a <c>MERGE</c> statement. An existing row is matched using the properties
-        /// marked with <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if
+        /// marked with <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if
         /// none are marked — treating two <see langword="null"/> values in a key property as equal. On a match,
         /// every property is updated except the identifier, any database-generated property, and the key
         /// properties themselves; otherwise, a new row is inserted using every property that is not

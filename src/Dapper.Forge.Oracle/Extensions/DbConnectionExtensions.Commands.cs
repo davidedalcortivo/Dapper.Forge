@@ -741,7 +741,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the upsert.</returns>
         /// <remarks>
         /// The generated command is a <c>MERGE</c> statement. An existing row is matched using the properties
-        /// marked with <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if
+        /// marked with <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if
         /// none are marked — treating two <see langword="null"/> values in a key property as equal. On a match,
         /// every property is updated except the identifier, any database-generated property, and the key
         /// properties themselves; otherwise, a new row is inserted using every property that is not
@@ -941,7 +941,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// </returns>
         /// <remarks>
         /// Each generated command is a <c>MERGE</c> statement. An existing row is matched using the properties
-        /// marked with <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if
+        /// marked with <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if
         /// none are marked — treating two <see langword="null"/> values in a key property as equal. On a match,
         /// every property is updated except the identifier, any database-generated property, and the key
         /// properties themselves; otherwise, a new row is inserted using every property that is not
