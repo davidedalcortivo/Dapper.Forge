@@ -1055,6 +1055,15 @@ namespace Dapper.Forge.Oracle.Extensions
         /// A task that represents the asynchronous operation. The task result contains the total number of rows
         /// affected across all round trips.
         /// </returns>
+        /// <remarks>
+        /// When <paramref name="entities"/> requires more than one round trip, and no <paramref name="transaction"/>
+        /// is provided, all round trips run inside a single transaction that this method begins, commits on
+        /// success, and rolls back if any round trip fails — so the operation is all-or-nothing even though it
+        /// spans multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this;
+        /// committing or rolling back is then the caller's responsibility. If <paramref name="connection"/> is
+        /// closed when this method is called and it owns the transaction, it also opens and closes the connection
+        /// for the duration of the operation.
+        /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
         /// </exception>
@@ -1088,6 +1097,15 @@ namespace Dapper.Forge.Oracle.Extensions
         /// A task that represents the asynchronous operation. The task result contains the total number of rows
         /// affected across all round trips.
         /// </returns>
+        /// <remarks>
+        /// When <paramref name="ids"/> requires more than one round trip, and no <paramref name="transaction"/> is
+        /// provided, all round trips run inside a single transaction that this method begins, commits on success,
+        /// and rolls back if any round trip fails — so the operation is all-or-nothing even though it spans
+        /// multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this; committing or
+        /// rolling back is then the caller's responsibility. If <paramref name="connection"/> is closed when this
+        /// method is called and it owns the transaction, it also opens and closes the connection for the duration
+        /// of the operation.
+        /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="ids"/> is <see langword="null"/>, or one of its
         /// elements is <see langword="null"/>.
