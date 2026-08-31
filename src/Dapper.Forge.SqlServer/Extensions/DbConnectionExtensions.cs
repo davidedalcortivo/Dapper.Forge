@@ -777,7 +777,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <remarks>
         /// Unlike this library's other providers, this executes two separate statements rather than a single atomic
         /// one: an <c>UPDATE</c> that matches an existing row using the properties marked with
-        /// <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if none are
+        /// <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if none are
         /// marked — treating two <see langword="null"/> values in a key property as equal, followed by an
         /// <c>INSERT</c> that runs only if the <c>UPDATE</c> affected no rows. On a match, every property is
         /// updated except the identifier, any database-generated property, and the key properties themselves;
@@ -1030,7 +1030,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// Unlike this library's other providers, each round trip executes two separate statements rather than a
         /// single atomic one: an <c>UPDATE ... FROM</c> that joins the target table to a <c>VALUES</c>-derived
         /// source table, matching rows using the properties marked with
-        /// <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if none are
+        /// <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if none are
         /// marked — treating two <see langword="null"/> values in a key property as equal, followed by an
         /// <c>INSERT ... WHERE NOT EXISTS</c> that inserts only the entities with no matching row. On a match,
         /// every property is updated except the identifier, any database-generated property, and the key

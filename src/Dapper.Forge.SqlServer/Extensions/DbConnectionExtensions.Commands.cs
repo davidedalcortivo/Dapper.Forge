@@ -756,7 +756,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <remarks>
         /// The generated command is not a single statement: it is an <c>UPDATE</c> (using a
         /// <c>WITH (UPDLOCK, HOLDLOCK)</c> table hint) that matches an existing row using the properties marked
-        /// with <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if none are
+        /// with <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if none are
         /// marked — treating two <see langword="null"/> values in a key property as equal and setting every
         /// property except the identifier, any database-generated property, and the key properties themselves,
         /// followed by an <c>INSERT</c> that runs only if the <c>UPDATE</c> affected no rows. This library avoids a
@@ -959,7 +959,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <remarks>
         /// Each generated command is two statements: an <c>UPDATE ... FROM</c> that joins the target table to a
         /// <c>VALUES</c>-derived source table, matching rows using the properties marked with
-        /// <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if none are
+        /// <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if none are
         /// marked — treating two <see langword="null"/> values in a key property as equal, followed by an
         /// <c>INSERT ... WHERE NOT EXISTS</c> (using a <c>WITH (UPDLOCK, HOLDLOCK)</c> table hint) that inserts only
         /// the entities with no matching row. On a match, every property is updated except the identifier, any
