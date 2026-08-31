@@ -13,192 +13,938 @@ namespace Dapper.Forge.SqlServer.Extensions
 {
     public static partial class DbConnectionExtensions
     {
+        /// <summary>
+        /// Ensures the SQL command cache and the database's column metadata for <typeparamref name="TEntity"/> are
+        /// loaded, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to load the cache for.</typeparam>
+        /// <param name="connection">The connection used to load the cache.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <remarks>
+        /// SQL Server needs to know a column's actual data type to decide whether computing <c>Avg</c> or
+        /// <c>Sum</c> over it needs a safety cast first. The first call for a given <typeparamref name="TEntity"/>
+        /// and connection queries SQL Server's system catalogs and caches the result; later calls for the same
+        /// combination return immediately without hitting the database again.
+        /// <para>
+        /// Calling this ahead of time is required before using
+        /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> or
+        /// <see cref="SumCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (or their
+        /// overloads) directly. The corresponding <c>Avg</c>/<c>AvgAsync</c> and <c>Sum</c>/<c>SumAsync</c>
+        /// execution methods in this class call it automatically and do not need it called first.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task LoadDbCacheAsync<TEntity>(this SqlConnection connection, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             await DbExecutionStrategy.Instance.LoadDbCacheImplAsync<TEntity>(connection, false, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, no
+        /// explicit ordering is applied.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the matching rows; never
+        /// <see langword="null"/>, an empty list if none match.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetAllImplAsync(connection, false, (IFilterNode<TEntity>?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves every <typeparamref name="TEntity"/> row matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned rows must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, no
+        /// explicit ordering is applied.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the matching rows; never
+        /// <see langword="null"/>, an empty list if none match.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetAllImplAsync(connection, false, predicate, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves every <typeparamref name="TEntity"/> row matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned rows must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, no
+        /// explicit ordering is applied.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the matching rows; never
+        /// <see langword="null"/>, an empty list if none match.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<IReadOnlyList<TEntity>> GetAllAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetAllImplAsync(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the first <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the first matching row.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="InvalidOperationException">No row exists.</exception>
         public static async Task<TEntity> GetFirstAsync<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetFirstImplAsync(connection, false, (IFilterNode<TEntity>?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the first <typeparamref name="TEntity"/> row matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the first matching row.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="InvalidOperationException">No row matches.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<TEntity> GetFirstAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetFirstImplAsync(connection, false, predicate, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the first <typeparamref name="TEntity"/> row matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the first matching row.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="InvalidOperationException">No row matches.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<TEntity> GetFirstAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetFirstImplAsync(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the first <typeparamref name="TEntity"/> row, or <see langword="null"/> if none exists, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the first matching row, or
+        /// <see langword="null"/> if none exists.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<TEntity?> GetFirstOrDefaultAsync<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync(connection, false, (IFilterNode<TEntity>?)null, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the first <typeparamref name="TEntity"/> row matching the specified predicate, or
+        /// <see langword="null"/> if none matches, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the first matching row, or
+        /// <see langword="null"/> if none matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<TEntity?> GetFirstOrDefaultAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync(connection, false, predicate, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the first <typeparamref name="TEntity"/> row matching the specified filter, or
+        /// <see langword="null"/> if none matches, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the first matching row, or
+        /// <see langword="null"/> if none matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<TEntity?> GetFirstOrDefaultAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetFirstOrDefaultImplAsync(connection, false, filterNode, sortDescriptors, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the single <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the single row.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="InvalidOperationException">No row exists, or more than one row exists.</exception>
         public static async Task<TEntity> GetSingleAsync<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetSingleImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the single <typeparamref name="TEntity"/> row matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the single matching row.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="InvalidOperationException">No row matches, or more than one row matches.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<TEntity> GetSingleAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetSingleImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the single <typeparamref name="TEntity"/> row matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the single matching row.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="InvalidOperationException">No row matches, or more than one row matches.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<TEntity> GetSingleAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetSingleImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the single <typeparamref name="TEntity"/> row, or <see langword="null"/> if none exists, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the single row, or
+        /// <see langword="null"/> if none exists.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="InvalidOperationException">More than one row exists.</exception>
         public static async Task<TEntity?> GetSingleOrDefaultAsync<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the single <typeparamref name="TEntity"/> row matching the specified predicate, or
+        /// <see langword="null"/> if none matches, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the single matching row, or
+        /// <see langword="null"/> if none matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="InvalidOperationException">More than one row matches.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<TEntity?> GetSingleOrDefaultAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the single <typeparamref name="TEntity"/> row matching the specified filter, or
+        /// <see langword="null"/> if none matches, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the single matching row, or
+        /// <see langword="null"/> if none matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="InvalidOperationException">More than one row matches.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<TEntity?> GetSingleOrDefaultAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetSingleOrDefaultImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the <typeparamref name="TEntity"/> row with the specified identifier, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="id">
+        /// The identifier of the row to retrieve. Its runtime type must exactly match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the matching row, or
+        /// <see langword="null"/> if no row has that identifier.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="id"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The type of <paramref name="id"/> does not match the type of <typeparamref name="TEntity"/>'s identifier
+        /// property, or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<TEntity?> GetByIdAsync<TEntity>(this SqlConnection connection, object id, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetByIdImplAsync<TEntity>(connection, false, id, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves a page of <typeparamref name="TEntity"/> rows, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty and
+        /// <paramref name="skip"/> or <paramref name="take"/> is specified, the results are ordered by the
+        /// identifier property instead, to ensure stable pagination.
+        /// </param>
+        /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
+        /// <param name="take">
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
+        /// is specified, all remaining rows after the skip are returned.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the matching rows for the
+        /// requested page; never <see langword="null"/>, an empty list if none match.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<IReadOnlyList<TEntity>> GetPageAsync<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetPageImplAsync(connection, false, (IFilterNode<TEntity>?)null, sortDescriptors, skip, take, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves a page of <typeparamref name="TEntity"/> rows matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned rows must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty and
+        /// <paramref name="skip"/> or <paramref name="take"/> is specified, the results are ordered by the
+        /// identifier property instead, to ensure stable pagination.
+        /// </param>
+        /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
+        /// <param name="take">
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
+        /// is specified, all remaining rows after the skip are returned.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the matching rows for the
+        /// requested page; never <see langword="null"/>, an empty list if none match.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<IReadOnlyList<TEntity>> GetPageAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetPageImplAsync(connection, false, predicate, sortDescriptors, skip, take, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves a page of <typeparamref name="TEntity"/> rows matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned rows must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty and
+        /// <paramref name="skip"/> or <paramref name="take"/> is specified, the results are ordered by the
+        /// identifier property instead, to ensure stable pagination.
+        /// </param>
+        /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
+        /// <param name="take">
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
+        /// is specified, all remaining rows after the skip are returned.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the matching rows for the
+        /// requested page; never <see langword="null"/>, an empty list if none match.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<IReadOnlyList<TEntity>> GetPageAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.GetPageImplAsync(connection, false, filterNode, sortDescriptors, skip, take, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Updates every column of <paramref name="entity"/>'s row, except its identifier and any
+        /// database-generated property, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection to execute the update on.</param>
+        /// <param name="entity">The entity whose current property values are written back to its row.</param>
+        /// <param name="transaction">The transaction to execute the update within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, entity, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Updates the specified columns for every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection to execute the update on.</param>
+        /// <param name="values">
+        /// An object whose public properties specify the columns to update and their new values. Every property
+        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
+        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the update within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <remarks>
+        /// This updates every row in the table. Use one of the overloads that also accepts a predicate or a filter
+        /// to restrict which rows are updated.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
+        /// updatable property of <typeparamref name="TEntity"/>, a property's value is not assignable to the
+        /// corresponding property's type, or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object values, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Updates the specified columns for every <typeparamref name="TEntity"/> row matching the specified
+        /// predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection to execute the update on.</param>
+        /// <param name="values">
+        /// An object whose public properties specify the columns to update and their new values. Every property
+        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
+        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// </param>
+        /// <param name="predicate">
+        /// An optional predicate the updated rows must satisfy. When <see langword="null"/>, every row is updated.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the update within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
+        /// updatable property of <typeparamref name="TEntity"/>, a property's value is not assignable to the
+        /// corresponding property's type, or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object values, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Updates the specified columns for every <typeparamref name="TEntity"/> row matching the specified
+        /// filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection to execute the update on.</param>
+        /// <param name="values">
+        /// An object whose public properties specify the columns to update and their new values. Every property
+        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
+        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// </param>
+        /// <param name="filterNode">
+        /// An optional filter the updated rows must satisfy. When <see langword="null"/>, every row is updated.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the update within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
+        /// updatable property of <typeparamref name="TEntity"/>, a property's value is not assignable to the
+        /// corresponding property's type, or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<int> UpdateAsync<TEntity>(this SqlConnection connection, object values, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.UpdateImplAsync(connection, false, values, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Inserts <paramref name="entity"/> as a new row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to insert.</typeparam>
+        /// <param name="connection">The connection to execute the insert on.</param>
+        /// <param name="entity">The entity to insert.</param>
+        /// <param name="transaction">The transaction to execute the insert within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <remarks>
+        /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
+        /// including the identifier property unless it is itself database-generated.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> InsertAsync<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.InsertImplAsync(connection, false, entity, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Deletes <paramref name="entity"/>'s row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete.</typeparam>
+        /// <param name="connection">The connection to execute the delete on.</param>
+        /// <param name="entity">The entity whose row is deleted, matched by its identifier.</param>
+        /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> DeleteAsync<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.DeleteImplAsync(connection, false, entity, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Deletes the <typeparamref name="TEntity"/> row with the specified identifier, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete.</typeparam>
+        /// <param name="connection">The connection to execute the delete on.</param>
+        /// <param name="id">
+        /// The identifier of the row to delete. Its runtime type must exactly match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="id"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The type of <paramref name="id"/> does not match the type of <typeparamref name="TEntity"/>'s identifier
+        /// property, or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> DeleteAsync<TEntity>(this SqlConnection connection, object id, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.DeleteImplAsync<TEntity>(connection, false, id, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Deletes every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete rows from.</typeparam>
+        /// <param name="connection">The connection to execute the delete on.</param>
+        /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <remarks>
+        /// This deletes every row in the table. Use one of the overloads that accepts a predicate or a filter to
+        /// restrict which rows are deleted.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> DeleteAsync<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.DeleteImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Deletes every <typeparamref name="TEntity"/> row matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete rows from.</typeparam>
+        /// <param name="connection">The connection to execute the delete on.</param>
+        /// <param name="predicate">
+        /// An optional predicate the deleted rows must satisfy. When <see langword="null"/>, every row is deleted.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<int> DeleteAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.DeleteImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Deletes every <typeparamref name="TEntity"/> row matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete rows from.</typeparam>
+        /// <param name="connection">The connection to execute the delete on.</param>
+        /// <param name="filterNode">
+        /// An optional filter the deleted rows must satisfy. When <see langword="null"/>, every row is deleted.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<int> DeleteAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.DeleteImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Inserts <paramref name="entity"/> as a new row, or updates its row if one already exists, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to upsert.</typeparam>
+        /// <param name="connection">The connection to execute the upsert on.</param>
+        /// <param name="entity">The entity to insert or update.</param>
+        /// <param name="transaction">
+        /// The transaction to execute the upsert within, or <see langword="null"/> to have this method manage its
+        /// own transaction (see remarks).
+        /// </param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected.</returns>
+        /// <remarks>
+        /// Unlike this library's other providers, this executes two separate statements rather than a single atomic
+        /// one: an <c>UPDATE</c> that matches an existing row using the properties marked with
+        /// <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if none are
+        /// marked — treating two <see langword="null"/> values in a key property as equal, followed by an
+        /// <c>INSERT</c> that runs only if the <c>UPDATE</c> affected no rows. On a match, every property is
+        /// updated except the identifier, any database-generated property, and the key properties themselves;
+        /// otherwise, a new row is inserted using every property that is not database-generated.
+        /// <para>
+        /// Because correctness under concurrent access depends on both statements running in the same transaction,
+        /// when <paramref name="transaction"/> is <see langword="null"/>, this method begins one, commits it on
+        /// success, and rolls it back if execution fails — passing an explicit <paramref name="transaction"/> opts
+        /// out of this, making it the caller's responsibility instead. If <paramref name="connection"/> is closed
+        /// when this method is called and it owns the transaction, it also opens and closes the connection for the
+        /// duration of the operation.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> UpsertAsync<TEntity>(this SqlConnection connection, TEntity entity, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.UpsertImplAsync(connection, false, entity, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Retrieves the <typeparamref name="TEntity"/> rows with the specified identifiers, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="ids">
+        /// The identifiers of the rows to retrieve. Neither the sequence nor any of its elements may be
+        /// <see langword="null"/>, and each identifier's runtime type must exactly match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </param>
+        /// <param name="preserveDuplicates">
+        /// Whether an identifier repeated in <paramref name="ids"/> should produce the same entity more than once
+        /// in the result. When <see langword="false"/>, duplicate identifiers are queried once.
+        /// </param>
+        /// <param name="preserveNulls">
+        /// Whether an identifier with no matching row should produce a <see langword="null"/> entry in the result,
+        /// keeping the result the same length as (the possibly deduplicated) <paramref name="ids"/>. When
+        /// <see langword="false"/>, unmatched identifiers are omitted and the result may be shorter.
+        /// </param>
+        /// <param name="batchSize">
+        /// The maximum number of identifiers queried by a single round trip, capped at roughly 2,100 — SQL Server's
+        /// limit on the number of parameters in a single command. When less than or equal to zero, or greater than
+        /// the cap, the cap is used.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the matching rows. The
+        /// result preserves the order of <paramref name="ids"/>; see <paramref name="preserveDuplicates"/> and
+        /// <paramref name="preserveNulls"/> for how duplicates and misses are represented.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="ids"/> is <see langword="null"/>, or one of its
+        /// elements is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The type of one of the elements of <paramref name="ids"/> does not match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property, or <paramref name="transaction"/> does not belong
+        /// to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<IReadOnlyList<TEntity?>> GetByIdRangeAsync<TEntity>(this SqlConnection connection, IEnumerable ids, bool preserveDuplicates = false, bool preserveNulls = false, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -206,6 +952,44 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.GetByIdRangeImplAsync<TEntity>(connection, false, ids, preserveDuplicates, preserveNulls, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Updates every column, except the identifier and any database-generated property, of each of the
+        /// specified entities' rows, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection to execute the update on.</param>
+        /// <param name="entities">The entities whose current property values are written back to their rows.</param>
+        /// <param name="batchSize">
+        /// The maximum number of entities updated by a single round trip, capped so that the number of parameters
+        /// the round trip uses — one per property of every entity in the batch — stays within SQL Server's roughly
+        /// 2,100-parameter limit. When less than or equal to zero, or greater than the cap, the cap is used.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the update within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the total number of rows
+        /// affected across all round trips.
+        /// </returns>
+        /// <remarks>
+        /// Each round trip executes an <c>UPDATE ... FROM</c> statement that joins the target table to a
+        /// <c>VALUES</c>-derived source table on identifier, and updates matched rows; rows with no match in the
+        /// table are left untouched, and no new rows are inserted.
+        /// <para>
+        /// When <paramref name="entities"/> requires more than one round trip, and no <paramref name="transaction"/>
+        /// is provided, all round trips run inside a single transaction that this method begins, commits on
+        /// success, and rolls back if any round trip fails — so the operation is all-or-nothing even though it
+        /// spans multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this;
+        /// committing or rolling back is then the caller's responsibility. If <paramref name="connection"/> is
+        /// closed when this method is called and it owns the transaction, it also opens and closes the connection
+        /// for the duration of the operation.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> UpdateRangeAsync<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -215,6 +999,44 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.UpdateRangeImplAsync(connection, false, entities, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Inserts each of the specified entities as a new row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to insert.</typeparam>
+        /// <param name="connection">The connection to execute the insert on.</param>
+        /// <param name="entities">The entities to insert.</param>
+        /// <param name="batchSize">
+        /// The maximum number of entities inserted by a single round trip, capped so that the number of parameters
+        /// the round trip uses — one per inserted property of every entity in the batch — stays within SQL
+        /// Server's roughly 2,100-parameter limit, and additionally capped at 1,000 — SQL Server's limit on the
+        /// number of rows in a single <c>INSERT ... VALUES</c> statement. When less than or equal to zero, or
+        /// greater than the applicable cap, the cap is used.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the insert within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the total number of rows
+        /// affected across all round trips.
+        /// </returns>
+        /// <remarks>
+        /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
+        /// including the identifier property unless it is itself database-generated.
+        /// <para>
+        /// When <paramref name="entities"/> requires more than one round trip, and no <paramref name="transaction"/>
+        /// is provided, all round trips run inside a single transaction that this method begins, commits on
+        /// success, and rolls back if any round trip fails — so the operation is all-or-nothing even though it
+        /// spans multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this;
+        /// committing or rolling back is then the caller's responsibility. If <paramref name="connection"/> is
+        /// closed when this method is called and it owns the transaction, it also opens and closes the connection
+        /// for the duration of the operation.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> InsertRangeAsync<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -224,6 +1046,38 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.InsertRangeImplAsync(connection, false, entities, batchSize, SqlDialectStrategy.Instance.MaxInsertRowCount, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Deletes each of the specified entities' rows, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete.</typeparam>
+        /// <param name="connection">The connection to execute the delete on.</param>
+        /// <param name="entities">The entities whose rows are deleted, matched by their identifiers.</param>
+        /// <param name="batchSize">
+        /// The maximum number of identifiers included in a single round trip, capped at roughly 2,100 — SQL
+        /// Server's limit on the number of parameters in a single command. When less than or equal to zero, or
+        /// greater than the cap, the cap is used.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the total number of rows
+        /// affected across all round trips.
+        /// </returns>
+        /// <remarks>
+        /// When <paramref name="entities"/> requires more than one round trip, and no <paramref name="transaction"/>
+        /// is provided, all round trips run inside a single transaction that this method begins, commits on
+        /// success, and rolls back if any round trip fails — so the operation is all-or-nothing even though it
+        /// spans multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this;
+        /// committing or rolling back is then the caller's responsibility. If <paramref name="connection"/> is
+        /// closed when this method is called and it owns the transaction, it also opens and closes the connection
+        /// for the duration of the operation.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> DeleteRangeAsync<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -231,6 +1085,47 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.DeleteRangeImplAsync(connection, false, entities, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Deletes the <typeparamref name="TEntity"/> rows with the specified identifiers, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete.</typeparam>
+        /// <param name="connection">The connection to execute the delete on.</param>
+        /// <param name="ids">
+        /// The identifiers of the rows to delete. Neither the sequence nor any of its elements may be
+        /// <see langword="null"/>, and each identifier's runtime type must exactly match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </param>
+        /// <param name="batchSize">
+        /// The maximum number of identifiers included in a single round trip, capped at roughly 2,100 — SQL
+        /// Server's limit on the number of parameters in a single command. When less than or equal to zero, or
+        /// greater than the cap, the cap is used.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the total number of rows
+        /// affected across all round trips.
+        /// </returns>
+        /// <remarks>
+        /// When <paramref name="ids"/> requires more than one round trip, and no <paramref name="transaction"/> is
+        /// provided, all round trips run inside a single transaction that this method begins, commits on success,
+        /// and rolls back if any round trip fails — so the operation is all-or-nothing even though it spans
+        /// multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this; committing or
+        /// rolling back is then the caller's responsibility. If <paramref name="connection"/> is closed when this
+        /// method is called and it owns the transaction, it also opens and closes the connection for the duration
+        /// of the operation.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="ids"/> is <see langword="null"/>, or one of its
+        /// elements is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The type of one of the elements of <paramref name="ids"/> does not match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property, or <paramref name="transaction"/> does not belong
+        /// to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> DeleteRangeAsync<TEntity>(this SqlConnection connection, IEnumerable ids, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -238,6 +1133,51 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.DeleteRangeImplAsync<TEntity>(connection, false, ids, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Inserts each of the specified entities as a new row, or updates its row if one already exists, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to upsert.</typeparam>
+        /// <param name="connection">The connection to execute the upsert on.</param>
+        /// <param name="entities">The entities to insert or update.</param>
+        /// <param name="batchSize">
+        /// The maximum number of entities upserted by a single round trip, capped so that the number of parameters
+        /// the round trip uses — one per property of every entity in the batch — stays within SQL Server's roughly
+        /// 2,100-parameter limit. When less than or equal to zero, or greater than the cap, the cap is used.
+        /// </param>
+        /// <param name="transaction">
+        /// The transaction to execute the upsert within, or <see langword="null"/> to have this method manage its
+        /// own transaction (see remarks).
+        /// </param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the total number of rows
+        /// affected across all round trips.
+        /// </returns>
+        /// <remarks>
+        /// Unlike this library's other providers, each round trip executes two separate statements rather than a
+        /// single atomic one: an <c>UPDATE ... FROM</c> that joins the target table to a <c>VALUES</c>-derived
+        /// source table, matching rows using the properties marked with
+        /// <see cref="Dapper.Forge.Core.Models.UpsertKeyAttribute"/> — or the entity's identifier, if none are
+        /// marked — treating two <see langword="null"/> values in a key property as equal, followed by an
+        /// <c>INSERT ... WHERE NOT EXISTS</c> that inserts only the entities with no matching row. On a match,
+        /// every property is updated except the identifier, any database-generated property, and the key
+        /// properties themselves.
+        /// <para>
+        /// Because correctness under concurrent access depends on both statements in each round trip running in
+        /// the same transaction, and because this needs to hold across every round trip for the whole operation to
+        /// be atomic, when <paramref name="transaction"/> is <see langword="null"/>, this method begins one,
+        /// commits it on success, and rolls it back if any round trip fails — passing an explicit
+        /// <paramref name="transaction"/> opts out of this, making it the caller's responsibility instead. If
+        /// <paramref name="connection"/> is closed when this method is called and it owns the transaction, it also
+        /// opens and closes the connection for the duration of the operation.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<int> UpsertRangeAsync<TEntity>(this SqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -247,78 +1187,369 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.UpsertRangeImplAsync(connection, false, entities, batchSize, 0, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Determines whether any <typeparamref name="TEntity"/> row exists, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result is <see langword="true"/> if any row
+        /// exists; otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<bool> ExistsAsync<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.ExistsImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Determines whether any <typeparamref name="TEntity"/> row matching the specified predicate exists, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="predicate">
+        /// An optional predicate the matched row must satisfy. When <see langword="null"/>, any row counts as a match.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result is <see langword="true"/> if a
+        /// matching row exists; otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<bool> ExistsAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.ExistsImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Determines whether any <typeparamref name="TEntity"/> row matching the specified filter exists, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="filterNode">
+        /// An optional filter the matched row must satisfy. When <see langword="null"/>, any row counts as a match.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result is <see langword="true"/> if a
+        /// matching row exists; otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<bool> ExistsAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.ExistsImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts every <typeparamref name="TEntity"/> row matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="predicate">
+        /// An optional predicate the counted rows must satisfy. When <see langword="null"/>, every row is counted.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of matching rows.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts every <typeparamref name="TEntity"/> row matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="filterNode">
+        /// An optional filter the counted rows must satisfy. When <see langword="null"/>, every row is counted.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the number of matching rows.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts the <typeparamref name="TEntity"/> rows in which the selected property is not
+        /// <see langword="null"/>, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to count, for example <c>x =&gt; x.Discount</c>.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the number of rows in which
+        /// the selected property is not <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, object?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts the <typeparamref name="TEntity"/> rows, matching the specified predicate, in which the selected
+        /// property is not <see langword="null"/>, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to count, for example <c>x =&gt; x.Discount</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the counted rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the number of matching rows
+        /// in which the selected property is not <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts the <typeparamref name="TEntity"/> rows, matching the specified filter, in which the selected
+        /// property is not <see langword="null"/>, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to count, for example <c>x =&gt; x.Discount</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the counted rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the number of matching rows
+        /// in which the selected property is not <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts the <typeparamref name="TEntity"/> rows in which the named property is not <see langword="null"/>, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to count.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the number of rows in which
+        /// the named property is not <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts the <typeparamref name="TEntity"/> rows, matching the specified predicate, in which the named
+        /// property is not <see langword="null"/>, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to count.</param>
+        /// <param name="predicate">
+        /// An optional predicate the counted rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the number of matching rows
+        /// in which the named property is not <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Counts the <typeparamref name="TEntity"/> rows, matching the specified filter, in which the named
+        /// property is not <see langword="null"/>, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to count.</param>
+        /// <param name="filterNode">
+        /// An optional filter the counted rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the number of matching rows
+        /// in which the named property is not <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<long> CountAsync<TEntity>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.CountImplAsync(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the average of the selected property across every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to average, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the average, or
+        /// <see langword="null"/> if no row exists.
+        /// </returns>
+        /// <remarks>
+        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OverflowException">The computed average does not fit in a <see cref="decimal"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<decimal?> AvgAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -326,6 +1557,40 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the average of the selected property across every <typeparamref name="TEntity"/> row matching
+        /// the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to average, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the average, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <remarks>
+        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OverflowException">The computed average does not fit in a <see cref="decimal"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<decimal?> AvgAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -333,6 +1598,41 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the average of the selected property across every <typeparamref name="TEntity"/> row matching
+        /// the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to average, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the average, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <remarks>
+        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OverflowException">The computed average does not fit in a <see cref="decimal"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<decimal?> AvgAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -340,6 +1640,33 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the average of the named property across every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to average.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the average, or
+        /// <see langword="null"/> if no row exists.
+        /// </returns>
+        /// <remarks>
+        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OverflowException">The computed average does not fit in a <see cref="decimal"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<decimal?> AvgAsync<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -347,6 +1674,40 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the average of the named property across every <typeparamref name="TEntity"/> row matching the
+        /// specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to average.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the average, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <remarks>
+        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OverflowException">The computed average does not fit in a <see cref="decimal"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<decimal?> AvgAsync<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -354,6 +1715,41 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the average of the named property across every <typeparamref name="TEntity"/> row matching the
+        /// specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to average.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the average, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <remarks>
+        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OverflowException">The computed average does not fit in a <see cref="decimal"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<decimal?> AvgAsync<TEntity>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -361,6 +1757,32 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.AvgImplAsync(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the sum of the selected property across every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to sum, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the sum, or
+        /// <see langword="null"/> if no row exists.
+        /// </returns>
+        /// <remarks>
+        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<decimal?> SumAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -368,6 +1790,39 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the sum of the selected property across every <typeparamref name="TEntity"/> row matching the
+        /// specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to sum, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the sum, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <remarks>
+        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<decimal?> SumAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -375,6 +1830,40 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the sum of the selected property across every <typeparamref name="TEntity"/> row matching the
+        /// specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to sum, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the sum, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <remarks>
+        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<decimal?> SumAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -382,6 +1871,32 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the sum of the named property across every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to sum.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the sum, or
+        /// <see langword="null"/> if no row exists.
+        /// </returns>
+        /// <remarks>
+        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<decimal?> SumAsync<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -389,6 +1904,39 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the sum of the named property across every <typeparamref name="TEntity"/> row matching the
+        /// specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to sum.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the sum, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <remarks>
+        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<decimal?> SumAsync<TEntity>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -396,6 +1944,40 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the sum of the named property across every <typeparamref name="TEntity"/> row matching the
+        /// specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to sum.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the sum, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <remarks>
+        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
+        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
+        /// arithmetic than the result needs.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<decimal?> SumAsync<TEntity>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -403,72 +1985,402 @@ namespace Dapper.Forge.SqlServer.Extensions
             return await DbExecutionStrategy.Instance.SumImplAsync(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the minimum value of the selected property across every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the minimum value, or
+        /// <see langword="null"/> if no row exists.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this SqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the minimum value of the selected property across every <typeparamref name="TEntity"/> row
+        /// matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the minimum value, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this SqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the minimum value of the selected property across every <typeparamref name="TEntity"/> row
+        /// matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the minimum value, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this SqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the minimum value of the named property across every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the minimum value, or
+        /// <see langword="null"/> if no row exists.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, its type
+        /// does not match <typeparamref name="TProperty"/>, or <paramref name="transaction"/> does not belong to
+        /// <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the minimum value of the named property across every <typeparamref name="TEntity"/> row
+        /// matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the minimum value, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, its type
+        /// does not match <typeparamref name="TProperty"/>, or <paramref name="transaction"/> does not belong to
+        /// <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the minimum value of the named property across every <typeparamref name="TEntity"/> row
+        /// matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the minimum value, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, its type
+        /// does not match <typeparamref name="TProperty"/>, or <paramref name="transaction"/> does not belong to
+        /// <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<TProperty?> MinAsync<TEntity, TProperty>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MinImplAsync<TEntity, TProperty>(connection, false, propertyName, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the maximum value of the selected property across every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the maximum value, or
+        /// <see langword="null"/> if no row exists.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this SqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the maximum value of the selected property across every <typeparamref name="TEntity"/> row
+        /// matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the maximum value, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this SqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the maximum value of the selected property across every <typeparamref name="TEntity"/> row
+        /// matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the maximum value, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
+        /// not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this SqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync(connection, false, selector, filterNode, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the maximum value of the named property across every <typeparamref name="TEntity"/> row, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the maximum value, or
+        /// <see langword="null"/> if no row exists.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, its type
+        /// does not match <typeparamref name="TProperty"/>, or <paramref name="transaction"/> does not belong to
+        /// <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, (IFilterNode<TEntity>?)null, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the maximum value of the named property across every <typeparamref name="TEntity"/> row
+        /// matching the specified predicate, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the maximum value, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, its type
+        /// does not match <typeparamref name="TProperty"/>, or <paramref name="transaction"/> does not belong to
+        /// <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this SqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
             return await DbExecutionStrategy.Instance.MaxImplAsync<TEntity, TProperty>(connection, false, propertyName, predicate, transaction, commandTimeout, cancellationToken);
         }
 
+        /// <summary>
+        /// Computes the maximum value of the named property across every <typeparamref name="TEntity"/> row
+        /// matching the specified filter, asynchronously.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection to query.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
+        /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the maximum value, or
+        /// <see langword="null"/> if no row matches.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, its type
+        /// does not match <typeparamref name="TProperty"/>, or <paramref name="transaction"/> does not belong to
+        /// <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
         public static async Task<TProperty?> MaxAsync<TEntity, TProperty>(this SqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
