@@ -767,8 +767,8 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <typeparamref name="TEntity"/>'s identifier property.
         /// </param>
         /// <param name="batchSize">
-        /// The maximum number of identifiers included in a single command (round trip). When less than or equal to
-        /// zero, every identifier is included in a single command.
+        /// The maximum number of identifiers included in a single command. When less than or equal to zero, every
+        /// identifier is included in a single command.
         /// </param>
         /// <returns>
         /// The <see cref="DbCommandInfo"/> instances for the query, one per batch of up to <paramref name="batchSize"/>

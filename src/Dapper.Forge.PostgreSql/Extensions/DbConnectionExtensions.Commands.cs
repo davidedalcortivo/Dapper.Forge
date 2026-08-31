@@ -11,8 +11,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
     public static partial class DbConnectionExtensions
     {
         /// <summary>
-        /// Ensures the cached SQL commands and PostgreSQL dialect settings for <typeparamref name="TEntity"/> are
-        /// initialized.
+        /// Ensures the cached SQL commands and PostgreSQL dialect settings for <typeparamref name="TEntity"/> are initialized.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to initialize the cache for.</typeparam>
         /// <param name="connection">The connection used to resolve PostgreSQL-specific settings, such as the default schema.</param>
@@ -428,8 +427,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
         /// <remarks>
         /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
         /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
-        /// <paramref name="take"/> in place of a fixed limit of one row. The generated command uses a
-        /// <c>LIMIT</c>/<c>OFFSET</c> clause.
+        /// <paramref name="take"/> in place of a fixed limit of one row.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         public static DbCommandInfo GetPageCommand<TEntity>(this NpgsqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
@@ -460,8 +458,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
         /// <remarks>
         /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
         /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
-        /// <paramref name="take"/> in place of a fixed limit of one row. The generated command uses a
-        /// <c>LIMIT</c>/<c>OFFSET</c> clause.
+        /// <paramref name="take"/> in place of a fixed limit of one row.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         /// <exception cref="NotSupportedException">
@@ -495,8 +492,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
         /// <remarks>
         /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
         /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
-        /// <paramref name="take"/> in place of a fixed limit of one row. The generated command uses a
-        /// <c>LIMIT</c>/<c>OFFSET</c> clause.
+        /// <paramref name="take"/> in place of a fixed limit of one row.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         /// <exception cref="NotSupportedException">

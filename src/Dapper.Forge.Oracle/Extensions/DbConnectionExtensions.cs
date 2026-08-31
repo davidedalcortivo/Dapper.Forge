@@ -11,7 +11,7 @@ namespace Dapper.Forge.Oracle.Extensions
     public static partial class DbConnectionExtensions
     {
         /// <summary>
-        /// Ensures the SQL command cache and the database's column metadata for <typeparamref name="TEntity"/> are
+        /// Ensures the SQL command cache and any database-derived metadata for <typeparamref name="TEntity"/> are
         /// loaded, synchronously.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to load the cache for.</typeparam>

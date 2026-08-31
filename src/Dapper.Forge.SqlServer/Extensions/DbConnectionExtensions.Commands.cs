@@ -14,8 +14,7 @@ namespace Dapper.Forge.SqlServer.Extensions
     public static partial class DbConnectionExtensions
     {
         /// <summary>
-        /// Ensures the SQL command cache and SQL Server dialect settings for <typeparamref name="TEntity"/> are
-        /// initialized.
+        /// Ensures the cached SQL commands and SQL Server dialect settings for <typeparamref name="TEntity"/> are initialized.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to initialize the cache for.</typeparam>
         /// <param name="connection">The connection used to resolve SQL Server-specific settings, such as the default schema.</param>
@@ -112,8 +111,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// This overload and the corresponding <c>GetFirstOrDefaultCommand</c> overload generate the same SQL; the
-        /// difference between requiring a match and allowing none only matters when the command is executed. The
-        /// generated command uses a <c>SELECT TOP (...)</c> clause.
+        /// difference between requiring a match and allowing none only matters when the command is executed.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         public static DbCommandInfo GetFirstCommand<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
@@ -137,8 +135,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// This overload and the corresponding <c>GetFirstOrDefaultCommand</c> overload generate the same SQL; the
-        /// difference between requiring a match and allowing none only matters when the command is executed. The
-        /// generated command uses a <c>SELECT TOP (...)</c> clause.
+        /// difference between requiring a match and allowing none only matters when the command is executed.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         /// <exception cref="NotSupportedException">
@@ -165,8 +162,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// This overload and the corresponding <c>GetFirstOrDefaultCommand</c> overload generate the same SQL; the
-        /// difference between requiring a match and allowing none only matters when the command is executed. The
-        /// generated command uses a <c>SELECT TOP (...)</c> clause.
+        /// difference between requiring a match and allowing none only matters when the command is executed.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         /// <exception cref="NotSupportedException">
@@ -435,9 +431,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <remarks>
         /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
         /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
-        /// <paramref name="take"/> in place of a fixed limit of one row. Otherwise, the generated command uses an
-        /// <c>ORDER BY ... OFFSET ... ROWS FETCH NEXT ... ROWS ONLY</c> clause, which SQL Server requires an
-        /// explicit ordering for.
+        /// <paramref name="take"/> in place of a fixed limit of one row.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         public static DbCommandInfo GetPageCommand<TEntity>(this SqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
@@ -468,9 +462,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <remarks>
         /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
         /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
-        /// <paramref name="take"/> in place of a fixed limit of one row. Otherwise, the generated command uses an
-        /// <c>ORDER BY ... OFFSET ... ROWS FETCH NEXT ... ROWS ONLY</c> clause, which SQL Server requires an
-        /// explicit ordering for.
+        /// <paramref name="take"/> in place of a fixed limit of one row.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         /// <exception cref="NotSupportedException">
@@ -504,9 +496,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <remarks>
         /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
         /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
-        /// <paramref name="take"/> in place of a fixed limit of one row. Otherwise, the generated command uses an
-        /// <c>ORDER BY ... OFFSET ... ROWS FETCH NEXT ... ROWS ONLY</c> clause, which SQL Server requires an
-        /// explicit ordering for.
+        /// <paramref name="take"/> in place of a fixed limit of one row.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         /// <exception cref="NotSupportedException">

@@ -14,7 +14,7 @@ namespace Dapper.Forge.SqlServer.Extensions
     public static partial class DbConnectionExtensions
     {
         /// <summary>
-        /// Ensures the SQL command cache and the database's column metadata for <typeparamref name="TEntity"/> are
+        /// Ensures the SQL command cache and any database-derived metadata for <typeparamref name="TEntity"/> are
         /// loaded, asynchronously.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to load the cache for.</typeparam>
@@ -361,12 +361,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>A task that represents the asynchronous operation. The task result contains the single matching row.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="transaction"/> does not belong to <paramref name="connection"/>.</exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         /// <exception cref="InvalidOperationException">No row matches, or more than one row matches.</exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
         /// translator does not know how to translate it.
         /// </exception>
-        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<TEntity> GetSingleAsync<TEntity>(this SqlConnection connection, IFilterNode<TEntity>? filterNode, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
@@ -1819,10 +1819,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="selector"/> does not select a simple property, or <paramref name="transaction"/> does
         /// not belong to <paramref name="connection"/>.
         /// </exception>
+        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
         /// </exception>
-        /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public static async Task<decimal?> SumAsync<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate, SqlTransaction? transaction = null, int? commandTimeout = null, CancellationToken cancellationToken = default) where TEntity : class
         {
             DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);

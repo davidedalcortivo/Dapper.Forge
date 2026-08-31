@@ -14,7 +14,7 @@ namespace Dapper.Forge.SqlServer.Extensions
     public static partial class DbConnectionExtensions
     {
         /// <summary>
-        /// Ensures the SQL command cache and the database's column metadata for <typeparamref name="TEntity"/> are
+        /// Ensures the SQL command cache and any database-derived metadata for <typeparamref name="TEntity"/> are
         /// loaded, synchronously.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to load the cache for.</typeparam>
@@ -1275,7 +1275,8 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
         /// </exception>
         public static long Count<TEntity>(this SqlConnection connection, string propertyName, SqlTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
@@ -1300,7 +1301,8 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
@@ -1328,7 +1330,8 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
+        /// <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
