@@ -23,7 +23,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// calling it directly is only useful to pay the one-time initialization cost ahead of time (for example,
         /// during application startup) rather than on the first real call.
         /// <para>
-        /// This is distinct from <c>LoadDbCache</c>/<c>LoadDbCacheAsync</c>, which additionally reads column
+        /// This is distinct from <c>LoadDbCache</c>/<c>LoadDbCacheAsync</c>, which additionally reads
         /// metadata from the database. Only <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/>
         /// and <see cref="SumCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and their
         /// overloads) require that metadata to have already been loaded; the other commands in this class do not.
@@ -1235,12 +1235,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
-        /// the result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement. The generated command also casts its result to a string, which the execution methods parse
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
+        /// The generated command also casts its result to a string, which the execution methods parse
         /// back into a <see cref="decimal"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1269,12 +1267,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
-        /// the result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement. The generated command also casts its result to a string, which the execution methods parse
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
+        /// The generated command also casts its result to a string, which the execution methods parse
         /// back into a <see cref="decimal"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1306,12 +1302,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
-        /// the result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement. The generated command also casts its result to a string, which the execution methods parse
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
+        /// The generated command also casts its result to a string, which the execution methods parse
         /// back into a <see cref="decimal"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1341,12 +1335,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
-        /// the result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement. The generated command also casts its result to a string, which the execution methods parse
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
+        /// The generated command also casts its result to a string, which the execution methods parse
         /// back into a <see cref="decimal"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1377,12 +1369,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
-        /// the result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement. The generated command also casts its result to a string, which the execution methods parse
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
+        /// The generated command also casts its result to a string, which the execution methods parse
         /// back into a <see cref="decimal"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1416,12 +1406,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
-        /// the result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement. The generated command also casts its result to a string, which the execution methods parse
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
+        /// The generated command also casts its result to a string, which the execution methods parse
         /// back into a <see cref="decimal"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1452,12 +1440,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
-        /// result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement.
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1485,12 +1470,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
-        /// result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement.
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1521,12 +1503,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
-        /// result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement.
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1554,12 +1533,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
-        /// result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement.
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1589,12 +1565,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
-        /// result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement.
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1627,12 +1600,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
-        /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
-        /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
-        /// result needs. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first; the corresponding
-        /// <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this automatically and do not have this
-        /// requirement.
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// first; the corresponding <c>Sum</c>/<c>SumAsync</c> execution methods in this class do this
+        /// automatically and do not have this requirement.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.

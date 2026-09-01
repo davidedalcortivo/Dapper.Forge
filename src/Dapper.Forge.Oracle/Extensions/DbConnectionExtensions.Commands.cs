@@ -20,9 +20,11 @@ namespace Dapper.Forge.Oracle.Extensions
         /// calling it directly is only useful to pay the one-time initialization cost ahead of time (for example,
         /// during application startup) rather than on the first real call.
         /// <para>
-        /// This is distinct from <c>LoadDbCache</c>/<c>LoadDbCacheAsync</c>, which additionally reads column
-        /// metadata from the database; some of the commands built by this class require that metadata to have
-        /// already been loaded (see <see cref="UpdateRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/>).
+        /// This is distinct from <c>LoadDbCache</c>/<c>LoadDbCacheAsync</c>, which additionally reads
+        /// metadata from the database. Only <see cref="UpdateRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/>,
+        /// <see cref="InsertRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/>, and
+        /// <see cref="UpsertRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/> require that metadata to have
+        /// already been loaded; the other commands in this class do not.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>

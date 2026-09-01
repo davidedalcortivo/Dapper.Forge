@@ -23,10 +23,11 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         /// <remarks>
-        /// SQL Server needs to know a column's actual data type to decide whether computing <c>Avg</c> or
-        /// <c>Sum</c> over it needs a safety cast first. The first call for a given <typeparamref name="TEntity"/>
-        /// and connection queries SQL Server's system catalogs and caches the result; later calls for the same
-        /// combination return immediately without hitting the database again.
+        /// SQL Server needs to know a column's actual data type to decide whether computing <c>Avg</c>/<c>AvgAsync</c> or
+        /// <c>Sum</c>/<c>SumAsync</c> over it needs a safety cast first — for example, a narrow integer type (<c>int</c>,
+        /// <c>smallint</c>, or <c>tinyint</c>) may need to be cast to <c>bigint</c> before summing, to avoid integer overflow during
+        /// the aggregation. The first call for a given <typeparamref name="TEntity"/> and connection queries SQL Server's system catalogs
+        /// and caches the result; later calls for the same combination return immediately without hitting the database again.
         /// <para>
         /// Calling this ahead of time is required before using
         /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> or
@@ -1537,9 +1538,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row exists.
         /// </returns>
         /// <remarks>
-        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1575,9 +1577,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row matches.
         /// </returns>
         /// <remarks>
-        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1616,9 +1619,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row matches.
         /// </returns>
         /// <remarks>
-        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1654,9 +1658,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row exists.
         /// </returns>
         /// <remarks>
-        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1692,9 +1697,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row matches.
         /// </returns>
         /// <remarks>
-        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1733,9 +1739,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row matches.
         /// </returns>
         /// <remarks>
-        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1771,9 +1778,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row exists.
         /// </returns>
         /// <remarks>
-        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="SumCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1808,9 +1816,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row matches.
         /// </returns>
         /// <remarks>
-        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="SumCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1848,9 +1857,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row matches.
         /// </returns>
         /// <remarks>
-        /// If the selected column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="SumCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1885,9 +1895,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row exists.
         /// </returns>
         /// <remarks>
-        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="SumCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1922,9 +1933,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row matches.
         /// </returns>
         /// <remarks>
-        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="SumCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1962,9 +1974,10 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="null"/> if no row matches.
         /// </returns>
         /// <remarks>
-        /// If the named column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>), this
-        /// casts it to <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower
-        /// arithmetic than the result needs.
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
+        /// on <paramref name="connection"/> before building any commands, so — unlike
+        /// <see cref="SumCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
+        /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.

@@ -28,8 +28,8 @@ namespace Dapper.Forge.Oracle.Extensions
         /// Calling this ahead of time is required before using <see cref="UpdateRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/>,
         /// <see cref="InsertRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/>, or
         /// <see cref="UpsertRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/> directly. The
-        /// corresponding <c>UpdateRange</c>, <c>InsertRange</c>, and <c>UpsertRange</c> execution methods in this
-        /// class call it automatically and do not need it called first.
+        /// corresponding <c>UpdateRange</c>/<c>UpdateRangeAsync</c>, <c>InsertRange</c>/<c>InsertRangeAsync</c>, and
+        /// <c>UpsertRange</c>/<c>UpsertRangeAsync</c> execution methods in this class call it automatically and do not need it called first.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>

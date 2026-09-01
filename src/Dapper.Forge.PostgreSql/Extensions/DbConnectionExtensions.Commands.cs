@@ -20,7 +20,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
         /// calling it directly is only useful to pay the one-time initialization cost ahead of time (for example,
         /// during application startup) rather than on the first real call.
         /// <para>
-        /// This is distinct from <c>LoadDbCache</c>/<c>LoadDbCacheAsync</c>, which additionally reads column
+        /// This is distinct from <c>LoadDbCache</c>/<c>LoadDbCacheAsync</c>, which additionally reads
         /// metadata from the database. Only <see cref="UpdateRangeCommands{TEntity}(NpgsqlConnection, IEnumerable{TEntity}, int)"/>
         /// requires that metadata to have already been loaded; the other commands in this class do not.
         /// </para>
@@ -816,8 +816,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
         /// table are left untouched, and no new rows are inserted.
         /// <para>
         /// Building these commands requires the database's metadata for <typeparamref name="TEntity"/> to
-        /// already be loaded on <paramref name="connection"/> — PostgreSQL needs to know each column's actual
-        /// position in the table to build the update safely. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
+        /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>UpdateRange</c>/<c>UpdateRangeAsync</c> execution methods do this
         /// automatically and do not have this requirement.
         /// </para>

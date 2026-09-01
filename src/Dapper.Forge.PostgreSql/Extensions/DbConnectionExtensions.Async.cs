@@ -27,8 +27,8 @@ namespace Dapper.Forge.PostgreSql.Extensions
         /// <para>
         /// Calling this ahead of time is required before using
         /// <see cref="UpdateRangeCommands{TEntity}(NpgsqlConnection, IEnumerable{TEntity}, int)"/> directly. The
-        /// corresponding <c>UpdateRangeAsync</c> execution method in this class calls it automatically and does not
-        /// need it called first.
+        /// corresponding <c>UpdateRange</c>/<c>UpdateRangeAsync</c> execution methods in this class call it
+        /// automatically and do not need it called first.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
