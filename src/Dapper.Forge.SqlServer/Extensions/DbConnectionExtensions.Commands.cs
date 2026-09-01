@@ -1234,12 +1234,15 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="selector">An expression selecting the property to average, for example <c>x =&gt; x.Price</c>.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// <para>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
-        /// The generated command also casts its result to a string, which the execution methods parse
-        /// back into a <see cref="decimal"/>.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1266,12 +1269,15 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// <para>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
-        /// The generated command also casts its result to a string, which the execution methods parse
-        /// back into a <see cref="decimal"/>.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1301,12 +1307,15 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// <para>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
-        /// The generated command also casts its result to a string, which the execution methods parse
-        /// back into a <see cref="decimal"/>.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1334,12 +1343,15 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="propertyName">The name of the property to average.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// <para>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
-        /// The generated command also casts its result to a string, which the execution methods parse
-        /// back into a <see cref="decimal"/>.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1368,12 +1380,15 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// <para>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
-        /// The generated command also casts its result to a string, which the execution methods parse
-        /// back into a <see cref="decimal"/>.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1405,12 +1420,15 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// <para>
         /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
-        /// The generated command also casts its result to a string, which the execution methods parse
-        /// back into a <see cref="decimal"/>.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
