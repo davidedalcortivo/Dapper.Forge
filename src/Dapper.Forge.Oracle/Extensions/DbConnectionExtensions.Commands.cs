@@ -813,7 +813,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// them; it has no <c>WHEN NOT MATCHED</c> clause, so rows with no match in the table are left untouched
         /// and no new rows are inserted.
         /// <para>
-        /// Building these commands requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building these commands requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>UpdateRange</c>/<c>UpdateRangeAsync</c> execution methods do this
         /// automatically and do not have this requirement.
@@ -823,7 +823,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         public static IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {
@@ -849,7 +849,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
         /// including the identifier property unless it is itself database-generated.
         /// <para>
-        /// Building these commands requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building these commands requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>InsertRange</c>/<c>InsertRangeAsync</c> execution methods do this
         /// automatically and do not have this requirement.
@@ -859,7 +859,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         public static IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {
@@ -947,7 +947,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// properties themselves; otherwise, a new row is inserted using every property that is not
         /// database-generated.
         /// <para>
-        /// Building these commands requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building these commands requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>UpsertRange</c>/<c>UpsertRangeAsync</c> execution methods do this
         /// automatically and do not have this requirement.
@@ -957,7 +957,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         public static IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(this OracleConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
         {

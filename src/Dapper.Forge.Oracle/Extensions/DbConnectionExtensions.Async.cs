@@ -963,7 +963,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// Each round trip executes a <c>MERGE</c> statement that matches existing rows by identifier and updates
         /// them; rows with no match in the table are left untouched, and no new rows are inserted.
         /// <para>
-        /// This automatically ensures the database's column metadata for <typeparamref name="TEntity"/> is loaded
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="UpdateRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/> — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
@@ -1011,7 +1011,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
         /// including the identifier property unless it is itself database-generated.
         /// <para>
-        /// This automatically ensures the database's column metadata for <typeparamref name="TEntity"/> is loaded
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="InsertRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/> — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
@@ -1148,7 +1148,7 @@ namespace Dapper.Forge.Oracle.Extensions
         /// properties themselves; otherwise, a new row is inserted using every property that is not
         /// database-generated.
         /// <para>
-        /// This automatically ensures the database's column metadata for <typeparamref name="TEntity"/> is loaded
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="UpsertRangeCommands{TEntity}(OracleConnection, IEnumerable{TEntity}, int)"/> — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.

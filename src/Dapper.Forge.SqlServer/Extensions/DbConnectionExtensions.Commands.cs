@@ -1234,7 +1234,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="selector">An expression selecting the property to average, for example <c>x =&gt; x.Price</c>.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
@@ -1248,7 +1248,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </exception>
         /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         public static DbCommandInfo AvgCommand<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
         {
@@ -1268,7 +1268,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
@@ -1282,7 +1282,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </exception>
         /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
@@ -1305,7 +1305,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
@@ -1319,7 +1319,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </exception>
         /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
@@ -1340,7 +1340,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="propertyName">The name of the property to average.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
@@ -1356,7 +1356,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         public static DbCommandInfo AvgCommand<TEntity>(this SqlConnection connection, string propertyName) where TEntity : class
         {
@@ -1376,7 +1376,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
@@ -1392,7 +1392,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
@@ -1415,7 +1415,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before averaging, to avoid SQL Server computing the average using narrower arithmetic than
@@ -1431,7 +1431,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
@@ -1451,7 +1451,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="selector">An expression selecting the property to sum, for example <c>x =&gt; x.Price</c>.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
@@ -1464,7 +1464,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </exception>
         /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         public static DbCommandInfo SumCommand<TEntity>(this SqlConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
         {
@@ -1484,7 +1484,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
@@ -1497,7 +1497,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </exception>
         /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
@@ -1520,7 +1520,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the selected
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
@@ -1533,7 +1533,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </exception>
         /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
@@ -1553,7 +1553,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="propertyName">The name of the property to sum.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
@@ -1568,7 +1568,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         public static DbCommandInfo SumCommand<TEntity>(this SqlConnection connection, string propertyName) where TEntity : class
         {
@@ -1588,7 +1588,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
@@ -1603,7 +1603,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
@@ -1626,7 +1626,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
-        /// Building this command requires the database's column metadata for <typeparamref name="TEntity"/> to
+        /// Building this command requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/> — this is how the command knows whether the named
         /// column is a narrow integer type (<c>int</c>, <c>smallint</c>, or <c>tinyint</c>) that needs casting to
         /// <c>bigint</c> before summing, to avoid SQL Server computing the sum using narrower arithmetic than the
@@ -1641,7 +1641,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The column metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
+        /// The metadata for <typeparamref name="TEntity"/> has not been loaded on <paramref name="connection"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL

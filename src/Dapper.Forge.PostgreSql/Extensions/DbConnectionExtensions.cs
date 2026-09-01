@@ -852,7 +852,7 @@ namespace Dapper.Forge.PostgreSql.Extensions
         /// Each round trip matches existing rows by identifier and updates them; rows with no match in the table
         /// are left untouched, and no new rows are inserted.
         /// <para>
-        /// This automatically ensures the database's column metadata for <typeparamref name="TEntity"/> is loaded
+        /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="UpdateRangeCommands{TEntity}(NpgsqlConnection, IEnumerable{TEntity}, int)"/> — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.

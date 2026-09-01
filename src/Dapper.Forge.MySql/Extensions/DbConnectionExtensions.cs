@@ -20,7 +20,7 @@ namespace Dapper.Forge.MySql.Extensions
         /// <remarks>
         /// For MySQL, this does no additional work beyond what
         /// <see cref="LoadRuntimeCache{TEntity}(MySqlConnection)"/> already does, since the MySQL provider does not
-        /// need to read column metadata from the database. This method exists for parity with the other providers,
+        /// need to read metadata from the database. This method exists for parity with the other providers,
         /// some of which do use it to preload that metadata; calling either method is equivalent for MySQL.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
