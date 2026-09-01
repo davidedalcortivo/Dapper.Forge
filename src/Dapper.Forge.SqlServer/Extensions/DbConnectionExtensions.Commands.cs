@@ -781,9 +781,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <typeparamref name="TEntity"/>'s identifier property.
         /// </param>
         /// <param name="batchSize">
-        /// The maximum number of identifiers included in a single command, and therefore the number of parameters
-        /// it uses, capped at roughly 2,100 — SQL Server's limit on the number of parameters in a single command.
-        /// When less than or equal to zero, or greater than the cap, the cap is used.
+        /// The maximum number of identifiers included in a single command, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <returns>
         /// The <see cref="DbCommandInfo"/> instances for the query, one per batch of up to <paramref name="batchSize"/>
@@ -812,20 +812,15 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="connection">The connection used to build the commands.</param>
         /// <param name="entities">The entities whose current property values are written back to their rows.</param>
         /// <param name="batchSize">
-        /// The requested number of entities per round trip. When less than or equal to zero, every entity is
-        /// requested for a single round trip.
+        /// The maximum number of entities updated by a single command, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> instances for the update.</returns>
         /// <remarks>
         /// Each generated command is an <c>UPDATE ... FROM</c> statement that joins the target table to a
         /// <c>VALUES</c>-derived source table on identifier, and updates matched rows; rows with no match in the
         /// table are left untouched, and no new rows are inserted.
-        /// <para>
-        /// Because every property of each entity is bound as a parameter, and SQL Server rejects a command with
-        /// more than roughly 2,100 parameters, this splits a requested <paramref name="batchSize"/> into more than
-        /// one command where necessary to stay under that limit — so the number of returned commands can be
-        /// greater than a simple division of the entity count by <paramref name="batchSize"/> would suggest.
-        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
@@ -846,20 +841,14 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="connection">The connection used to build the commands.</param>
         /// <param name="entities">The entities to insert.</param>
         /// <param name="batchSize">
-        /// The requested number of entities per round trip. When less than or equal to zero, every entity is
-        /// requested for a single round trip.
+        /// The maximum number of entities inserted by a single command, capped according to SQL Server's limits of
+        /// 1,000 rows per <c>INSERT ... VALUES</c> statement and roughly 2,100 parameters per command. When less than
+        /// or equal to zero, the maximum number allowed by these limits is used.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> instances for the insert.</returns>
         /// <remarks>
         /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
         /// including the identifier property unless it is itself database-generated.
-        /// <para>
-        /// SQL Server rejects a single <c>INSERT ... VALUES</c> statement with more than 1,000 rows, and a command
-        /// with more than roughly 2,100 parameters. This splits a requested <paramref name="batchSize"/> into more
-        /// than one command where necessary to stay under whichever limit applies first, so the number of returned
-        /// commands can be greater than a simple division of the entity count by <paramref name="batchSize"/>
-        /// would suggest.
-        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
@@ -880,16 +869,11 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="connection">The connection used to build the commands.</param>
         /// <param name="entities">The entities whose rows are deleted, matched by their identifiers.</param>
         /// <param name="batchSize">
-        /// The requested number of identifiers per round trip. When less than or equal to zero, every identifier
-        /// is requested for a single round trip.
+        /// The maximum number of identifiers included in a single command, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> instances for the delete.</returns>
-        /// <remarks>
-        /// SQL Server rejects a command with more than roughly 2,100 parameters. This splits a requested
-        /// <paramref name="batchSize"/> into more than one command where necessary to stay under that limit, so the
-        /// number of returned commands can be greater than a simple division of the identifier count by
-        /// <paramref name="batchSize"/> would suggest.
-        /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
         /// </exception>
@@ -910,16 +894,11 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <typeparamref name="TEntity"/>'s identifier property.
         /// </param>
         /// <param name="batchSize">
-        /// The requested number of identifiers per round trip. When less than or equal to zero, every identifier
-        /// is requested for a single round trip.
+        /// The maximum number of identifiers included in a single command, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> instances for the delete.</returns>
-        /// <remarks>
-        /// SQL Server rejects a command with more than roughly 2,100 parameters. This splits a requested
-        /// <paramref name="batchSize"/> into more than one command where necessary to stay under that limit, so the
-        /// number of returned commands can be greater than a simple division of the identifier count by
-        /// <paramref name="batchSize"/> would suggest.
-        /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="ids"/> is <see langword="null"/>, or one of its
         /// elements is <see langword="null"/>.
@@ -942,8 +921,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="connection">The connection used to build the commands.</param>
         /// <param name="entities">The entities to insert or update.</param>
         /// <param name="batchSize">
-        /// The requested number of entities per round trip. When less than or equal to zero, every entity is
-        /// requested for a single round trip.
+        /// The maximum number of entities upserted by a single command, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> instances for the upsert.</returns>
         /// <remarks>
@@ -960,12 +940,6 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see cref="UpsertRange{TEntity}(SqlConnection, IEnumerable{TEntity}, int, SqlTransaction?, int?)"/>
         /// execution method provides this, and code that executes these commands directly is responsible for doing
         /// the same.
-        /// </para>
-        /// <para>
-        /// SQL Server rejects a command with more than roughly 2,100 parameters. This splits a requested
-        /// <paramref name="batchSize"/> into more than one command where necessary to stay under that limit, so the
-        /// number of returned commands can be greater than a simple division of the entity count by
-        /// <paramref name="batchSize"/> would suggest.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">

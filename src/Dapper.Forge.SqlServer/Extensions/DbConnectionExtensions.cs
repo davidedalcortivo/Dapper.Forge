@@ -822,9 +822,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <see langword="false"/>, unmatched identifiers are omitted and the result may be shorter.
         /// </param>
         /// <param name="batchSize">
-        /// The maximum number of identifiers queried by a single round trip, capped at roughly 2,100 — SQL Server's
-        /// limit on the number of parameters in a single command. When less than or equal to zero, or greater than
-        /// the cap, the cap is used.
+        /// The maximum number of identifiers queried by a single round trip, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -857,9 +857,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="connection">The connection to execute the update on.</param>
         /// <param name="entities">The entities whose current property values are written back to their rows.</param>
         /// <param name="batchSize">
-        /// The maximum number of entities updated by a single round trip, capped so that the number of parameters
-        /// the round trip uses — one per property of every entity in the batch — stays within SQL Server's roughly
-        /// 2,100-parameter limit. When less than or equal to zero, or greater than the cap, the cap is used.
+        /// The maximum number of entities updated by a single round trip, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <param name="transaction">The transaction to execute the update within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -898,11 +898,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="connection">The connection to execute the insert on.</param>
         /// <param name="entities">The entities to insert.</param>
         /// <param name="batchSize">
-        /// The maximum number of entities inserted by a single round trip, capped so that the number of parameters
-        /// the round trip uses — one per inserted property of every entity in the batch — stays within SQL
-        /// Server's roughly 2,100-parameter limit, and additionally capped at 1,000 — SQL Server's limit on the
-        /// number of rows in a single <c>INSERT ... VALUES</c> statement. When less than or equal to zero, or
-        /// greater than the applicable cap, the cap is used.
+        /// The maximum number of entities inserted by a single round trip, capped according to SQL Server's limits of
+        /// 1,000 rows per <c>INSERT ... VALUES</c> statement and roughly 2,100 parameters per command. When less than
+        /// or equal to zero, the maximum number allowed by these limits is used.
         /// </param>
         /// <param name="transaction">The transaction to execute the insert within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -940,9 +938,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="connection">The connection to execute the delete on.</param>
         /// <param name="entities">The entities whose rows are deleted, matched by their identifiers.</param>
         /// <param name="batchSize">
-        /// The maximum number of identifiers included in a single round trip, capped at roughly 2,100 — SQL
-        /// Server's limit on the number of parameters in a single command. When less than or equal to zero, or
-        /// greater than the cap, the cap is used.
+        /// The maximum number of identifiers included in a single round trip, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -978,9 +976,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <typeparamref name="TEntity"/>'s identifier property.
         /// </param>
         /// <param name="batchSize">
-        /// The maximum number of identifiers included in a single round trip, capped at roughly 2,100 — SQL
-        /// Server's limit on the number of parameters in a single command. When less than or equal to zero, or
-        /// greater than the cap, the cap is used.
+        /// The maximum number of identifiers included in a single round trip, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <param name="transaction">The transaction to execute the delete within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -1017,9 +1015,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="connection">The connection to execute the upsert on.</param>
         /// <param name="entities">The entities to insert or update.</param>
         /// <param name="batchSize">
-        /// The maximum number of entities upserted by a single round trip, capped so that the number of parameters
-        /// the round trip uses — one per property of every entity in the batch — stays within SQL Server's roughly
-        /// 2,100-parameter limit. When less than or equal to zero, or greater than the cap, the cap is used.
+        /// The maximum number of entities upserted by a single round trip, capped according to SQL Server's limit of
+        /// roughly 2,100 parameters per command. When less than or equal to zero, the maximum number allowed by
+        /// the parameter limit is used.
         /// </param>
         /// <param name="transaction">
         /// The transaction to execute the upsert within, or <see langword="null"/> to have this method manage its
