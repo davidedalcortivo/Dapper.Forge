@@ -3,6 +3,8 @@ using Dapper.Forge.Core.Models;
 using Dapper.Forge.Oracle.Strategies;
 using Oracle.ManagedDataAccess.Client;
 using System.Collections;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
 
@@ -422,8 +424,8 @@ namespace Dapper.Forge.Oracle.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
@@ -453,8 +455,8 @@ namespace Dapper.Forge.Oracle.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
@@ -487,8 +489,8 @@ namespace Dapper.Forge.Oracle.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
@@ -508,8 +510,8 @@ namespace Dapper.Forge.Oracle.Extensions
         }
 
         /// <summary>
-        /// Builds the command that updates every column of <paramref name="entity"/>'s row, except its identifier
-        /// and any database-generated property.
+        /// Builds the command that updates every column of <paramref name="entity"/>'s row, except its identifier,
+        /// any database-generated property, and any property marked <see cref="NotMappedAttribute"/>.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
@@ -530,9 +532,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the update.</returns>
         /// <remarks>
@@ -543,9 +548,14 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, or a property's value is not assignable to the
-        /// corresponding property's type.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         public static DbCommandInfo UpdateCommand<TEntity>(this OracleConnection connection, object values) where TEntity : class
         {
@@ -560,9 +570,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <param name="predicate">
         /// An optional predicate the updated rows must satisfy. When <see langword="null"/>, every row is updated.
@@ -572,9 +585,14 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, or a property's value is not assignable to the
-        /// corresponding property's type.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
@@ -592,9 +610,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <param name="filterNode">
         /// An optional filter the updated rows must satisfy. When <see langword="null"/>, every row is updated.
@@ -604,9 +625,14 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, or a property's value is not assignable to the
-        /// corresponding property's type.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
@@ -626,8 +652,9 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="entity">The entity to insert.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the insert.</returns>
         /// <remarks>
-        /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
-        /// including the identifier property unless it is itself database-generated.
+        /// Every property that is not marked <see cref="NotMappedAttribute"/> or as database-generated
+        /// is included in the generated <c>INSERT</c>, including the identifier property
+        /// unless it is itself database-generated.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
@@ -742,12 +769,18 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="entity">The entity to insert or update.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the upsert.</returns>
         /// <remarks>
+        /// Every property that is not marked as database-generated or <see cref="NotMappedAttribute"/>
+        /// is included in the <c>INSERT</c> portion of the statement;
+        /// the <c>UPDATE</c> portion updates the same set of properties, except the identifier and
+        /// any property marked <see cref="UpsertKeyAttribute"/>.
+        /// <para>
         /// The generated command is a <c>MERGE</c> statement. An existing row is matched using the properties
         /// marked with <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if
         /// none are marked — treating two <see langword="null"/> values in a key property as equal. On a match,
         /// every property is updated except the identifier, any database-generated property, and the key
         /// properties themselves; otherwise, a new row is inserted using every property that is not
         /// database-generated.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
@@ -796,8 +829,8 @@ namespace Dapper.Forge.Oracle.Extensions
         }
 
         /// <summary>
-        /// Builds the commands that update every column, except the identifier and any database-generated
-        /// property, of each of the specified entities' rows.
+        /// Builds the commands that update every column, except the identifier, any database-generated property,
+        /// and any property marked <see cref="NotMappedAttribute"/>, of each of the specified entities' rows.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the commands.</param>
@@ -848,8 +881,9 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="batchSize"/> entities.
         /// </returns>
         /// <remarks>
-        /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
-        /// including the identifier property unless it is itself database-generated.
+        /// Every property that is not marked <see cref="NotMappedAttribute"/> or as database-generated
+        /// is included in the generated <c>INSERT</c>, including the identifier property
+        /// unless it is itself database-generated.
         /// <para>
         /// Building these commands requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
@@ -942,13 +976,19 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="batchSize"/> entities.
         /// </returns>
         /// <remarks>
+        /// Every property that is not marked as database-generated or <see cref="NotMappedAttribute"/>
+        /// is included in the <c>INSERT</c> portion of each row;
+        /// the <c>UPDATE</c> portion updates the same set of properties, except the identifier and
+        /// any property marked <see cref="UpsertKeyAttribute"/>.
+        /// <para>
         /// Each generated command is a <c>MERGE</c> statement. An existing row is matched using the properties
         /// marked with <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if
         /// none are marked — treating two <see langword="null"/> values in a key property as equal. On a match,
         /// every property is updated except the identifier, any database-generated property, and the key
         /// properties themselves; otherwise, a new row is inserted using every property that is not
         /// database-generated.
-        /// <para>
+        /// </para>
+		/// <para>
         /// Building these commands requires the database's metadata for <typeparamref name="TEntity"/> to
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>UpsertRange</c>/<c>UpsertRangeAsync</c> execution methods do this

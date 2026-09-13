@@ -69,8 +69,9 @@ namespace Dapper.Forge.Core.Models
         /// <param name="ignoreCase">Whether to ignore case when <paramref name="value"/> is a <see cref="string"/>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="selector"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="selector"/> does not select a simple property, or <paramref name="value"/> — or, if it is
-        /// a non-string collection, one of its elements — is not assignable to the selected property's type.
+        /// <paramref name="selector"/> does not select a simple property, or <paramref name="value"/> is not
+        /// assignable to the selected property's type. When that property's type is a non-string collection, this
+        /// instead means one of <paramref name="value"/>'s elements is not assignable to it.
         /// </exception>
         public FilterDescriptor(Expression<Func<TEntity, object?>> selector, object? value, ComparisonOperator comparisonOperator = ComparisonOperator.Equal, bool not = false, bool ignoreCase = false)
         {
@@ -95,8 +96,9 @@ namespace Dapper.Forge.Core.Models
         /// <exception cref="ArgumentNullException"><paramref name="propertyName"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or
-        /// <paramref name="value"/> — or, if it is a non-string collection, one of its elements — is not assignable
-        /// to the property's type.
+        /// <paramref name="value"/> is not assignable to the property's type. When that property's type is a
+        /// non-string collection, this instead means one of <paramref name="value"/>'s elements is not assignable
+        /// to it.
         /// </exception>
         public FilterDescriptor(string propertyName, object? value, ComparisonOperator comparisonOperator = ComparisonOperator.Equal, bool not = false, bool ignoreCase = false)
         {

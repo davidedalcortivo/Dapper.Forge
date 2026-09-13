@@ -5,6 +5,8 @@ using Dapper.Forge.SqlServer.Strategies;
 using Microsoft.Data.SqlClient;
 using System.Collections;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -424,8 +426,8 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
@@ -455,8 +457,8 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
@@ -489,8 +491,8 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
         /// <remarks>
@@ -510,8 +512,8 @@ namespace Dapper.Forge.SqlServer.Extensions
         }
 
         /// <summary>
-        /// Builds the command that updates every column of <paramref name="entity"/>'s row, except its identifier
-        /// and any database-generated property.
+        /// Builds the command that updates every column of <paramref name="entity"/>'s row, except its identifier,
+        /// any database-generated property, and any property marked <see cref="NotMappedAttribute"/>.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
@@ -532,9 +534,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> for the update.</returns>
         /// <remarks>
@@ -545,9 +550,14 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, or a property's value is not assignable to the
-        /// corresponding property's type.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         public static DbCommandInfo UpdateCommand<TEntity>(this SqlConnection connection, object values) where TEntity : class
         {
@@ -562,9 +572,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <param name="predicate">
         /// An optional predicate the updated rows must satisfy. When <see langword="null"/>, every row is updated.
@@ -574,9 +587,14 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, or a property's value is not assignable to the
-        /// corresponding property's type.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
@@ -594,9 +612,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the command.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <param name="filterNode">
         /// An optional filter the updated rows must satisfy. When <see langword="null"/>, every row is updated.
@@ -606,9 +627,14 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, or a property's value is not assignable to the
-        /// corresponding property's type.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
@@ -628,8 +654,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="entity">The entity to insert.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the insert.</returns>
         /// <remarks>
-        /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
-        /// including the identifier property unless it is itself database-generated.
+        /// Every property that is not marked <see cref="NotMappedAttribute"/> or as database-generated
+        /// is included in the generated <c>INSERT</c>, including the identifier property
+        /// unless it is itself database-generated.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
@@ -744,6 +771,11 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <param name="entity">The entity to insert or update.</param>
         /// <returns>The <see cref="DbCommandInfo"/> for the upsert.</returns>
         /// <remarks>
+        /// Every property that is not marked as database-generated or <see cref="NotMappedAttribute"/>
+        /// is included in the <c>INSERT</c> portion of the statement;
+        /// the <c>UPDATE</c> portion updates the same set of properties, except the identifier and
+        /// any property marked <see cref="UpsertKeyAttribute"/>.
+        /// <para>
         /// The generated command is not a single statement: it is an <c>UPDATE</c> (using a
         /// <c>WITH (UPDLOCK, HOLDLOCK)</c> table hint) that matches an existing row using the properties marked
         /// with <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if none are
@@ -752,6 +784,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// followed by an <c>INSERT</c> that runs only if the <c>UPDATE</c> affected no rows. This library avoids a
         /// single <c>MERGE</c> statement here, a construct with several documented correctness issues in SQL
         /// Server.
+        /// </para>
         /// <para>
         /// Because the command is two statements relying on <c>@@ROWCOUNT</c> between them, executing it safely
         /// under concurrent access requires both statements to run in the same transaction — the table hint alone
@@ -805,8 +838,8 @@ namespace Dapper.Forge.SqlServer.Extensions
         }
 
         /// <summary>
-        /// Builds the commands that update every column, except the identifier and any database-generated
-        /// property, of each of the specified entities' rows.
+        /// Builds the commands that update every column, except the identifier, any database-generated property,
+        /// and any property marked <see cref="NotMappedAttribute"/>, of each of the specified entities' rows.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection used to build the commands.</param>
@@ -847,8 +880,9 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> instances for the insert.</returns>
         /// <remarks>
-        /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
-        /// including the identifier property unless it is itself database-generated.
+        /// Every property that is not marked <see cref="NotMappedAttribute"/> or as database-generated
+        /// is included in the generated <c>INSERT</c>, including the identifier property
+        /// unless it is itself database-generated.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
@@ -927,6 +961,11 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// </param>
         /// <returns>The <see cref="DbCommandInfo"/> instances for the upsert.</returns>
         /// <remarks>
+        /// Every property that is not marked as database-generated or <see cref="NotMappedAttribute"/>
+        /// is included in the <c>INSERT</c> portion of each row;
+        /// the <c>UPDATE</c> portion updates the same set of properties, except the identifier and
+        /// any property marked <see cref="UpsertKeyAttribute"/>.
+        /// <para>
         /// Each generated command is two statements: an <c>UPDATE ... FROM</c> that joins the target table to a
         /// <c>VALUES</c>-derived source table, matching rows using the properties marked with
         /// <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if none are
@@ -934,6 +973,7 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// <c>INSERT ... WHERE NOT EXISTS</c> (using a <c>WITH (UPDLOCK, HOLDLOCK)</c> table hint) that inserts only
         /// the entities with no matching row. On a match, every property is updated except the identifier, any
         /// database-generated property, and the key properties themselves.
+        /// </para>
         /// <para>
         /// As with the single-entity upsert, executing both statements safely under concurrent access requires them
         /// to run in the same transaction; the corresponding

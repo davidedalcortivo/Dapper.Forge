@@ -3,6 +3,8 @@ using Dapper.Forge.Core.Models;
 using Dapper.Forge.Oracle.Strategies;
 using Oracle.ManagedDataAccess.Client;
 using System.Collections;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
 
@@ -430,8 +432,8 @@ namespace Dapper.Forge.Oracle.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -459,8 +461,8 @@ namespace Dapper.Forge.Oracle.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -491,8 +493,8 @@ namespace Dapper.Forge.Oracle.Extensions
         /// </param>
         /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
         /// <param name="take">
-        /// The maximum number of rows to return. When <see langword="null"/> or negative, and <paramref name="skip"/>
-        /// is specified, all remaining rows after the skip are returned.
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
         /// </param>
         /// <param name="transaction">The transaction to execute the query within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -510,8 +512,8 @@ namespace Dapper.Forge.Oracle.Extensions
         }
 
         /// <summary>
-        /// Updates every column of <paramref name="entity"/>'s row, except its identifier and any
-        /// database-generated property, synchronously.
+        /// Updates every column of <paramref name="entity"/>'s row, except its identifier, any
+        /// database-generated property, and any property marked <see cref="NotMappedAttribute"/>, synchronously.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection to execute the update on.</param>
@@ -535,9 +537,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection to execute the update on.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <param name="transaction">The transaction to execute the update within, or <see langword="null"/> to execute it outside of an explicit transaction.</param>
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
@@ -550,9 +555,15 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, a property's value is not assignable to the
-        /// corresponding property's type, or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>;
+        /// a remaining property's value is not assignable to the corresponding property's type;
+        /// or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         public static int Update<TEntity>(this OracleConnection connection, object values, OracleTransaction? transaction = null, int? commandTimeout = null) where TEntity : class
         {
@@ -567,9 +578,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection to execute the update on.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <param name="predicate">
         /// An optional predicate the updated rows must satisfy. When <see langword="null"/>, every row is updated.
@@ -581,9 +595,15 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, a property's value is not assignable to the
-        /// corresponding property's type, or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>;
+        /// a remaining property's value is not assignable to the corresponding property's type;
+        /// or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
@@ -601,9 +621,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection to execute the update on.</param>
         /// <param name="values">
-        /// An object whose public properties specify the columns to update and their new values. Every property
-        /// must correspond to an updatable property of <typeparamref name="TEntity"/> — that is, neither the
-        /// identifier nor a database-generated property — and its value must be assignable to that property's type.
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
         /// </param>
         /// <param name="filterNode">
         /// An optional filter the updated rows must satisfy. When <see langword="null"/>, every row is updated.
@@ -615,9 +638,15 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="values"/> has no updatable properties, one of its properties does not correspond to an
-        /// updatable property of <typeparamref name="TEntity"/>, a property's value is not assignable to the
-        /// corresponding property's type, or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>;
+        /// a remaining property's value is not assignable to the corresponding property's type;
+        /// or <paramref name="transaction"/> does not belong to <paramref name="connection"/>.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
@@ -639,8 +668,9 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
         /// <returns>The number of rows affected.</returns>
         /// <remarks>
-        /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
-        /// including the identifier property unless it is itself database-generated.
+        /// Every property that is not marked <see cref="NotMappedAttribute"/> or as database-generated
+        /// is included in the generated <c>INSERT</c>, including the identifier property
+        /// unless it is itself database-generated.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
@@ -771,11 +801,17 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
         /// <returns>The number of rows affected.</returns>
         /// <remarks>
+        /// Every property that is not marked as database-generated or <see cref="NotMappedAttribute"/>
+        /// is included in the <c>INSERT</c> portion of the statement;
+        /// the <c>UPDATE</c> portion updates the same set of properties, except the identifier and
+        /// any property marked <see cref="UpsertKeyAttribute"/>.
+        /// <para>
         /// This executes a <c>MERGE</c> statement. An existing row is matched using the properties marked with
         /// <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if none are
         /// marked — treating two <see langword="null"/> values in a key property as equal. On a match, every
         /// property is updated except the identifier, any database-generated property, and the key properties
         /// themselves; otherwise, a new row is inserted using every property that is not database-generated.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
@@ -838,8 +874,8 @@ namespace Dapper.Forge.Oracle.Extensions
         }
 
         /// <summary>
-        /// Updates every column, except the identifier and any database-generated property, of each of the
-        /// specified entities' rows, synchronously.
+        /// Updates every column, except the identifier, any database-generated property, and any property marked
+        /// <see cref="NotMappedAttribute"/>, of each of the specified entities' rows, synchronously.
         /// </summary>
         /// <typeparam name="TEntity">The entity type to update.</typeparam>
         /// <param name="connection">The connection to execute the update on.</param>
@@ -861,13 +897,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </para>
         /// <para>
-        /// When <paramref name="entities"/> requires more than one round trip, and no <paramref name="transaction"/>
-        /// is provided, all round trips run inside a single transaction that this method begins, commits on
-        /// success, and rolls back if any round trip fails — so the operation is all-or-nothing even though it
-        /// spans multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this;
-        /// committing or rolling back is then the caller's responsibility. If <paramref name="connection"/> is
-        /// closed when this method is called and it owns the transaction, it also opens and closes the connection
-        /// for the duration of the operation.
+        /// When no <paramref name="transaction"/> is provided, this method begins one, commits it on success, and
+        /// rolls it back if execution fails — ensuring that the entire operation remains atomic regardless of
+        /// how many statements or round trips are required. Passing an explicit <paramref name="transaction"/>
+        /// opts out of this; committing or rolling back is then the caller's responsibility.
+        /// If <paramref name="connection"/> is closed when this method is called and it owns the transaction,
+        /// it also opens and closes the connection for the duration of the operation.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -895,8 +930,9 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
         /// <returns>The total number of rows affected across all round trips.</returns>
         /// <remarks>
-        /// Every property that is not marked as database-generated is included in the generated <c>INSERT</c>,
-        /// including the identifier property unless it is itself database-generated.
+        /// Every property that is not marked <see cref="NotMappedAttribute"/> or as database-generated
+        /// is included in the generated <c>INSERT</c>, including the identifier property
+        /// unless it is itself database-generated.
         /// <para>
         /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
         /// on <paramref name="connection"/> before building any commands, so — unlike
@@ -904,13 +940,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </para>
         /// <para>
-        /// When <paramref name="entities"/> requires more than one round trip, and no <paramref name="transaction"/>
-        /// is provided, all round trips run inside a single transaction that this method begins, commits on
-        /// success, and rolls back if any round trip fails — so the operation is all-or-nothing even though it
-        /// spans multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this;
-        /// committing or rolling back is then the caller's responsibility. If <paramref name="connection"/> is
-        /// closed when this method is called and it owns the transaction, it also opens and closes the connection
-        /// for the duration of the operation.
+        /// When no <paramref name="transaction"/> is provided, this method begins one, commits it on success, and
+        /// rolls it back if execution fails — ensuring that the entire operation remains atomic regardless of
+        /// how many statements or round trips are required. Passing an explicit <paramref name="transaction"/>
+        /// opts out of this; committing or rolling back is then the caller's responsibility.
+        /// If <paramref name="connection"/> is closed when this method is called and it owns the transaction,
+        /// it also opens and closes the connection for the duration of the operation.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -938,13 +973,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
         /// <returns>The total number of rows affected across all round trips.</returns>
         /// <remarks>
-        /// When <paramref name="entities"/> requires more than one round trip, and no <paramref name="transaction"/>
-        /// is provided, all round trips run inside a single transaction that this method begins, commits on
-        /// success, and rolls back if any round trip fails — so the operation is all-or-nothing even though it
-        /// spans multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this;
-        /// committing or rolling back is then the caller's responsibility. If <paramref name="connection"/> is
-        /// closed when this method is called and it owns the transaction, it also opens and closes the connection
-        /// for the duration of the operation.
+        /// When no <paramref name="transaction"/> is provided, this method begins one, commits it on success, and
+        /// rolls it back if execution fails — ensuring that the entire operation remains atomic regardless of
+        /// how many statements or round trips are required. Passing an explicit <paramref name="transaction"/>
+        /// opts out of this; committing or rolling back is then the caller's responsibility.
+        /// If <paramref name="connection"/> is closed when this method is called and it owns the transaction,
+        /// it also opens and closes the connection for the duration of the operation.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
@@ -975,13 +1009,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
         /// <returns>The total number of rows affected across all round trips.</returns>
         /// <remarks>
-        /// When <paramref name="ids"/> requires more than one round trip, and no <paramref name="transaction"/> is
-        /// provided, all round trips run inside a single transaction that this method begins, commits on success,
-        /// and rolls back if any round trip fails — so the operation is all-or-nothing even though it spans
-        /// multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this; committing or
-        /// rolling back is then the caller's responsibility. If <paramref name="connection"/> is closed when this
-        /// method is called and it owns the transaction, it also opens and closes the connection for the duration
-        /// of the operation.
+        /// When no <paramref name="transaction"/> is provided, this method begins one, commits it on success, and
+        /// rolls it back if execution fails — ensuring that the entire operation remains atomic regardless of
+        /// how many statements or round trips are required. Passing an explicit <paramref name="transaction"/>
+        /// opts out of this; committing or rolling back is then the caller's responsibility.
+        /// If <paramref name="connection"/> is closed when this method is called and it owns the transaction,
+        /// it also opens and closes the connection for the duration of the operation.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="ids"/> is <see langword="null"/>, or one of its
@@ -1013,12 +1046,18 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <param name="commandTimeout">The number of seconds to wait before timing out, or <see langword="null"/> to use the default timeout.</param>
         /// <returns>The total number of rows affected across all round trips.</returns>
         /// <remarks>
+        /// Every property that is not marked as database-generated or <see cref="NotMappedAttribute"/>
+        /// is included in the <c>INSERT</c> portion of each row;
+        /// the <c>UPDATE</c> portion updates the same set of properties, except the identifier and
+        /// any property marked <see cref="UpsertKeyAttribute"/>.
+        /// <para>
         /// Each round trip executes a <c>MERGE</c> statement. An existing row is matched using the properties
         /// marked with <see cref="UpsertKeyAttribute"/> — or the entity's identifier, if
         /// none are marked — treating two <see langword="null"/> values in a key property as equal. On a match,
         /// every property is updated except the identifier, any database-generated property, and the key
         /// properties themselves; otherwise, a new row is inserted using every property that is not
         /// database-generated.
+        /// </para>
         /// <para>
         /// This automatically ensures the database's metadata for <typeparamref name="TEntity"/> is loaded
         /// on <paramref name="connection"/> before building any commands, so — unlike
@@ -1026,13 +1065,12 @@ namespace Dapper.Forge.Oracle.Extensions
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
         /// </para>
         /// <para>
-        /// When <paramref name="entities"/> requires more than one round trip, and no <paramref name="transaction"/>
-        /// is provided, all round trips run inside a single transaction that this method begins, commits on
-        /// success, and rolls back if any round trip fails — so the operation is all-or-nothing even though it
-        /// spans multiple round trips. Passing an explicit <paramref name="transaction"/> opts out of this;
-        /// committing or rolling back is then the caller's responsibility. If <paramref name="connection"/> is
-        /// closed when this method is called and it owns the transaction, it also opens and closes the connection
-        /// for the duration of the operation.
+        /// When no <paramref name="transaction"/> is provided, this method begins one, commits it on success, and
+        /// rolls it back if execution fails — ensuring that the entire operation remains atomic regardless of
+        /// how many statements or round trips are required. Passing an explicit <paramref name="transaction"/>
+        /// opts out of this; committing or rolling back is then the caller's responsibility.
+        /// If <paramref name="connection"/> is closed when this method is called and it owns the transaction,
+        /// it also opens and closes the connection for the duration of the operation.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
