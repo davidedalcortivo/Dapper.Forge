@@ -20,6 +20,11 @@ namespace Dapper.Forge.MySql.Strategies
             return $"CONCAT({string.Join(", ", parts)})";
         }
 
+        public override string Like(string column, string pattern)
+        {
+            return $"{column} LIKE {pattern} ESCAPE '\\\\'";
+        }
+
         public override string Pagination(string skipParameter, string takeParameter)
         {
             StringBuilder sqlBuffer = new();

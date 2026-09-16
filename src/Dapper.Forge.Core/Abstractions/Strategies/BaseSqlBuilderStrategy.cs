@@ -139,7 +139,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
-            (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]));
+            (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]), false);
             string clause = inPrefix + SqlDialectStrategy.Placeholder + inSuffix;
 
             sqlBuffer.Append("SELECT");
@@ -184,7 +184,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             ImmutableDictionary<string, string> columnNamesByPropertyName = EntityInfoCache<TEntity>.ColumnNamesByPropertyName;
 
             StringBuilder sqlBuffer = new();
-            (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]));
+            (string inPrefix, string inSuffix) = SqlDialectStrategy.In(SqlDialectStrategy.RenderIdentifier(columnNamesByPropertyName[idProperty.Name]), false);
             string clause = inPrefix + SqlDialectStrategy.Placeholder + inSuffix;
 
             sqlBuffer.Append("DELETE FROM ");

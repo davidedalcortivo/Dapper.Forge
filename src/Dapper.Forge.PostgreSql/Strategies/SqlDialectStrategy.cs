@@ -10,13 +10,19 @@ namespace Dapper.Forge.PostgreSql.Strategies
     {
         public static SqlDialectStrategy Instance { get; } = new();
 
-        public override string In(string identifier, string parameter)
+        public override string In(string identifier, string parameter, bool mixed)
         {
+            if (mixed)
+                return base.In(identifier, parameter, mixed);
+
             return $"{identifier} = ANY({parameter})";
         }
 
-        public override (string, string) In(string identifier)
+        public override (string, string) In(string identifier, bool mixed)
         {
+            if (mixed)
+                return base.In(identifier, mixed);
+
             return ($"{identifier} = ANY(", ")");
         }
 

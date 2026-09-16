@@ -52,7 +52,7 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             {
                 char c = value[i];
 
-                if (c == '\\' || c == '%' || c == '_' || c == '\'')
+                if (c == '\\' || c == '%' || c == '_')
                     break;
             }
 
@@ -69,8 +69,6 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
 
                 if (c == '\\' || c == '%' || c == '_')
                     sb.Append('\\');
-                else if (c == '\'')
-                    sb.Append('\'');
 
                 sb.Append(c);
             }
@@ -78,12 +76,12 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
             return sb.ToString();
         }
 
-        public virtual string In(string identifier, string parameter)
+        public virtual string In(string identifier, string parameter, bool mixed)
         {
             return $"{identifier} IN {parameter}";
         }
 
-        public virtual (string, string) In(string identifier)
+        public virtual (string, string) In(string identifier, bool mixed)
         {
             return ($"{identifier} IN ", string.Empty);
         }

@@ -48,7 +48,7 @@ namespace Dapper.Forge.Core.Caching
 
                     if (property.IsDefined(typeof(KeyAttribute), true))
                     {
-                        if (keyAttributeCount++ > 1)
+                        if (++keyAttributeCount > 1)
                             throw new InvalidOperationException($"Multiple properties in the entity '{entityType.Name}' are marked with the [Key] attribute. Only one property can be marked as the key.");
 
                         IdProperty = property;

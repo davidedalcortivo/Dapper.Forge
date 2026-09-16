@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Project-local working notes (internal devlog, not the public-facing roadmap)
+ROADMAP.md
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
 # User-specific files
 *.rsuser
 *.suo

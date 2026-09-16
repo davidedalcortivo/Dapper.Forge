@@ -61,7 +61,7 @@ namespace Dapper.Forge.Core.Utilities
             }
             else if (f.ComparisonOperator is ComparisonOperator.In && f.Value is IEnumerable enumerable && f.Value is not string)
             {
-                List<object?> values = [];
+                List<object> values = [];
                 bool hasNull = false;
 
                 foreach (object? item in enumerable)
@@ -87,8 +87,24 @@ namespace Dapper.Forge.Core.Utilities
 
                     if (values.Count > 0)
                     {
-                        string p = _ctx.AddParameter(values.ToArray());
-                        parts.Add($"({_ctx.SqlDialectStrategy.In(left, p)})");
+                        Type valueType = values[0].GetType();
+
+                        if (values.Any(x => x.GetType() != valueType))
+                        {
+                            string p = _ctx.AddParameter(values.ToArray());
+                            parts.Add($"({_ctx.SqlDialectStrategy.In(left, p, true)})");
+                        }
+                        else
+                        {
+                            Array array = Array.CreateInstance(valueType, values.Count);
+
+                            for (int i = 0; i < values.Count; i++)
+                                array.SetValue(values[i], i);
+
+                            string p = _ctx.AddParameter(array);
+                            parts.Add($"({_ctx.SqlDialectStrategy.In(left, p, false)})");
+                        }
+
                         conditionCount++;
                     }
 

@@ -494,7 +494,7 @@ namespace Dapper.Forge.Core.Utilities
             if (raw is not IEnumerable coll)
                 throw new NotSupportedException("Contains requires an IEnumerable source.");
 
-            List<object?> values = [];
+            List<object> values = [];
             bool hasNull = false;
 
             foreach (object? item in coll)
@@ -523,8 +523,24 @@ namespace Dapper.Forge.Core.Utilities
 
             if (values.Count > 0)
             {
-                string p = _ctx.AddParameter(values.ToArray());
-                parts.Add($"({_ctx.SqlDialectStrategy.In(colSql, p)})");
+                Type valueType = values[0].GetType();
+
+                if (values.Any(x => x.GetType() != valueType))
+                {
+                    string p = _ctx.AddParameter(values.ToArray());
+                    parts.Add($"({_ctx.SqlDialectStrategy.In(colSql, p, true)})");
+                }
+                else
+                {
+                    Array array = Array.CreateInstance(valueType, values.Count);
+
+                    for (int i = 0; i < values.Count; i++)
+                        array.SetValue(values[i], i);
+
+                    string p = _ctx.AddParameter(array);
+                    parts.Add($"({_ctx.SqlDialectStrategy.In(colSql, p, false)})");
+                }
+                
                 conditionCount++;
             }
 

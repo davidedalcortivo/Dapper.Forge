@@ -17,8 +17,8 @@ namespace Dapper.Forge.Core.Abstractions.Strategies
         string ToUpper(string sql);
         string Like(string column, string pattern);
         string EscapeLike(string value);
-        string In(string identifier, string parameter);
-        (string, string) In(string identifier);
+        string In(string identifier, string parameter, bool mixed);
+        (string, string) In(string identifier, bool mixed);
         string IsNull(string column);
         string IsNotNull(string column);
         string IsTrue(string column);
