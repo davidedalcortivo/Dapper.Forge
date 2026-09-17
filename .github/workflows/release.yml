@@ -1,0 +1,51 @@
+name: Release
+
+"on":
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Pack & Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Both installed side by side, same reason as build-test.yml: the test runs on the real 8.0 runtime,
+      # not on 10 via roll-forward.
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Extract and validate version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not look like a valid version (expected vX.Y.Z or vX.Y.Z-suffix, e.g. v1.2.3 or v1.2.3-beta.1)"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # Never publish a commit that hasn't been verified - the full suite, not the parallel per-provider split
+      # build-test.yml uses, since this only runs on a tag push and speed matters less than certainty here.
+      - name: Test
+        run: dotnet test tests/Dapper.Forge.Tests/Dapper.Forge.Tests.csproj
+
+      - name: Pack
+        run: dotnet pack Dapper.Forge.slnx -c Release -p:Version=${{ steps.version.outputs.version }} -o ./artifacts
+
+      # One `dotnet nuget push` call per .nupkg (each auto-picks up its matching .snupkg from the same folder) -
+      # not a single call with a *.nupkg wildcard, which is documented to unreliably skip packages
+      # (see NuGet/Home#9867).
+      - name: Push to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          for pkg in ./artifacts/*.nupkg; do
+            dotnet nuget push "$pkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done

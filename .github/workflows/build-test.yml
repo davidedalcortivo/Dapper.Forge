@@ -1,0 +1,108 @@
+name: Build & Test
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Both installed side by side: the net8.0-targeted assembly then runs on the real 8.0 runtime (exact
+      # match preferred over roll-forward), not just "compiled for 8.0, executed on 10 via roll-forward" -
+      # verified locally with an isolated 8.0 SDK before adding this (build + Testcontainers-based SqlServer
+      # tests both passed under 8.0 alone).
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Build
+        run: dotnet build
+
+  test:
+    name: Test (${{ matrix.provider }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [Core, SqlServer, MySql, PostgreSql, Oracle]
+    steps:
+      - uses: actions/checkout@v7
+
+      # Both installed side by side: the net8.0-targeted assembly then runs on the real 8.0 runtime (exact
+      # match preferred over roll-forward), not just "compiled for 8.0, executed on 10 via roll-forward" -
+      # verified locally with an isolated 8.0 SDK before adding this (build + Testcontainers-based SqlServer
+      # tests both passed under 8.0 alone).
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      # Ubuntu GitHub-hosted runners ship Docker Engine preinstalled, which is all Testcontainers needs -
+      # no extra setup step required for the SqlServer/MySql/PostgreSql/Oracle containers the tests spin up
+      # themselves.
+      - name: Test
+        run: >
+          dotnet test tests/Dapper.Forge.Tests/Dapper.Forge.Tests.csproj
+          --filter "FullyQualifiedName~Dapper.Forge.Tests.${{ matrix.provider }}"
+
+  coverage-badge:
+    name: Update coverage badge
+    needs: build
+    # Only on pushes to main (never on PRs - fork PRs have no write access anyway, and this shouldn't run on
+    # every PR push regardless). Runs the full, unfiltered suite once - coverage on Dapper.Forge.Core comes
+    # from the whole test suite (unit + all 4 providers' real integration tests), not just Core's own
+    # namespace, since provider integration tests exercise plenty of Core code too.
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Run full suite with coverage
+        run: >
+          dotnet test tests/Dapper.Forge.Tests/Dapper.Forge.Tests.csproj
+          --coverage --coverage-output-format cobertura
+          --results-directory ./coverage-results
+
+      - name: Compute Core line coverage
+        id: coverage
+        run: |
+          COVERAGE_FILE=$(find ./coverage-results -name "*.cobertura.xml" | head -n 1)
+          python3 scripts/compute-coverage-badge.py "$COVERAGE_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Generate badge
+        run: |
+          mkdir -p docs/badges
+          curl -sSL "https://img.shields.io/badge/Core_line_coverage-${{ steps.coverage.outputs.pct }}%25-${{ steps.coverage.outputs.color }}" -o docs/badges/coverage.svg
+
+      - name: Commit badge if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/badges/coverage.svg
+          if git diff --cached --quiet; then
+            echo "Coverage badge unchanged, nothing to commit."
+          else
+            git commit -m "Update coverage badge to ${{ steps.coverage.outputs.pct }}% [skip ci]"
+            git push
+          fi
