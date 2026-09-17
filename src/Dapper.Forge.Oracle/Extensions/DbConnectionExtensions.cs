@@ -10,6 +10,11 @@ using System.Linq.Expressions;
 
 namespace Dapper.Forge.Oracle.Extensions
 {
+    /// <summary>
+    /// Extension methods on <see cref="OracleConnection"/> providing type-safe CRUD (single-row or multi-row),
+    /// dynamic filtering, sorting, paging, and aggregation against Oracle, for any entity mapped with the
+    /// attributes in <c>Dapper.Forge.Core.Models</c>.
+    /// </summary>
     public static partial class DbConnectionExtensions
     {
         /// <summary>

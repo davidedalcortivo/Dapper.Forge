@@ -10,6 +10,11 @@ using System.Linq.Expressions;
 
 namespace Dapper.Forge.PostgreSql.Extensions
 {
+    /// <summary>
+    /// Extension methods on <see cref="NpgsqlConnection"/> providing type-safe CRUD (single-row or multi-row),
+    /// dynamic filtering, sorting, paging, and aggregation against PostgreSQL, for any entity mapped with the
+    /// attributes in <c>Dapper.Forge.Core.Models</c>.
+    /// </summary>
     public static partial class DbConnectionExtensions
     {
         /// <summary>
