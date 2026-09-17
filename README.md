@@ -1,7 +1,7 @@
 # Dapper.Forge
 
 [![Build & Test](https://github.com/davidedalcortivo/Dapper.Forge/actions/workflows/build-test.yml/badge.svg)](https://github.com/davidedalcortivo/Dapper.Forge/actions/workflows/build-test.yml)
-![Core line coverage](docs/badges/coverage.svg)
+![Core line coverage](assets/badges/coverage.svg)
 
 A thin, provider-aware extension layer on top of [Dapper](https://github.com/DapperLib/Dapper): type-safe CRUD
 (single-row or multi-row), dynamic filtering, sorting, and paging against one mapped table at a time — with SQL

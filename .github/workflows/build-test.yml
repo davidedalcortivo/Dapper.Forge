@@ -92,14 +92,14 @@ jobs:
 
       - name: Generate badge
         run: |
-          mkdir -p docs/badges
-          curl -sSL "https://img.shields.io/badge/Core_line_coverage-${{ steps.coverage.outputs.pct }}%25-${{ steps.coverage.outputs.color }}" -o docs/badges/coverage.svg
+          mkdir -p assets/badges
+          curl -sSL "https://img.shields.io/badge/Core_line_coverage-${{ steps.coverage.outputs.pct }}%25-${{ steps.coverage.outputs.color }}" -o assets/badges/coverage.svg
 
       - name: Commit badge if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/badges/coverage.svg
+          git add assets/badges/coverage.svg
           if git diff --cached --quiet; then
             echo "Coverage badge unchanged, nothing to commit."
           else
