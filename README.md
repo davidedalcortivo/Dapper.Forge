@@ -14,7 +14,7 @@ boilerplate for every entity.
 |                                                    | Dapper           | Dapper.Forge                              | EF Core                                   |
 |----------------------------------------------------|-------------------|--------------------------------------------|--------------------------------------------|
 | Single-row CRUD                                      | You write the SQL | Generated, one line per call                | Generated                                   |
-| Multi-row insert/update/delete/upsert                | You write the SQL, and your own batching | ✅ Generated as one atomic multi-row statement, with a configurable batch size | Generated, but one statement per row, batched into fewer round trips — not a single multi-row statement |
+| Multi-row insert/update/delete/upsert                | You write the SQL | ✅ Generated as one atomic multi-row statement, with a configurable batch size | Generated, but one statement per row, batched into fewer round trips — not a single multi-row statement |
 | Filter built from a compile-time LINQ expression     | You write the SQL | ✅ `Expression<Func<T, bool>>`              | ✅                                           |
 | Filter built dynamically at runtime (e.g. from a query string, with no `Expression` in sight) | You write the SQL | ✅ `FilterDescriptor`/`FilterGroup`, by property name | Needs `Expression.Lambda` plumbing or a package like `System.Linq.Dynamic.Core` |
 | Upsert on a natural (non-identity) key               | You write the SQL | ✅ `[UpsertKey]`, one call across all 4 providers | Needs manual logic or a third-party package |
