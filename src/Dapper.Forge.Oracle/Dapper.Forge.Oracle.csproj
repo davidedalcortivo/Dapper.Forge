@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Dapper.Forge.Oracle</PackageId>
+    <Description>Oracle provider for Dapper.Forge: type-safe CRUD, expression-based filtering, sorting, paging and upsert on top of Dapper, including true multi-row insert/upsert (UNION ALL/DUAL with automatic per-column cast discovery) where Oracle has no native VALUES (...), (...) syntax.</Description>
+    <PackageTags>$(PackageTags);oracle;odp.net</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

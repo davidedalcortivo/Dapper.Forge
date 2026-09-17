@@ -4,6 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Dapper.Forge.Core</PackageId>
+    <Description>Core engine of Dapper.Forge: expression-based filtering, entity/column caching and per-dialect SQL building on top of Dapper. Pulled in automatically by a provider package (Dapper.Forge.SqlServer, Dapper.Forge.MySql, Dapper.Forge.PostgreSql or Dapper.Forge.Oracle) - you normally don't install this package directly.</Description>
   </PropertyGroup>
 
   <ItemGroup>

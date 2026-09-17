@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Dapper.Forge.MySql</PackageId>
+    <Description>MySQL provider for Dapper.Forge: type-safe CRUD, expression-based filtering, sorting, paging and upsert on top of Dapper, without the overhead of a full ORM.</Description>
+    <PackageTags>$(PackageTags);mysql</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

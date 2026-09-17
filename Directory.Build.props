@@ -1,0 +1,30 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>Davide Dal Cortivo</Authors>
+    <Product>Dapper.Forge</Product>
+    <Copyright>Copyright $([System.DateTime]::Now.Year) Davide Dal Cortivo</Copyright>
+
+    <Version>1.0.0</Version>
+
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/davidedalcortivo/Dapper.Forge</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/davidedalcortivo/Dapper.Forge</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>dapper;orm;micro-orm;sql;data-access</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Missing XML doc comments are tracked as a Fase 2 roadmap item, not a build-breaking warning. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- CI systems (GitHub Actions included) set CI=true automatically; deterministic source paths are only
+         wanted for those builds, not for a developer's local debug session. -->
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+</Project>

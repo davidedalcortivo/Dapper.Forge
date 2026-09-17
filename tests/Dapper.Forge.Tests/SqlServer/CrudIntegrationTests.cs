@@ -165,6 +165,23 @@ namespace Dapper.Forge.Tests.SqlServer
         }
 
         [Fact]
+        public async Task AvgAsync_OnIntegerColumn_ReturnsTruncatedResultMatchingNativeTSqlSemantics()
+        {
+            // True average of 1, 2, 4 is 2.333... . T-SQL's own AVG returns the same exact numeric type as its
+            // input, so AVG of an int-typed expression truncates to a whole number - identical to what a
+            // hand-written `AVG(Quantity)` query returns. Dapper.Forge does not alter that native behavior (see
+            // the remarks on LoadDbCacheAsync); this test locks it in as documented, intentional behavior rather
+            // than leaving it as an untested accident.
+            await _fixture.Connection.InsertAsync(new Widget { Id = 70, Name = "Avg70", Quantity = 1, IsActive = true, Price = 1m }, cancellationToken: TestContext.Current.CancellationToken);
+            await _fixture.Connection.InsertAsync(new Widget { Id = 71, Name = "Avg71", Quantity = 2, IsActive = true, Price = 1m }, cancellationToken: TestContext.Current.CancellationToken);
+            await _fixture.Connection.InsertAsync(new Widget { Id = 72, Name = "Avg72", Quantity = 4, IsActive = true, Price = 1m }, cancellationToken: TestContext.Current.CancellationToken);
+
+            decimal? avg = await _fixture.Connection.AvgAsync<Widget>(w => w.Quantity, w => w.Id >= 70 && w.Id <= 72, cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.Equal(2m, avg);
+        }
+
+        [Fact]
         public async Task DeleteAsync_RemovesRow()
         {
             await _fixture.Connection.InsertAsync(new Widget { Id = 50, Name = "To delete", IsActive = true, Price = 1m }, cancellationToken: TestContext.Current.CancellationToken);

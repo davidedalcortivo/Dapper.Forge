@@ -1257,6 +1257,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
         /// </para>
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1291,6 +1297,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
+        /// </para>
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1330,6 +1342,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
         /// </para>
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1365,6 +1383,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
+        /// </para>
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1402,6 +1426,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
+        /// </para>
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -1442,6 +1472,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// already be loaded on <paramref name="connection"/>. Call <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c>
         /// first; the corresponding <c>Avg</c>/<c>AvgAsync</c> execution methods in this class do this
         /// automatically and do not have this requirement.
+        /// </para>
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">

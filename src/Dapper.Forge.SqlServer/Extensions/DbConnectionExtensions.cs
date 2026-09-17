@@ -1394,6 +1394,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1428,6 +1434,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1465,6 +1477,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
@@ -1499,6 +1517,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1533,6 +1557,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
@@ -1570,6 +1600,12 @@ namespace Dapper.Forge.SqlServer.Extensions
         /// on <paramref name="connection"/> before building any commands, so — unlike
         /// <see cref="AvgCommand{TEntity}(SqlConnection, Expression{Func{TEntity, decimal?}})"/> (and its overloads) — calling
         /// <c>LoadDbCache</c> or <c>LoadDbCacheAsync</c> first is not required.
+        /// <para>
+        /// When the averaged column is <c>int</c>/<c>smallint</c>/<c>tinyint</c>/<c>bigint</c>-typed: SQL Server's
+        /// own <c>AVG</c> returns the same exact numeric type as its input, so this still returns a truncated,
+        /// whole-number result — identical to what a hand-written <c>AVG(column)</c> query returns. This library
+        /// does not alter that native behavior.
+        /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
