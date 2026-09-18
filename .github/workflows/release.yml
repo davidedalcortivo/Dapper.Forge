@@ -9,6 +9,9 @@ jobs:
   release:
     name: Pack & Publish
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # lets NuGet/login exchange an OIDC token for a short-lived push key - no stored secret
+      contents: read
     steps:
       - uses: actions/checkout@v7
 
@@ -39,13 +42,18 @@ jobs:
       - name: Pack
         run: dotnet pack Dapper.Forge.slnx -c Release -p:Version=${{ steps.version.outputs.version }} -o ./artifacts
 
+      # Requested right before the push (not earlier): the exchanged key is only valid for 1 hour.
+      - name: NuGet login (OIDC -> temporary API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: davidedalcortivo
+
       # One `dotnet nuget push` call per .nupkg (each auto-picks up its matching .snupkg from the same folder) -
       # not a single call with a *.nupkg wildcard, which is documented to unreliably skip packages
       # (see NuGet/Home#9867).
       - name: Push to NuGet.org
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           for pkg in ./artifacts/*.nupkg; do
-            dotnet nuget push "$pkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+            dotnet nuget push "$pkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
           done
