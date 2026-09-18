@@ -6,10 +6,10 @@
 A thin, provider-aware extension layer on top of [Dapper](https://github.com/DapperLib/Dapper): type-safe CRUD
 (single-row or multi-row), dynamic filtering, sorting, and paging against one mapped table at a time — with SQL
 generated correctly for the engine you're actually running against, not a lowest-common-denominator translation.
-Supports **SQL Server**, **MySQL**, **PostgreSQL**, and **Oracle**.
+Supports **MySQL**, **Oracle**, **PostgreSQL**, and **SQL Server**.
 
 It sits between raw Dapper and a full ORM: you still map plain classes to tables with a handful of attributes, but
-you stop hand-writing (and hand-maintaining, across 4 dialects) the same `SELECT`/`INSERT`/`UPDATE`/`MERGE`
+you stop hand-writing (and hand-maintaining, across 4 dialects) the same `SELECT`/`UPDATE`/`INSERT`/`MERGE`
 boilerplate for every entity.
 
 ## Why
@@ -17,7 +17,7 @@ boilerplate for every entity.
 |                                                    | Dapper           | Dapper.Forge                              | EF Core                                   |
 |----------------------------------------------------|-------------------|--------------------------------------------|--------------------------------------------|
 | Single-row CRUD                                      | You write the SQL | Generated, one line per call                | Generated                                   |
-| Multi-row insert/update/delete/upsert                | You write the SQL | ✅ Generated as one atomic multi-row statement, with a configurable batch size | Generated, but one statement per row, batched into fewer round trips — not a single multi-row statement |
+| Multi-row update/insert/delete/upsert                | You write the SQL | ✅ Generated as one atomic multi-row statement, with a configurable batch size | Generated, but one statement per row, batched into fewer round trips — not a single multi-row statement |
 | Filter built from a compile-time LINQ expression     | You write the SQL | ✅ `Expression<Func<T, bool>>`              | ✅                                           |
 | Filter built dynamically at runtime (e.g. from a query string, with no `Expression` in sight) | You write the SQL | ✅ `FilterDescriptor`/`FilterGroup`, by property name | Needs `Expression.Lambda` plumbing or a package like `System.Linq.Dynamic.Core` |
 | Upsert on a natural (non-identity) key               | You write the SQL | ✅ `[UpsertKey]`, one call across all 4 providers | Needs manual logic or a third-party package |
@@ -34,10 +34,10 @@ automatically.
 
 | Database   | Package                                                        | Connection type      |
 |------------|------------------------------------------------------------------|-----------------------|
-| SQL Server | [`Dapper.Forge.SqlServer`](https://www.nuget.org/packages/Dapper.Forge.SqlServer) | `SqlConnection`       |
 | MySQL      | [`Dapper.Forge.MySql`](https://www.nuget.org/packages/Dapper.Forge.MySql)         | `MySqlConnection`     |
-| PostgreSQL | [`Dapper.Forge.PostgreSql`](https://www.nuget.org/packages/Dapper.Forge.PostgreSql) | `NpgsqlConnection`    |
 | Oracle     | [`Dapper.Forge.Oracle`](https://www.nuget.org/packages/Dapper.Forge.Oracle)       | `OracleConnection`    |
+| PostgreSQL | [`Dapper.Forge.PostgreSql`](https://www.nuget.org/packages/Dapper.Forge.PostgreSql) | `NpgsqlConnection`    |
+| SQL Server | [`Dapper.Forge.SqlServer`](https://www.nuget.org/packages/Dapper.Forge.SqlServer) | `SqlConnection`       |
 
 ```bash
 dotnet add package Dapper.Forge.SqlServer
@@ -69,8 +69,9 @@ public class Product
 ```
 
 Then use the connection extension methods — every method below exists identically (same name, same overloads) on
-all 4 providers; only the `using` and the connection type change. `[UpsertKey]` (on `Sku` above) makes `UpsertAsync`
-match rows by that column instead of the identity column — see
+all 4 providers, and each has both a synchronous and an asynchronous overload (`GetAll`/`GetAllAsync`,
+`Insert`/`InsertAsync`, and so on); only the `using` and the connection type change. `[UpsertKey]` (on `Sku`
+above) makes `Upsert`/`UpsertAsync` match rows by that column instead of the identity column — see
 [Upsert on a natural key](#upsert-on-a-natural-key-one-call-a-different-correct-statement-per-engine) below for
 what actually runs:
 
@@ -81,6 +82,8 @@ using Microsoft.Data.SqlClient;
 await using SqlConnection connection = new(connectionString);
 
 IReadOnlyList<Product> all = await connection.GetAllAsync<Product>();
+// Every method also has a synchronous overload with the same name minus "Async" - the rest of this example
+// sticks to async, but this one works identically: IReadOnlyList<Product> all = connection.GetAll<Product>();
 
 Product? product = await connection.GetByIdAsync<Product>(id: 42);
 
@@ -121,7 +124,8 @@ IReadOnlyList<Product> results = await connection.GetAllAsync(filter);
 ```
 
 `GetAll`, `GetFirst`, `GetSingle`, `GetPage`, `Update`, `Delete`, `Exists`, `Count`, `Avg`, `Sum`, `Min`, and `Max`
-all accept either shape — pick whichever fits the call site, they translate to the same SQL.
+(and their respective asynchronous overloads) all accept either shape — pick whichever fits the call site, they
+translate to the same SQL.
 
 ### Sorting and paging
 
@@ -159,8 +163,8 @@ await connection.UpsertAsync(new Product { Sku = "SKU-1", Name = "Widget", Categ
 What actually runs is deliberately *not* the same statement re-parameterized four times:
 
 - **MySQL**: `INSERT INTO ... VALUES (...) AS new ON DUPLICATE KEY UPDATE col = new.col, ...`
-- **PostgreSQL**: `INSERT INTO ... VALUES (...) ON CONFLICT (sku) DO UPDATE SET col = EXCLUDED.col, ...`
 - **Oracle**: `MERGE INTO ... USING (SELECT ... FROM DUAL) SOURCE ON (...) WHEN MATCHED THEN UPDATE ... WHEN NOT MATCHED THEN INSERT ...`
+- **PostgreSQL**: `INSERT INTO ... VALUES (...) ON CONFLICT (sku) DO UPDATE SET col = EXCLUDED.col, ...`
 - **SQL Server**: *not* `MERGE` — a documented, well-known source of concurrency correctness bugs. Instead:
   `UPDATE ... WITH (UPDLOCK, HOLDLOCK) SET ... WHERE ...` followed by a conditional `INSERT` guarded by
   `IF @@ROWCOUNT = 0`, wrapped in a transaction Dapper.Forge manages for you if you don't supply one.
@@ -170,20 +174,20 @@ but is subtly wrong (or slow, or unsafe under concurrency) on at least one of th
 
 ### Avg, on every provider: read as text, converted to `decimal` in C#
 
-Database numeric types can carry more precision than .NET's `decimal` can hold: SQL Server's `AVG` on a
-`decimal(p,s)` column returns `decimal(38,s)`, MySQL's `DECIMAL` goes up to 65 digits, PostgreSQL's `NUMERIC` is
-effectively unbounded, and Oracle's `NUMBER` up to 38 significant digits — while `System.Decimal` only holds
-about 28-29. Averaging routinely produces exactly this kind of long, non-terminating result, and reading it as a
+Database numeric types can carry more precision than .NET's `decimal` can hold: MySQL's `DECIMAL` goes up to 65
+digits, Oracle's `NUMBER` up to 38 significant digits, PostgreSQL's `NUMERIC` is effectively unbounded, and SQL
+Server's `AVG` on a `decimal(p,s)` column returns `decimal(38,s)` — while `System.Decimal` only holds about
+28-29. Averaging routinely produces exactly this kind of long, non-terminating result, and reading it as a
 native decimal scalar risks the ADO.NET driver itself failing before Dapper.Forge ever gets a say.
 
-So on all 4 providers, the database returns the average as text instead of a raw decimal, and `AvgAsync` then
-converts that text into a `decimal` in C# with its own parser: precision beyond what `decimal` can represent is
-rounded off, and only a magnitude that genuinely doesn't fit throws `OverflowException`. `SumAsync` doesn't go
-through any of this — summing a column doesn't introduce precision beyond what it already had, so it reads the
+So on all 4 providers, the database returns the average as text instead of a raw decimal, and `Avg`/`AvgAsync`
+then converts that text into a `decimal` in C# with its own parser: precision beyond what `decimal` can represent
+is rounded off, and only a magnitude that genuinely doesn't fit throws `OverflowException`. `Sum`/`SumAsync`
+doesn't go through any of this — summing a column doesn't introduce precision beyond what it already had, so it reads the
 native decimal scalar directly. The exact SQL each provider uses to produce that text is visible via
 `AvgCommand`, if you want to see it.
 
-### Oracle: no native multi-row `VALUES (...), (...)` — insert, update, and upsert all need a way around it
+### Oracle: no native multi-row `VALUES (...), (...)` — update, insert, and upsert all need a way around it
 
 Oracle has no native multi-row insert syntax. The common workaround is:
 
@@ -198,11 +202,11 @@ which immediately runs into `ORA-01790` ("expression must have same datatype as 
 moment two rows disagree on the inferred type of a bound parameter in the same `SELECT` position — which happens
 constantly, since a `NULL` or a numeric literal in one row and a string in another are common in real data.
 
-This isn't only an `InsertRangeAsync` problem: `UpdateRangeAsync` and `UpsertRangeAsync` build on the exact same
-`UNION ALL`/`DUAL` block as their source rowset (`UpdateRangeAsync` feeds it into a `MERGE` with only a `WHEN
-MATCHED` branch; `UpsertRangeAsync` into a full `MERGE` with both branches) — so all three needed solving, not
-just one. Dapper.Forge generates this shape automatically, but with every value cast to its column's real type
-first:
+This isn't only an `InsertRange`/`InsertRangeAsync` problem: `UpdateRange`/`UpdateRangeAsync` and
+`UpsertRange`/`UpsertRangeAsync` build on the exact same `UNION ALL`/`DUAL` block as their source rowset
+(`UpdateRange`/`UpdateRangeAsync` feeds it into a `MERGE` with only a `WHEN MATCHED` branch;
+`UpsertRange`/`UpsertRangeAsync` into a full `MERGE` with both branches) — so all three needed solving, not just
+one. Dapper.Forge generates this shape automatically, but with every value cast to its column's real type first:
 
 ```sql
 -- "app" here is whatever schema the entity resolves to (your Oracle user by default, or [Table(Schema = "...")])
@@ -269,9 +273,9 @@ It also doesn't do change tracking, migrations, or lazy loading — if you need 
 
 ## Inspecting generated SQL without running it
 
-Every execution method (`GetAllAsync`, `UpsertAsync`, `InsertRangeAsync`, ...) has a matching `*Command`/
-`*Commands` method that builds and returns the SQL text and parameters without executing them — useful for
-logging, testing, or executing manually:
+Every execution method (`GetAll`/`GetAllAsync`, `Upsert`/`UpsertAsync`, `InsertRange`/`InsertRangeAsync`, ...) has
+a matching `*Command`/`*Commands` method that builds and returns the SQL text and parameters without executing
+them — useful for logging, testing, or executing manually:
 
 ```csharp
 DbCommandInfo command = connection.UpsertCommand(product);
