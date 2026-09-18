@@ -2,6 +2,7 @@
 
 [![Build & Test](https://github.com/davidedalcortivo/Forget/actions/workflows/build-test.yml/badge.svg)](https://github.com/davidedalcortivo/Forget/actions/workflows/build-test.yml)
 ![Core line coverage](https://raw.githubusercontent.com/davidedalcortivo/Forget/main/assets/badges/coverage.svg)
+[![Buy Me A Coffee](https://img.shields.io/badge/-Buy_Me_A_Coffee-ffdd00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/davidedalcortivo)
 
 A thin, provider-aware extension layer on top of [Dapper](https://github.com/DapperLib/Dapper): type-safe CRUD
 (single-row or multi-row), dynamic filtering, sorting, and paging against one mapped table at a time — with SQL
@@ -81,9 +82,9 @@ using Microsoft.Data.SqlClient;
 
 await using SqlConnection connection = new(connectionString);
 
+IReadOnlyList<Product> all = await connection.GetAllAsync<Product>();
 // Every method also has a synchronous overload with the same name minus "Async" - the rest of this example
 // sticks to async, but this one works identically: IReadOnlyList<Product> all = connection.GetAll<Product>();
-IReadOnlyList<Product> all = await connection.GetAllAsync<Product>();
 
 Product? product = await connection.GetByIdAsync<Product>(id: 42);
 
