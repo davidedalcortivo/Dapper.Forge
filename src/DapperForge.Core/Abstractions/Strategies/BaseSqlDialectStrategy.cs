@@ -2,7 +2,7 @@
 using System.Text;
 
 
-namespace Dapper.Forge.Core.Abstractions.Strategies
+namespace DapperForge.Core.Abstractions.Strategies
 {
     internal abstract partial class BaseSqlDialectStrategy : ISqlDialectStrategy
     {

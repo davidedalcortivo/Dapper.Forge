@@ -1,5 +1,5 @@
-﻿using Dapper.Forge.Core.Models;
-using Dapper.Forge.Core.Utilities;
+﻿using DapperForge.Core.Models;
+using DapperForge.Core.Utilities;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 
-namespace Dapper.Forge.Core.Caching
+namespace DapperForge.Core.Caching
 {
     internal static class ValuesPropertyCache<TEntity> where TEntity : class
     {

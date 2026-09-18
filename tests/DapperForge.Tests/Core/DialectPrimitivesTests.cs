@@ -1,7 +1,7 @@
-using Dapper.Forge.Core.Abstractions.Strategies;
+using DapperForge.Core.Abstractions.Strategies;
 
 
-namespace Dapper.Forge.Tests.Core
+namespace DapperForge.Tests.Core
 {
     /// <summary>
     /// Locks the literal SQL syntax each provider's dialect strategy renders. These are the primitives every other
@@ -13,7 +13,7 @@ namespace Dapper.Forge.Tests.Core
         [Fact]
         public void SqlServer_UsesBracketIdentifiersAndAtParameters()
         {
-            Forge.SqlServer.Strategies.SqlDialectStrategy dialect = Forge.SqlServer.Strategies.SqlDialectStrategy.Instance;
+            DapperForge.SqlServer.Strategies.SqlDialectStrategy dialect = DapperForge.SqlServer.Strategies.SqlDialectStrategy.Instance;
 
             Assert.Equal("[Name]", dialect.RenderIdentifier("Name"));
             Assert.Equal("@p0", dialect.RenderParameter("p0"));
@@ -27,7 +27,7 @@ namespace Dapper.Forge.Tests.Core
         [Fact]
         public void MySql_UsesBacktickIdentifiersAndConcatFunction()
         {
-            Forge.MySql.Strategies.SqlDialectStrategy dialect = Forge.MySql.Strategies.SqlDialectStrategy.Instance;
+            DapperForge.MySql.Strategies.SqlDialectStrategy dialect = DapperForge.MySql.Strategies.SqlDialectStrategy.Instance;
 
             Assert.Equal("`Name`", dialect.RenderIdentifier("Name"));
             Assert.Equal("@p0", dialect.RenderParameter("p0"));
@@ -41,7 +41,7 @@ namespace Dapper.Forge.Tests.Core
         [Fact]
         public void PostgreSql_UsesAnyForInAndTrueForBooleans()
         {
-            Forge.PostgreSql.Strategies.SqlDialectStrategy dialect = Forge.PostgreSql.Strategies.SqlDialectStrategy.Instance;
+            DapperForge.PostgreSql.Strategies.SqlDialectStrategy dialect = DapperForge.PostgreSql.Strategies.SqlDialectStrategy.Instance;
 
             Assert.Equal("\"Name\"", dialect.RenderIdentifier("Name"));
             Assert.Equal("@p0", dialect.RenderParameter("p0"));
@@ -55,7 +55,7 @@ namespace Dapper.Forge.Tests.Core
         [Fact]
         public void Oracle_UsesColonParametersAndToCharCast()
         {
-            Forge.Oracle.Strategies.SqlDialectStrategy dialect = Forge.Oracle.Strategies.SqlDialectStrategy.Instance;
+            DapperForge.Oracle.Strategies.SqlDialectStrategy dialect = DapperForge.Oracle.Strategies.SqlDialectStrategy.Instance;
 
             Assert.Equal("\"Name\"", dialect.RenderIdentifier("Name"));
             Assert.Equal(":p0", dialect.RenderParameter("p0"));
@@ -84,7 +84,7 @@ namespace Dapper.Forge.Tests.Core
         [Fact]
         public void MySql_Like_DoublesTheEscapeBackslashForItsOwnStringLiteralParsing()
         {
-            Forge.MySql.Strategies.SqlDialectStrategy dialect = Forge.MySql.Strategies.SqlDialectStrategy.Instance;
+            DapperForge.MySql.Strategies.SqlDialectStrategy dialect = DapperForge.MySql.Strategies.SqlDialectStrategy.Instance;
 
             // MySQL applies C-style backslash escaping inside string literals by default, so the ESCAPE clause's
             // literal must contain two backslash characters for MySQL's own parser to collapse them into the one
@@ -110,8 +110,8 @@ namespace Dapper.Forge.Tests.Core
         public void Pagination_SqlServerAndOracle_UseOffsetFetchNext(string dialectName)
         {
             ISqlDialectStrategy dialect = dialectName == "SqlServer"
-                ? Dapper.Forge.SqlServer.Strategies.SqlDialectStrategy.Instance
-                : Dapper.Forge.Oracle.Strategies.SqlDialectStrategy.Instance;
+                ? DapperForge.SqlServer.Strategies.SqlDialectStrategy.Instance
+                : DapperForge.Oracle.Strategies.SqlDialectStrategy.Instance;
 
             string expected = string.Join(Environment.NewLine,
                 "",
@@ -129,8 +129,8 @@ namespace Dapper.Forge.Tests.Core
         public void Pagination_MySqlAndPostgreSql_UseLimitOffset(string dialectName)
         {
             ISqlDialectStrategy dialect = dialectName == "MySql"
-                ? Dapper.Forge.MySql.Strategies.SqlDialectStrategy.Instance
-                : Dapper.Forge.PostgreSql.Strategies.SqlDialectStrategy.Instance;
+                ? DapperForge.MySql.Strategies.SqlDialectStrategy.Instance
+                : DapperForge.PostgreSql.Strategies.SqlDialectStrategy.Instance;
 
             string expected = string.Join(Environment.NewLine,
                 "",

@@ -1,6 +1,6 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
+﻿using DapperForge.Core.Abstractions.Strategies;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System.Data;
@@ -8,7 +8,7 @@ using System.Data.Common;
 using System.Text.Json;
 
 
-namespace Dapper.Forge.Oracle.Strategies
+namespace DapperForge.Oracle.Strategies
 {
     internal sealed class DbExecutionStrategy : BaseDbExecutionStrategy<DbCommandStrategy>
     {

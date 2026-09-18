@@ -1,9 +1,9 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
+﻿using DapperForge.Core.Abstractions.Strategies;
 using Microsoft.Data.SqlClient;
 using System.Data.Common;
 
 
-namespace Dapper.Forge.SqlServer.Strategies
+namespace DapperForge.SqlServer.Strategies
 {
     internal sealed partial class SqlDialectStrategy : BaseSqlDialectStrategy
     {

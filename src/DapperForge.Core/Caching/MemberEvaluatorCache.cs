@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 
-namespace Dapper.Forge.Core.Caching
+namespace DapperForge.Core.Caching
 {
     internal static class MemberEvaluatorCache
     {

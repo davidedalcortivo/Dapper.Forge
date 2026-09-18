@@ -1,4 +1,4 @@
-﻿namespace Dapper.Forge.Core.Models
+﻿namespace DapperForge.Core.Models
 {
     /// <summary>
     /// Marks a property as (part of) the key used to identify an existing row during an upsert operation.

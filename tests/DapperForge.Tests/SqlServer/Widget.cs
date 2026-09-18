@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace Dapper.Forge.Tests.SqlServer
+namespace DapperForge.Tests.SqlServer
 {
     /// <summary>
     /// SqlServer's own copy of the shared test entity shape (see <see cref="Core.Widget"/> for why every

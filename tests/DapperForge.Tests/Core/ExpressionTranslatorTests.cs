@@ -1,9 +1,10 @@
-using Dapper.Forge.Core.Abstractions.Strategies;
-using Dapper.Forge.Core.Utilities;
+using Dapper;
+using DapperForge.Core.Abstractions.Strategies;
+using DapperForge.Core.Utilities;
 using System.Linq.Expressions;
 
 
-namespace Dapper.Forge.Tests.Core
+namespace DapperForge.Tests.Core
 {
     /// <summary>
     /// Exercises <see cref="ExpressionTranslator{TEntity}"/> against every provider's real dialect strategy, so a

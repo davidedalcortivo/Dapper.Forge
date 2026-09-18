@@ -1,11 +1,11 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Models;
+﻿using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Models;
 using System.Collections;
 using System.Data.Common;
 using System.Linq.Expressions;
 
 
-namespace Dapper.Forge.Core.Abstractions.Strategies
+namespace DapperForge.Core.Abstractions.Strategies
 {
     internal interface IDbCommandStrategy
     {

@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <Authors>Davide Dal Cortivo</Authors>
-    <Product>Dapper.Forge</Product>
+    <Product>DapperForge</Product>
     <Copyright>Copyright $([System.DateTime]::Now.Year) Davide Dal Cortivo</Copyright>
 
     <Version>1.0.0</Version>
 
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/davidedalcortivo/Dapper.Forge</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/davidedalcortivo/Dapper.Forge</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/davidedalcortivo/DapperForge</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/davidedalcortivo/DapperForge</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>dapper;orm;micro-orm;sql;data-access</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

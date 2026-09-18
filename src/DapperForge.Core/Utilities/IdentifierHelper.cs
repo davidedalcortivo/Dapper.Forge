@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 
 
-namespace Dapper.Forge.Core.Utilities
+namespace DapperForge.Core.Utilities
 {
     internal static partial class IdentifierHelper
     {

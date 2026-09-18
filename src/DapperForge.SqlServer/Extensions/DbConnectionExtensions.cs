@@ -1,7 +1,7 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.SqlServer.Strategies;
+﻿using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
+using DapperForge.SqlServer.Strategies;
 using Microsoft.Data.SqlClient;
 using System.Collections;
 using System.Collections.Immutable;
@@ -11,12 +11,12 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 
-namespace Dapper.Forge.SqlServer.Extensions
+namespace DapperForge.SqlServer.Extensions
 {
     /// <summary>
     /// Extension methods on <see cref="SqlConnection"/> providing type-safe CRUD (single-row or multi-row),
     /// dynamic filtering, sorting, paging, and aggregation against SQL Server, for any entity mapped with the
-    /// attributes in <c>Dapper.Forge.Core.Models</c>.
+    /// attributes in <c>DapperForge.Core.Models</c>.
     /// </summary>
     public static partial class DbConnectionExtensions
     {

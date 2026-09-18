@@ -1,9 +1,9 @@
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
 using System.Collections.Concurrent;
 
 
-namespace Dapper.Forge.Tests.Core
+namespace DapperForge.Tests.Core
 {
     /// <summary>
     /// <see cref="EntityInfoCache{TEntity}"/>, <see cref="DbColumnInfoCache{TEntity}"/> and
@@ -69,7 +69,7 @@ namespace Dapper.Forge.Tests.Core
                 try
                 {
                     barrier.SignalAndWait();
-                    SqlBuilderCache<ConcurrencyWidgetB, Forge.SqlServer.Strategies.SqlBuilderStrategy>.Initialize(Forge.SqlServer.Strategies.SqlBuilderStrategy.Instance);
+                    SqlBuilderCache<ConcurrencyWidgetB, DapperForge.SqlServer.Strategies.SqlBuilderStrategy>.Initialize(DapperForge.SqlServer.Strategies.SqlBuilderStrategy.Instance);
                 }
                 catch (Exception ex)
                 {
@@ -80,10 +80,10 @@ namespace Dapper.Forge.Tests.Core
             await Task.WhenAll(tasks);
 
             Assert.Empty(exceptions);
-            Assert.NotNull(SqlBuilderCache<ConcurrencyWidgetB, Forge.SqlServer.Strategies.SqlBuilderStrategy>.GetAllSql);
-            Assert.NotNull(SqlBuilderCache<ConcurrencyWidgetB, Forge.SqlServer.Strategies.SqlBuilderStrategy>.InsertSql);
-            Assert.NotNull(SqlBuilderCache<ConcurrencyWidgetB, Forge.SqlServer.Strategies.SqlBuilderStrategy>.UpsertSql);
-            Assert.NotNull(SqlBuilderCache<ConcurrencyWidgetB, Forge.SqlServer.Strategies.SqlBuilderStrategy>.DeleteSql);
+            Assert.NotNull(SqlBuilderCache<ConcurrencyWidgetB, DapperForge.SqlServer.Strategies.SqlBuilderStrategy>.GetAllSql);
+            Assert.NotNull(SqlBuilderCache<ConcurrencyWidgetB, DapperForge.SqlServer.Strategies.SqlBuilderStrategy>.InsertSql);
+            Assert.NotNull(SqlBuilderCache<ConcurrencyWidgetB, DapperForge.SqlServer.Strategies.SqlBuilderStrategy>.UpsertSql);
+            Assert.NotNull(SqlBuilderCache<ConcurrencyWidgetB, DapperForge.SqlServer.Strategies.SqlBuilderStrategy>.DeleteSql);
         }
 
         private sealed class ConcurrencyWidgetC

@@ -18,4 +18,4 @@ Initial release.
   syntax constraints (e.g. Oracle's `UNION ALL`/`DUAL`-based multi-row insert with automatic per-column cast
   discovery, since Oracle has no native `VALUES (...), (...)` syntax).
 
-[1.0.0]: https://github.com/davidedalcortivo/Dapper.Forge/releases/tag/v1.0.0
+[1.0.0]: https://github.com/davidedalcortivo/DapperForge/releases/tag/v1.0.0

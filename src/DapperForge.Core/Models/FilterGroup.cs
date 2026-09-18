@@ -1,7 +1,7 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
+﻿using DapperForge.Core.Abstractions.Models;
 
 
-namespace Dapper.Forge.Core.Models
+namespace DapperForge.Core.Models
 {
     /// <summary>
     /// Combines one or more <see cref="IFilterNode{TEntity}"/> instances with a logical operator, as a branch node

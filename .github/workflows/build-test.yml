@@ -54,14 +54,14 @@ jobs:
       # themselves.
       - name: Test
         run: >
-          dotnet test tests/Dapper.Forge.Tests/Dapper.Forge.Tests.csproj
-          --filter "FullyQualifiedName~Dapper.Forge.Tests.${{ matrix.provider }}"
+          dotnet test tests/DapperForge.Tests/DapperForge.Tests.csproj
+          --filter "FullyQualifiedName~DapperForge.Tests.${{ matrix.provider }}"
 
   coverage-badge:
     name: Update coverage badge
     needs: build
     # Only on pushes to main (never on PRs - fork PRs have no write access anyway, and this shouldn't run on
-    # every PR push regardless). Runs the full, unfiltered suite once - coverage on Dapper.Forge.Core comes
+    # every PR push regardless). Runs the full, unfiltered suite once - coverage on DapperForge.Core comes
     # from the whole test suite (unit + all 4 providers' real integration tests), not just Core's own
     # namespace, since provider integration tests exercise plenty of Core code too.
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -80,7 +80,7 @@ jobs:
 
       - name: Run full suite with coverage
         run: >
-          dotnet test tests/Dapper.Forge.Tests/Dapper.Forge.Tests.csproj
+          dotnet test tests/DapperForge.Tests/DapperForge.Tests.csproj
           --coverage --coverage-output-format cobertura
           --results-directory ./coverage-results
 

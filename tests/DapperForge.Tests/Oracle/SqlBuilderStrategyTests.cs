@@ -1,4 +1,4 @@
-namespace Dapper.Forge.Tests.Oracle
+namespace DapperForge.Tests.Oracle
 {
     /// <summary>
     /// Locks the exact SQL text produced by Oracle's <c>SqlBuilderStrategy</c> — <c>FETCH FIRST ... ROWS ONLY</c>
@@ -18,7 +18,7 @@ namespace Dapper.Forge.Tests.Oracle
     /// </summary>
     public class SqlBuilderStrategyTests
     {
-        private static readonly Forge.Oracle.Strategies.SqlBuilderStrategy _strategy = Forge.Oracle.Strategies.SqlBuilderStrategy.Instance;
+        private static readonly DapperForge.Oracle.Strategies.SqlBuilderStrategy _strategy = DapperForge.Oracle.Strategies.SqlBuilderStrategy.Instance;
 
         private static string Golden(params string[] lines)
         {
@@ -401,7 +401,7 @@ namespace Dapper.Forge.Tests.Oracle
         {
             // Unlike the other three providers, Oracle has no multi-row VALUES(...),(...) syntax: the row batch
             // placeholder stands in for a whole "SELECT ... FROM DUAL UNION ALL ..." block built elsewhere
-            // (Dapper.Forge.Oracle.Strategies.DbCommandStrategy.BuildUpsertRangeCommands), not a VALUES clause.
+            // (DapperForge.Oracle.Strategies.DbCommandStrategy.BuildUpsertRangeCommands), not a VALUES clause.
             string sql = _strategy.InsertRangeSqlBuilder<Widget>().Render("<<ROWS>>");
 
             Assert.Equal(Golden(

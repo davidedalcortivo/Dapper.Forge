@@ -1,9 +1,9 @@
-﻿using Dapper.Forge.Core.Utilities;
+﻿using DapperForge.Core.Utilities;
 using System.Linq.Expressions;
 using System.Reflection;
 
 
-namespace Dapper.Forge.Core.Models
+namespace DapperForge.Core.Models
 {
     /// <summary>
     /// Specifies how results should be ordered by a single property.

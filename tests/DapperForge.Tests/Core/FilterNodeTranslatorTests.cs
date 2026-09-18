@@ -1,9 +1,10 @@
-using Dapper.Forge.Core.Abstractions.Strategies;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.Core.Utilities;
+using Dapper;
+using DapperForge.Core.Abstractions.Strategies;
+using DapperForge.Core.Models;
+using DapperForge.Core.Utilities;
 
 
-namespace Dapper.Forge.Tests.Core
+namespace DapperForge.Tests.Core
 {
     /// <summary>
     /// Exercises <see cref="FilterNodeTranslator{TEntity}"/> — the <see cref="FilterDescriptor{TEntity}"/>/

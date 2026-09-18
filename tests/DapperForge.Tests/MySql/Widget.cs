@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace Dapper.Forge.Tests.MySql
+namespace DapperForge.Tests.MySql
 {
     /// <summary>
     /// MySql's own copy of the shared test entity shape (see <see cref="Core.Widget"/> for why every

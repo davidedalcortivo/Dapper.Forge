@@ -2,7 +2,7 @@ using Npgsql;
 using Testcontainers.PostgreSql;
 
 
-namespace Dapper.Forge.Tests.PostgreSql
+namespace DapperForge.Tests.PostgreSql
 {
     /// <summary>
     /// Starts one real PostgreSql container (via Testcontainers) for the lifetime of a test class, and creates the

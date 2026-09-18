@@ -1,7 +1,8 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.Core.Utilities;
+﻿using Dapper;
+using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
+using DapperForge.Core.Utilities;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Data.Common;
@@ -10,7 +11,7 @@ using System.Reflection;
 using System.Text;
 
 
-namespace Dapper.Forge.Core.Abstractions.Strategies
+namespace DapperForge.Core.Abstractions.Strategies
 {
     internal abstract partial class BaseDbCommandStrategy<TStrategy> : IDbCommandStrategy where TStrategy : ISqlBuilderStrategy
     {

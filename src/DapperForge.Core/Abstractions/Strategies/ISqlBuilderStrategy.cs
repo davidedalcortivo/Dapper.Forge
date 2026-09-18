@@ -1,7 +1,7 @@
-﻿using Dapper.Forge.Core.Models;
+﻿using DapperForge.Core.Models;
 
 
-namespace Dapper.Forge.Core.Abstractions.Strategies
+namespace DapperForge.Core.Abstractions.Strategies
 {
     internal interface ISqlBuilderStrategy
     {

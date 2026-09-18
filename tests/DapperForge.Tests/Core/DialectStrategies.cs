@@ -1,4 +1,4 @@
-namespace Dapper.Forge.Tests.Core
+namespace DapperForge.Tests.Core
 {
     internal static class DialectStrategies
     {
@@ -6,10 +6,10 @@ namespace Dapper.Forge.Tests.Core
         {
             return new()
             {
-                { "SqlServer", Forge.SqlServer.Strategies.SqlDialectStrategy.Instance },
-                { "MySql", Forge.MySql.Strategies.SqlDialectStrategy.Instance },
-                { "PostgreSql", Forge.PostgreSql.Strategies.SqlDialectStrategy.Instance },
-                { "Oracle", Forge.Oracle.Strategies.SqlDialectStrategy.Instance }
+                { "SqlServer", DapperForge.SqlServer.Strategies.SqlDialectStrategy.Instance },
+                { "MySql", DapperForge.MySql.Strategies.SqlDialectStrategy.Instance },
+                { "PostgreSql", DapperForge.PostgreSql.Strategies.SqlDialectStrategy.Instance },
+                { "Oracle", DapperForge.Oracle.Strategies.SqlDialectStrategy.Instance }
             };
         }
     }

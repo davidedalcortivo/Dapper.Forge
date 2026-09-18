@@ -1,11 +1,11 @@
-﻿using Dapper.Forge.Core.Caching;
+﻿using DapperForge.Core.Caching;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
 
 
-namespace Dapper.Forge.Core.Utilities
+namespace DapperForge.Core.Utilities
 {
     internal static class PropertyHelper
     {

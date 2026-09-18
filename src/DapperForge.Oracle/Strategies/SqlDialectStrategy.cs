@@ -1,9 +1,9 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
+﻿using DapperForge.Core.Abstractions.Strategies;
 using Oracle.ManagedDataAccess.Client;
 using System.Data.Common;
 
 
-namespace Dapper.Forge.Oracle.Strategies
+namespace DapperForge.Oracle.Strategies
 {
     internal sealed partial class SqlDialectStrategy : BaseSqlDialectStrategy
     {

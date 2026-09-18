@@ -1,4 +1,4 @@
-﻿namespace Dapper.Forge.Core.Abstractions.Models
+﻿namespace DapperForge.Core.Abstractions.Models
 {
     /// <summary>
     /// Represents a node in a filter tree that can be translated into a SQL predicate for <typeparamref name="TEntity"/>.

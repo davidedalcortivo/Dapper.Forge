@@ -1,6 +1,6 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.Oracle.Strategies;
+﻿using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Models;
+using DapperForge.Oracle.Strategies;
 using Oracle.ManagedDataAccess.Client;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
@@ -8,12 +8,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
 
-namespace Dapper.Forge.Oracle.Extensions
+namespace DapperForge.Oracle.Extensions
 {
     /// <summary>
     /// Extension methods on <see cref="OracleConnection"/> providing type-safe CRUD (single-row or multi-row),
     /// dynamic filtering, sorting, paging, and aggregation against Oracle, for any entity mapped with the
-    /// attributes in <c>Dapper.Forge.Core.Models</c>.
+    /// attributes in <c>DapperForge.Core.Models</c>.
     /// </summary>
     public static partial class DbConnectionExtensions
     {

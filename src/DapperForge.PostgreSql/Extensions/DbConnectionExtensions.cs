@@ -1,6 +1,6 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.PostgreSql.Strategies;
+﻿using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Models;
+using DapperForge.PostgreSql.Strategies;
 using Npgsql;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
@@ -8,12 +8,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
 
-namespace Dapper.Forge.PostgreSql.Extensions
+namespace DapperForge.PostgreSql.Extensions
 {
     /// <summary>
     /// Extension methods on <see cref="NpgsqlConnection"/> providing type-safe CRUD (single-row or multi-row),
     /// dynamic filtering, sorting, paging, and aggregation against PostgreSQL, for any entity mapped with the
-    /// attributes in <c>Dapper.Forge.Core.Models</c>.
+    /// attributes in <c>DapperForge.Core.Models</c>.
     /// </summary>
     public static partial class DbConnectionExtensions
     {

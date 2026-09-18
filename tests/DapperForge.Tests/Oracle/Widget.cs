@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace Dapper.Forge.Tests.Oracle
+namespace DapperForge.Tests.Oracle
 {
     /// <summary>
     /// Oracle's own copy of the shared test entity shape (see <see cref="Core.Widget"/> for why every

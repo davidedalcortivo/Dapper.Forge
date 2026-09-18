@@ -1,11 +1,12 @@
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.Oracle.Extensions;
-using Dapper.Forge.Oracle.Strategies;
+using Dapper;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
+using DapperForge.Oracle.Extensions;
+using DapperForge.Oracle.Strategies;
 using Oracle.ManagedDataAccess.Client;
 
 
-namespace Dapper.Forge.Tests.Oracle
+namespace DapperForge.Tests.Oracle
 {
     /// <summary>
     /// Exercises the mechanism behind Oracle's multi-row insert/upsert: since Oracle has no

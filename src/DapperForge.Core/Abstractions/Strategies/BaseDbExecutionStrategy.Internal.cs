@@ -1,9 +1,10 @@
-﻿using Dapper.Forge.Core.Models;
+﻿using Dapper;
+using DapperForge.Core.Models;
 using System.Data;
 using System.Data.Common;
 
 
-namespace Dapper.Forge.Core.Abstractions.Strategies
+namespace DapperForge.Core.Abstractions.Strategies
 {
     internal abstract partial class BaseDbExecutionStrategy<TStrategy> : IDbExecutionStrategy where TStrategy : IDbCommandStrategy
     {

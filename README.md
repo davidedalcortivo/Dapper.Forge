@@ -1,6 +1,6 @@
-# Dapper.Forge
+# DapperForge
 
-[![Build & Test](https://github.com/davidedalcortivo/Dapper.Forge/actions/workflows/build-test.yml/badge.svg)](https://github.com/davidedalcortivo/Dapper.Forge/actions/workflows/build-test.yml)
+[![Build & Test](https://github.com/davidedalcortivo/DapperForge/actions/workflows/build-test.yml/badge.svg)](https://github.com/davidedalcortivo/DapperForge/actions/workflows/build-test.yml)
 ![Core line coverage](assets/badges/coverage.svg)
 
 A thin, provider-aware extension layer on top of [Dapper](https://github.com/DapperLib/Dapper): type-safe CRUD
@@ -14,7 +14,7 @@ boilerplate for every entity.
 
 ## Why
 
-|                                                    | Dapper           | Dapper.Forge                              | EF Core                                   |
+|                                                    | Dapper           | DapperForge                              | EF Core                                   |
 |----------------------------------------------------|-------------------|--------------------------------------------|--------------------------------------------|
 | Single-row CRUD                                      | You write the SQL | Generated, one line per call                | Generated                                   |
 | Multi-row update/insert/delete/upsert                | You write the SQL | ✅ Generated as one atomic multi-row statement, with a configurable batch size | Generated, but one statement per row, batched into fewer round trips — not a single multi-row statement |
@@ -24,23 +24,23 @@ boilerplate for every entity.
 | Multi-table joins / result-set mapping to several types | ✅ `splitOn`      | ❌ (see [What this isn't](#what-this-isnt)) | ✅                                           |
 | Change tracking, migrations, lazy loading            | ❌                | ❌                                           | ✅                                           |
 
-If you need joins across unrelated entities, keep using Dapper directly for that one query — Dapper.Forge doesn't
+If you need joins across unrelated entities, keep using Dapper directly for that one query — DapperForge doesn't
 replace it, it removes the repetitive single-table code around it.
 
 ## Install
 
-Pick the package for your database; each one pulls in `Dapper.Forge.Core` and the underlying ADO.NET driver
+Pick the package for your database; each one pulls in `DapperForge.Core` and the underlying ADO.NET driver
 automatically.
 
 | Database   | Package                                                        | Connection type      |
 |------------|------------------------------------------------------------------|-----------------------|
-| MySQL      | [`Dapper.Forge.MySql`](https://www.nuget.org/packages/Dapper.Forge.MySql)         | `MySqlConnection`     |
-| Oracle     | [`Dapper.Forge.Oracle`](https://www.nuget.org/packages/Dapper.Forge.Oracle)       | `OracleConnection`    |
-| PostgreSQL | [`Dapper.Forge.PostgreSql`](https://www.nuget.org/packages/Dapper.Forge.PostgreSql) | `NpgsqlConnection`    |
-| SQL Server | [`Dapper.Forge.SqlServer`](https://www.nuget.org/packages/Dapper.Forge.SqlServer) | `SqlConnection`       |
+| MySQL      | [`DapperForge.MySql`](https://www.nuget.org/packages/DapperForge.MySql)         | `MySqlConnection`     |
+| Oracle     | [`DapperForge.Oracle`](https://www.nuget.org/packages/DapperForge.Oracle)       | `OracleConnection`    |
+| PostgreSQL | [`DapperForge.PostgreSql`](https://www.nuget.org/packages/DapperForge.PostgreSql) | `NpgsqlConnection`    |
+| SQL Server | [`DapperForge.SqlServer`](https://www.nuget.org/packages/DapperForge.SqlServer) | `SqlConnection`       |
 
 ```bash
-dotnet add package Dapper.Forge.SqlServer
+dotnet add package DapperForge.SqlServer
 ```
 
 ## Quickstart
@@ -50,7 +50,7 @@ Map an entity with plain data-annotation attributes:
 ```csharp
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Dapper.Forge.Core.Models; // UpsertKeyAttribute, and later FilterDescriptor/FilterGroup/ComparisonOperator/SortDescriptor
+using DapperForge.Core.Models; // UpsertKeyAttribute, and later FilterDescriptor/FilterGroup/ComparisonOperator/SortDescriptor
 
 [Table("Products")]
 public class Product
@@ -76,7 +76,7 @@ column — see [Upsert on a natural key](#upsert-on-a-natural-key-one-call-a-dif
 below for what actually runs:
 
 ```csharp
-using Dapper.Forge.SqlServer.Extensions;
+using DapperForge.SqlServer.Extensions;
 using Microsoft.Data.SqlClient;
 
 await using SqlConnection connection = new(connectionString);
@@ -109,7 +109,7 @@ But a search endpoint rarely knows its filters at compile time — they come fro
 an API request body.
 Raw Dapper gives you nothing here beyond string concatenation, and EF Core needs you to build `Expression` trees
 by hand (or add `System.Linq.Dynamic.Core`).
-Dapper.Forge's `FilterDescriptor`/`FilterGroup` build the exact same kind of filter from plain data — a property
+DapperForge's `FilterDescriptor`/`FilterGroup` build the exact same kind of filter from plain data — a property
 **name**, not a property **selector** — so it composes cleanly from untyped input:
 
 ```csharp
@@ -169,7 +169,7 @@ What actually runs is deliberately *not* the same statement re-parameterized fou
 - **PostgreSQL**: `INSERT INTO ... VALUES (...) ON CONFLICT (sku) DO UPDATE SET col = EXCLUDED.col, ...`
 - **SQL Server**: *not* `MERGE` — a documented, well-known source of concurrency correctness bugs.
   Instead: `UPDATE ... WITH (UPDLOCK, HOLDLOCK) SET ... WHERE ...` followed by a conditional `INSERT` guarded by
-  `IF @@ROWCOUNT = 0`, wrapped in a transaction Dapper.Forge manages for you if you don't supply one.
+  `IF @@ROWCOUNT = 0`, wrapped in a transaction DapperForge manages for you if you don't supply one.
 
 Each statement is actually correct for that engine — instead of one statement that happens to parse everywhere
 but is subtly wrong (or slow, or unsafe under concurrency) on at least one of them.
@@ -181,7 +181,7 @@ digits, Oracle's `NUMBER` up to 38 significant digits, PostgreSQL's `NUMERIC` is
 Server's `AVG` on a `decimal(p,s)` column returns `decimal(38,s)` — while `System.Decimal` only holds about
 28-29.
 Averaging routinely produces exactly this kind of long, non-terminating result, and reading it as a native
-decimal scalar risks the ADO.NET driver itself failing before Dapper.Forge ever gets a say.
+decimal scalar risks the ADO.NET driver itself failing before DapperForge ever gets a say.
 
 So on all 4 providers, the database returns the average as text instead of a raw decimal, and `Avg`/`AvgAsync`
 then converts that text into a `decimal` in C# with its own parser: precision beyond what `decimal` can represent
@@ -211,7 +211,7 @@ This isn't only an `InsertRange`/`InsertRangeAsync` problem: `UpdateRange`/`Upda
 (`UpdateRange`/`UpdateRangeAsync` feeds it into a `MERGE` with only a `WHEN MATCHED` branch;
 `UpsertRange`/`UpsertRangeAsync` into a full `MERGE` with both branches) — so all three needed solving, not just
 one.
-Dapper.Forge generates this shape automatically, but with every value cast to its column's real type first:
+DapperForge generates this shape automatically, but with every value cast to its column's real type first:
 
 ```sql
 -- "app" here is whatever schema the entity resolves to (your Oracle user by default, or [Table(Schema = "...")])
@@ -224,7 +224,7 @@ SELECT CAST(:Id1 AS NUMBER(10)) AS "Id", :Name1 AS "Name", CAST(:Price1 AS NUMBE
 ```
 
 The cast expression for each column isn't hard-coded — on the first call for a given entity and connection,
-Dapper.Forge queries Oracle's data dictionary (`ALL_TAB_COLUMNS`) for that table, and for each column *probes*,
+DapperForge queries Oracle's data dictionary (`ALL_TAB_COLUMNS`) for that table, and for each column *probes*,
 via `EXECUTE IMMEDIATE` against a set of candidate type strings (precision+scale, precision-only, length-only,
 bare type name, and a `TO_<type>(...)` conversion-function fallback), which cast expression the server actually
 accepts for that column right now — then caches the result.
@@ -263,10 +263,10 @@ precisely because it fails silently (a plausible-looking wrong number, no except
 
 ## What this isn't
 
-Dapper.Forge is deliberately single-table: there is no multi-mapping, no `splitOn`, no join-building across
+DapperForge is deliberately single-table: there is no multi-mapping, no `splitOn`, no join-building across
 unrelated entities.
 Every generated statement targets exactly one table.
-For a query that spans several tables, drop down to Dapper directly on the same connection — Dapper.Forge doesn't
+For a query that spans several tables, drop down to Dapper directly on the same connection — DapperForge doesn't
 try to replace it, it exists so that most of your single-table data access code doesn't need to be Dapper's raw
 SQL either.
 

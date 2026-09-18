@@ -1,4 +1,4 @@
-namespace Dapper.Forge.Tests.MySql
+namespace DapperForge.Tests.MySql
 {
     /// <summary>
     /// Locks the exact SQL text produced by MySql's <c>SqlBuilderStrategy</c> — <c>LIMIT</c> instead of
@@ -13,7 +13,7 @@ namespace Dapper.Forge.Tests.MySql
     /// </summary>
     public class SqlBuilderStrategyTests
     {
-        private static readonly Forge.MySql.Strategies.SqlBuilderStrategy _strategy = Forge.MySql.Strategies.SqlBuilderStrategy.Instance;
+        private static readonly DapperForge.MySql.Strategies.SqlBuilderStrategy _strategy = DapperForge.MySql.Strategies.SqlBuilderStrategy.Instance;
 
         private static string Golden(params string[] lines)
         {

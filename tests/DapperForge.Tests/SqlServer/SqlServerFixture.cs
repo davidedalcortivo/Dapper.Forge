@@ -2,7 +2,7 @@ using Microsoft.Data.SqlClient;
 using Testcontainers.MsSql;
 
 
-namespace Dapper.Forge.Tests.SqlServer
+namespace DapperForge.Tests.SqlServer
 {
     /// <summary>
     /// Starts one real SqlServer container (via Testcontainers) for the lifetime of a test class, and creates the

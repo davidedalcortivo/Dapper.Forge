@@ -1,11 +1,11 @@
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 
-namespace Dapper.Forge.Tests.Core
+namespace DapperForge.Tests.Core
 {
     /// <summary>
     /// Exercises the entity-mapping rules enforced by <see cref="EntityInfoCache{TEntity}"/>'s static constructor.

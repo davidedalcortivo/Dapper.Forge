@@ -1,8 +1,8 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
-using Dapper.Forge.Core.Models;
+﻿using DapperForge.Core.Abstractions.Strategies;
+using DapperForge.Core.Models;
 
 
-namespace Dapper.Forge.Core.Caching
+namespace DapperForge.Core.Caching
 {
     internal static class SqlBuilderCache<TEntity, TStrategy> where TEntity : class where TStrategy : ISqlBuilderStrategy
     {

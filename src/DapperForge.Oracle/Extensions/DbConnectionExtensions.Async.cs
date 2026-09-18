@@ -1,6 +1,6 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.Oracle.Strategies;
+﻿using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Models;
+using DapperForge.Oracle.Strategies;
 using Oracle.ManagedDataAccess.Client;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
 
-namespace Dapper.Forge.Oracle.Extensions
+namespace DapperForge.Oracle.Extensions
 {
     public static partial class DbConnectionExtensions
     {

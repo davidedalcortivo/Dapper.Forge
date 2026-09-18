@@ -1,7 +1,7 @@
-using Dapper.Forge.PostgreSql.Extensions;
+using DapperForge.PostgreSql.Extensions;
 
 
-namespace Dapper.Forge.Tests.PostgreSql
+namespace DapperForge.Tests.PostgreSql
 {
     /// <summary>
     /// Runs the public CRUD/filter/upsert API against a real, disposable PostgreSql container. Unlike

@@ -1,11 +1,12 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.Core.Utilities;
+﻿using Dapper;
+using DapperForge.Core.Abstractions.Strategies;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
+using DapperForge.Core.Utilities;
 using System.Text;
 
 
-namespace Dapper.Forge.PostgreSql.Strategies
+namespace DapperForge.PostgreSql.Strategies
 {
     internal sealed partial class DbCommandStrategy : BaseDbCommandStrategy<SqlBuilderStrategy>
     {

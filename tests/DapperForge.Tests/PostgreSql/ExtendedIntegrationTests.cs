@@ -1,8 +1,8 @@
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.PostgreSql.Extensions;
+using DapperForge.Core.Models;
+using DapperForge.PostgreSql.Extensions;
 
 
-namespace Dapper.Forge.Tests.PostgreSql
+namespace DapperForge.Tests.PostgreSql
 {
     /// <summary>
     /// Covers the rest of the public API surface that <see cref="CrudIntegrationTests"/> doesn't touch —

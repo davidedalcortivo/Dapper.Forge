@@ -1,7 +1,7 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.SqlServer.Strategies;
+﻿using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
+using DapperForge.SqlServer.Strategies;
 using Microsoft.Data.SqlClient;
 using System.Collections;
 using System.Collections.Immutable;
@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 
-namespace Dapper.Forge.SqlServer.Extensions
+namespace DapperForge.SqlServer.Extensions
 {
     public static partial class DbConnectionExtensions
     {

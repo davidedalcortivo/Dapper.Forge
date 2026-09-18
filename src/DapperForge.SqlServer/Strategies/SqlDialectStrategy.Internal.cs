@@ -1,8 +1,8 @@
-﻿using Dapper.Forge.Core.Utilities;
+﻿using DapperForge.Core.Utilities;
 using System.Data.Common;
 
 
-namespace Dapper.Forge.SqlServer.Strategies
+namespace DapperForge.SqlServer.Strategies
 {
     internal sealed partial class SqlDialectStrategy
     {

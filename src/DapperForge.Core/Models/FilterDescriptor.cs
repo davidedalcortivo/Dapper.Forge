@@ -1,10 +1,10 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Utilities;
+﻿using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Utilities;
 using System.Linq.Expressions;
 using System.Reflection;
 
 
-namespace Dapper.Forge.Core.Models
+namespace DapperForge.Core.Models
 {
     /// <summary>
     /// Represents a single comparison between an entity property and a value, as a leaf node in a filter tree.

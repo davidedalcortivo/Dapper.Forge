@@ -1,10 +1,10 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
+﻿using DapperForge.Core.Abstractions.Strategies;
 using MySqlConnector;
 using System.Data.Common;
 using System.Text;
 
 
-namespace Dapper.Forge.MySql.Strategies
+namespace DapperForge.MySql.Strategies
 {
     internal sealed partial class SqlDialectStrategy : BaseSqlDialectStrategy
     {

@@ -37,10 +37,10 @@ jobs:
       # Never publish a commit that hasn't been verified - the full suite, not the parallel per-provider split
       # build-test.yml uses, since this only runs on a tag push and speed matters less than certainty here.
       - name: Test
-        run: dotnet test tests/Dapper.Forge.Tests/Dapper.Forge.Tests.csproj
+        run: dotnet test tests/DapperForge.Tests/DapperForge.Tests.csproj
 
       - name: Pack
-        run: dotnet pack Dapper.Forge.slnx -c Release -p:Version=${{ steps.version.outputs.version }} -o ./artifacts
+        run: dotnet pack DapperForge.slnx -c Release -p:Version=${{ steps.version.outputs.version }} -o ./artifacts
 
       # Requested right before the push (not earlier): the exchanged key is only valid for 1 hour.
       - name: NuGet login (OIDC -> temporary API key)

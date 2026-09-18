@@ -1,4 +1,4 @@
-﻿namespace Dapper.Forge.Core.Models
+﻿namespace DapperForge.Core.Models
 {
     internal sealed class DbColumnInfo
     {

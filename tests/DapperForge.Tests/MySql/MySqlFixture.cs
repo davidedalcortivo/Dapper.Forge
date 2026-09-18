@@ -2,7 +2,7 @@ using MySqlConnector;
 using Testcontainers.MySql;
 
 
-namespace Dapper.Forge.Tests.MySql
+namespace DapperForge.Tests.MySql
 {
     /// <summary>
     /// Starts one real MySql container (via Testcontainers) for the lifetime of a test class, and creates the

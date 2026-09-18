@@ -1,9 +1,10 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
+﻿using Dapper;
+using DapperForge.Core.Abstractions.Strategies;
 using System.Text;
 using System.Text.RegularExpressions;
 
 
-namespace Dapper.Forge.Core.Models
+namespace DapperForge.Core.Models
 {
     internal sealed partial class SqlTranslationContext
     {

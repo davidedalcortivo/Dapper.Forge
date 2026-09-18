@@ -1,8 +1,8 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
+﻿using DapperForge.Core.Abstractions.Strategies;
 using System.Data.Common;
 
 
-namespace Dapper.Forge.MySql.Strategies
+namespace DapperForge.MySql.Strategies
 {
     internal sealed class DbExecutionStrategy : BaseDbExecutionStrategy<DbCommandStrategy>
     {

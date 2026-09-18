@@ -1,10 +1,10 @@
-﻿using Dapper.Forge.Core.Utilities;
+﻿using DapperForge.Core.Utilities;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Reflection;
 
 
-namespace Dapper.Forge.Core.Caching
+namespace DapperForge.Core.Caching
 {
     internal static class ValuesGetterCache<TEntity> where TEntity : class
     {

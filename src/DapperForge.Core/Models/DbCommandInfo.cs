@@ -1,4 +1,7 @@
-﻿namespace Dapper.Forge.Core.Models
+﻿using Dapper;
+
+
+namespace DapperForge.Core.Models
 {
     /// <summary>
     /// Represents a ready-to-execute SQL command, pairing the generated SQL text with its bound parameters.

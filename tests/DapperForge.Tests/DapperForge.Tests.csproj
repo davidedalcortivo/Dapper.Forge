@@ -24,10 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dapper.Forge.MySql\Dapper.Forge.MySql.csproj" />
-    <ProjectReference Include="..\..\src\Dapper.Forge.Oracle\Dapper.Forge.Oracle.csproj" />
-    <ProjectReference Include="..\..\src\Dapper.Forge.PostgreSql\Dapper.Forge.PostgreSql.csproj" />
-    <ProjectReference Include="..\..\src\Dapper.Forge.SqlServer\Dapper.Forge.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\DapperForge.MySql\DapperForge.MySql.csproj" />
+    <ProjectReference Include="..\..\src\DapperForge.Oracle\DapperForge.Oracle.csproj" />
+    <ProjectReference Include="..\..\src\DapperForge.PostgreSql\DapperForge.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\src\DapperForge.SqlServer\DapperForge.SqlServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

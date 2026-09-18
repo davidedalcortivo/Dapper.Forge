@@ -1,12 +1,13 @@
-﻿using Dapper.Forge.Core.Abstractions.Strategies;
-using Dapper.Forge.Core.Caching;
-using Dapper.Forge.Core.Models;
+﻿using Dapper;
+using DapperForge.Core.Abstractions.Strategies;
+using DapperForge.Core.Caching;
+using DapperForge.Core.Models;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 
 
-namespace Dapper.Forge.Core.Utilities
+namespace DapperForge.Core.Utilities
 {
     internal sealed class ExpressionTranslator<TEntity> : ExpressionVisitor where TEntity : class
     {

@@ -2,7 +2,7 @@
 using System.Text;
 
 
-namespace Dapper.Forge.Core.Utilities
+namespace DapperForge.Core.Utilities
 {
     internal static class DecimalParserHelper
     {

@@ -1,7 +1,7 @@
-using Dapper.Forge.SqlServer.Extensions;
+using DapperForge.SqlServer.Extensions;
 
 
-namespace Dapper.Forge.Tests.SqlServer
+namespace DapperForge.Tests.SqlServer
 {
     /// <summary>
     /// Runs the public CRUD/filter/upsert API against a real, disposable SqlServer container. Unlike
@@ -169,7 +169,7 @@ namespace Dapper.Forge.Tests.SqlServer
         {
             // True average of 1, 2, 4 is 2.333... . T-SQL's own AVG returns the same exact numeric type as its
             // input, so AVG of an int-typed expression truncates to a whole number - identical to what a
-            // hand-written `AVG(Quantity)` query returns. Dapper.Forge does not alter that native behavior (see
+            // hand-written `AVG(Quantity)` query returns. DapperForge does not alter that native behavior (see
             // the remarks on LoadDbCacheAsync); this test locks it in as documented, intentional behavior rather
             // than leaving it as an untested accident.
             await _fixture.Connection.InsertAsync(new Widget { Id = 70, Name = "Avg70", Quantity = 1, IsActive = true, Price = 1m }, cancellationToken: TestContext.Current.CancellationToken);

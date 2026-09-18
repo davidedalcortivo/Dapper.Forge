@@ -1,7 +1,7 @@
-using Dapper.Forge.SqlServer.Strategies;
+using DapperForge.SqlServer.Strategies;
 
 
-namespace Dapper.Forge.Tests.SqlServer
+namespace DapperForge.Tests.SqlServer
 {
     /// <summary>
     /// Locks the exact SQL text produced by SqlServer's <see cref="SqlBuilderStrategy"/> — the T-SQL specific shapes

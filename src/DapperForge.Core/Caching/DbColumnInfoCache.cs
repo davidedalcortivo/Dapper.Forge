@@ -1,10 +1,10 @@
-﻿using Dapper.Forge.Core.Models;
+﻿using DapperForge.Core.Models;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Reflection;
 
 
-namespace Dapper.Forge.Core.Caching
+namespace DapperForge.Core.Caching
 {
     internal static class DbColumnInfoCache<TEntity> where TEntity : class
     {

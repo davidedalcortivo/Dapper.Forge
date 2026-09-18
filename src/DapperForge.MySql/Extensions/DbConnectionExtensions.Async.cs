@@ -1,6 +1,6 @@
-﻿using Dapper.Forge.Core.Abstractions.Models;
-using Dapper.Forge.Core.Models;
-using Dapper.Forge.MySql.Strategies;
+﻿using DapperForge.Core.Abstractions.Models;
+using DapperForge.Core.Models;
+using DapperForge.MySql.Strategies;
 using MySqlConnector;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
 
-namespace Dapper.Forge.MySql.Extensions
+namespace DapperForge.MySql.Extensions
 {
     public static partial class DbConnectionExtensions
     {

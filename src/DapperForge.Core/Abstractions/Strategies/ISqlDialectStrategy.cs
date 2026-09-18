@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 
 
-namespace Dapper.Forge.Core.Abstractions.Strategies
+namespace DapperForge.Core.Abstractions.Strategies
 {
     internal interface ISqlDialectStrategy
     {

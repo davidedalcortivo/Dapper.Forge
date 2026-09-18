@@ -1,9 +1,9 @@
-using Dapper.Forge.Oracle.Extensions;
+using DapperForge.Oracle.Extensions;
 using Oracle.ManagedDataAccess.Client;
 using Testcontainers.Oracle;
 
 
-namespace Dapper.Forge.Tests.Oracle
+namespace DapperForge.Tests.Oracle
 {
     /// <summary>
     /// Starts one real Oracle container (via the official <c>Testcontainers.Oracle</c> module) for the lifetime

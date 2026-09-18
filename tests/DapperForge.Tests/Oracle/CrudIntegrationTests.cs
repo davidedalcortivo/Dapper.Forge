@@ -1,7 +1,7 @@
-using Dapper.Forge.Oracle.Extensions;
+using DapperForge.Oracle.Extensions;
 
 
-namespace Dapper.Forge.Tests.Oracle
+namespace DapperForge.Tests.Oracle
 {
     /// <summary>
     /// Runs the public CRUD/filter/upsert/range API against a real, disposable Oracle container. Unlike

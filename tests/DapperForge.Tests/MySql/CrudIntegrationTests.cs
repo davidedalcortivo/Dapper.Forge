@@ -1,7 +1,7 @@
-using Dapper.Forge.MySql.Extensions;
+using DapperForge.MySql.Extensions;
 
 
-namespace Dapper.Forge.Tests.MySql
+namespace DapperForge.Tests.MySql
 {
     /// <summary>
     /// Runs the public CRUD/filter/upsert API against a real, disposable MySql container. Unlike

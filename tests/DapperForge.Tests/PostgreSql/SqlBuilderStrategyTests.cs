@@ -1,4 +1,4 @@
-namespace Dapper.Forge.Tests.PostgreSql
+namespace DapperForge.Tests.PostgreSql
 {
     /// <summary>
     /// Locks the exact SQL text produced by PostgreSql's <c>SqlBuilderStrategy</c> — <c>LIMIT</c> pagination,
@@ -14,7 +14,7 @@ namespace Dapper.Forge.Tests.PostgreSql
     /// </summary>
     public class SqlBuilderStrategyTests
     {
-        private static readonly Forge.PostgreSql.Strategies.SqlBuilderStrategy _strategy = Forge.PostgreSql.Strategies.SqlBuilderStrategy.Instance;
+        private static readonly DapperForge.PostgreSql.Strategies.SqlBuilderStrategy _strategy = DapperForge.PostgreSql.Strategies.SqlBuilderStrategy.Instance;
 
         private static string Golden(params string[] lines)
         {

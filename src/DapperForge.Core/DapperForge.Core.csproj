@@ -4,8 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>Dapper.Forge.Core</PackageId>
-    <Description>Core engine of Dapper.Forge: expression-based filtering, entity/column caching and per-dialect SQL building on top of Dapper. Pulled in automatically by a provider package (Dapper.Forge.SqlServer, Dapper.Forge.MySql, Dapper.Forge.PostgreSql or Dapper.Forge.Oracle) - you normally don't install this package directly.</Description>
+    <PackageId>DapperForge.Core</PackageId>
+    <Description>Core engine of DapperForge: expression-based filtering, entity/column caching and per-dialect SQL building on top of Dapper. Pulled in automatically by a provider package (DapperForge.SqlServer, DapperForge.MySql, DapperForge.PostgreSql or DapperForge.Oracle) - you normally don't install this package directly.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,19 +14,19 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Dapper.Forge.MySql</_Parameter1>
+      <_Parameter1>DapperForge.MySql</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Dapper.Forge.Oracle</_Parameter1>
+      <_Parameter1>DapperForge.Oracle</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Dapper.Forge.PostgreSql</_Parameter1>
+      <_Parameter1>DapperForge.PostgreSql</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Dapper.Forge.SqlServer</_Parameter1>
+      <_Parameter1>DapperForge.SqlServer</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Dapper.Forge.Tests</_Parameter1>
+      <_Parameter1>DapperForge.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 
