@@ -70,10 +70,10 @@ public class Product
 
 Then use the connection extension methods — every method below exists identically (same name, same overloads) on
 all 4 providers, and each has both a synchronous and an asynchronous overload (`GetAll`/`GetAllAsync`,
-`Insert`/`InsertAsync`, and so on); only the `using` and the connection type change. `[UpsertKey]` (on `Sku`
-above) makes `Upsert`/`UpsertAsync` match rows by that column instead of the identity column — see
-[Upsert on a natural key](#upsert-on-a-natural-key-one-call-a-different-correct-statement-per-engine) below for
-what actually runs:
+`Insert`/`InsertAsync`, and so on); only the `using` and the connection type change.
+`[UpsertKey]` (on `Sku` above) makes `Upsert`/`UpsertAsync` match rows by that column instead of the identity
+column — see [Upsert on a natural key](#upsert-on-a-natural-key-one-call-a-different-correct-statement-per-engine)
+below for what actually runs:
 
 ```csharp
 using Dapper.Forge.SqlServer.Extensions;
@@ -105,11 +105,12 @@ IReadOnlyList<Product> cheapTools = await connection.GetAllAsync<Product>(
     p => p.Category == "Tools" && p.Price < 20 && p.IsActive);
 ```
 
-But a search endpoint rarely knows its filters at compile time — they come from a query string, a search form, an
-API request body. Raw Dapper gives you nothing here beyond string concatenation, and EF Core needs you to build
-`Expression` trees by hand (or add `System.Linq.Dynamic.Core`). Dapper.Forge's `FilterDescriptor`/`FilterGroup`
-build the exact same kind of filter from plain data — a property **name**, not a property **selector** — so it
-composes cleanly from untyped input:
+But a search endpoint rarely knows its filters at compile time — they come from a query string, a search form,
+an API request body.
+Raw Dapper gives you nothing here beyond string concatenation, and EF Core needs you to build `Expression` trees
+by hand (or add `System.Linq.Dynamic.Core`).
+Dapper.Forge's `FilterDescriptor`/`FilterGroup` build the exact same kind of filter from plain data — a property
+**name**, not a property **selector** — so it composes cleanly from untyped input:
 
 ```csharp
 // PropertyName and Value could come straight from Request.Query, validated against Product's real properties.
@@ -140,8 +141,9 @@ IReadOnlyList<Product> page = await connection.GetPageAsync<Product>(
 ## Correctness details worth knowing about
 
 Every provider is designed individually at the query-generation level — the same C# call can, and usually does,
-produce a genuinely different statement depending on which engine it runs against. What follows is a handful of
-concrete examples of that, not an exhaustive list of every place the 4 providers diverge.
+produce a genuinely different statement depending on which engine it runs against.
+What follows is a handful of concrete examples of that, not an exhaustive list of every place the 4 providers
+diverge.
 
 A few smaller, mostly mechanical ones:
 
@@ -165,8 +167,8 @@ What actually runs is deliberately *not* the same statement re-parameterized fou
 - **MySQL**: `INSERT INTO ... VALUES (...) AS new ON DUPLICATE KEY UPDATE col = new.col, ...`
 - **Oracle**: `MERGE INTO ... USING (SELECT ... FROM DUAL) SOURCE ON (...) WHEN MATCHED THEN UPDATE ... WHEN NOT MATCHED THEN INSERT ...`
 - **PostgreSQL**: `INSERT INTO ... VALUES (...) ON CONFLICT (sku) DO UPDATE SET col = EXCLUDED.col, ...`
-- **SQL Server**: *not* `MERGE` — a documented, well-known source of concurrency correctness bugs. Instead:
-  `UPDATE ... WITH (UPDLOCK, HOLDLOCK) SET ... WHERE ...` followed by a conditional `INSERT` guarded by
+- **SQL Server**: *not* `MERGE` — a documented, well-known source of concurrency correctness bugs.
+  Instead: `UPDATE ... WITH (UPDLOCK, HOLDLOCK) SET ... WHERE ...` followed by a conditional `INSERT` guarded by
   `IF @@ROWCOUNT = 0`, wrapped in a transaction Dapper.Forge manages for you if you don't supply one.
 
 Each statement is actually correct for that engine — instead of one statement that happens to parse everywhere
@@ -177,19 +179,21 @@ but is subtly wrong (or slow, or unsafe under concurrency) on at least one of th
 Database numeric types can carry more precision than .NET's `decimal` can hold: MySQL's `DECIMAL` goes up to 65
 digits, Oracle's `NUMBER` up to 38 significant digits, PostgreSQL's `NUMERIC` is effectively unbounded, and SQL
 Server's `AVG` on a `decimal(p,s)` column returns `decimal(38,s)` — while `System.Decimal` only holds about
-28-29. Averaging routinely produces exactly this kind of long, non-terminating result, and reading it as a
-native decimal scalar risks the ADO.NET driver itself failing before Dapper.Forge ever gets a say.
+28-29.
+Averaging routinely produces exactly this kind of long, non-terminating result, and reading it as a native
+decimal scalar risks the ADO.NET driver itself failing before Dapper.Forge ever gets a say.
 
 So on all 4 providers, the database returns the average as text instead of a raw decimal, and `Avg`/`AvgAsync`
 then converts that text into a `decimal` in C# with its own parser: precision beyond what `decimal` can represent
-is rounded off, and only a magnitude that genuinely doesn't fit throws `OverflowException`. `Sum`/`SumAsync`
-doesn't go through any of this — summing a column doesn't introduce precision beyond what it already had, so it reads the
-native decimal scalar directly. The exact SQL each provider uses to produce that text is visible via
-`AvgCommand`, if you want to see it.
+is rounded off, and only a magnitude that genuinely doesn't fit throws `OverflowException`.
+`Sum`/`SumAsync` doesn't go through any of this — summing a column doesn't introduce precision beyond what it
+already had, so it reads the native decimal scalar directly.
+The exact SQL each provider uses to produce that text is visible via `AvgCommand`, if you want to see it.
 
 ### Oracle: no native multi-row `VALUES (...), (...)` — update, insert, and upsert all need a way around it
 
-Oracle has no native multi-row insert syntax. The common workaround is:
+Oracle has no native multi-row insert syntax.
+The common workaround is:
 
 ```sql
 INSERT INTO products (id, name, price)
@@ -206,7 +210,8 @@ This isn't only an `InsertRange`/`InsertRangeAsync` problem: `UpdateRange`/`Upda
 `UpsertRange`/`UpsertRangeAsync` build on the exact same `UNION ALL`/`DUAL` block as their source rowset
 (`UpdateRange`/`UpdateRangeAsync` feeds it into a `MERGE` with only a `WHEN MATCHED` branch;
 `UpsertRange`/`UpsertRangeAsync` into a full `MERGE` with both branches) — so all three needed solving, not just
-one. Dapper.Forge generates this shape automatically, but with every value cast to its column's real type first:
+one.
+Dapper.Forge generates this shape automatically, but with every value cast to its column's real type first:
 
 ```sql
 -- "app" here is whatever schema the entity resolves to (your Oracle user by default, or [Table(Schema = "...")])
@@ -222,8 +227,9 @@ The cast expression for each column isn't hard-coded — on the first call for a
 Dapper.Forge queries Oracle's data dictionary (`ALL_TAB_COLUMNS`) for that table, and for each column *probes*,
 via `EXECUTE IMMEDIATE` against a set of candidate type strings (precision+scale, precision-only, length-only,
 bare type name, and a `TO_<type>(...)` conversion-function fallback), which cast expression the server actually
-accepts for that column right now — then caches the result. This means it stays correct across Oracle versions
-and unusual column type definitions without the library hard-coding assumptions about either.
+accepts for that column right now — then caches the result.
+This means it stays correct across Oracle versions and unusual column type definitions without the library
+hard-coding assumptions about either.
 
 ```csharp
 await connection.InsertRangeAsync(products, batchSize: 500);
@@ -237,9 +243,10 @@ it to `BIGINT` first — the same value, just in a container wide enough not to 
 That cast doesn't (and can't, without inventing an arbitrary precision) give `Avg` fractional precision, though:
 T-SQL's own `AVG` returns the same exact numeric type as its input, so averaging an integer-typed column still
 returns a truncated whole number — `AVG` of `1, 2, 4` is `2`, not `2.33`, identical to what a hand-written
-`AVG(column)` query returns. We looked at "fixing" this and decided against it: unlike a real translation bug
-(an unnecessary escape character silently breaking a search, say), there's no single objectively correct
-alternative here to fall back on — only an arbitrary policy decision about precision that isn't ours to make.
+`AVG(column)` query returns.
+We looked at "fixing" this and decided against it: unlike a real translation bug (an unnecessary escape character
+silently breaking a search, say), there's no single objectively correct alternative here to fall back on — only
+an arbitrary policy decision about precision that isn't ours to make.
 This behavior is documented on every `Avg`/`AvgAsync`/`AvgCommand` overload and locked in by a regression test,
 precisely because it fails silently (a plausible-looking wrong number, no exception) rather than loudly.
 
@@ -257,9 +264,11 @@ precisely because it fails silently (a plausible-looking wrong number, no except
 ## What this isn't
 
 Dapper.Forge is deliberately single-table: there is no multi-mapping, no `splitOn`, no join-building across
-unrelated entities. Every generated statement targets exactly one table. For a query that spans several tables,
-drop down to Dapper directly on the same connection — Dapper.Forge doesn't try to replace it, it exists so that
-most of your single-table data access code doesn't need to be Dapper's raw SQL either.
+unrelated entities.
+Every generated statement targets exactly one table.
+For a query that spans several tables, drop down to Dapper directly on the same connection — Dapper.Forge doesn't
+try to replace it, it exists so that most of your single-table data access code doesn't need to be Dapper's raw
+SQL either.
 
 It also doesn't do change tracking, migrations, or lazy loading — if you need those, you likely want EF Core.
 
@@ -285,8 +294,8 @@ DbCommandInfo command = connection.UpsertCommand(product);
 ## Versioning
 
 This project follows [Semantic Versioning](https://semver.org/): breaking changes bump the major version,
-backwards-compatible additions bump the minor version, and fixes bump the patch version. See
-[CHANGELOG.md](CHANGELOG.md) for release history.
+backwards-compatible additions bump the minor version, and fixes bump the patch version.
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## License
 
