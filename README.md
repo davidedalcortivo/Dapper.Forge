@@ -48,9 +48,9 @@ dotnet add package Forget.SqlServer
 Map an entity with plain data-annotation attributes:
 
 ```csharp
+using Forget.Core.Models; // UpsertKeyAttribute, and later FilterDescriptor/FilterGroup/ComparisonOperator/SortDescriptor
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Forget.Core.Models; // UpsertKeyAttribute, and later FilterDescriptor/FilterGroup/ComparisonOperator/SortDescriptor
 
 [Table("Products")]
 public class Product
@@ -81,9 +81,9 @@ using Microsoft.Data.SqlClient;
 
 await using SqlConnection connection = new(connectionString);
 
-IReadOnlyList<Product> all = await connection.GetAllAsync<Product>();
 // Every method also has a synchronous overload with the same name minus "Async" - the rest of this example
 // sticks to async, but this one works identically: IReadOnlyList<Product> all = connection.GetAll<Product>();
+IReadOnlyList<Product> all = await connection.GetAllAsync<Product>();
 
 Product? product = await connection.GetByIdAsync<Product>(id: 42);
 
