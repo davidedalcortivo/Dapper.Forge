@@ -1,0 +1,1815 @@
+﻿using Forget.Core.Abstractions.Models;
+using Forget.Core.Models;
+using Forget.MySql.Strategies;
+using MySqlConnector;
+using System.Collections;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
+
+
+namespace Forget.MySql.Extensions
+{
+    public static partial class DbConnectionExtensions
+    {
+        /// <summary>
+        /// Ensures the cached SQL commands and MySQL dialect settings for <typeparamref name="TEntity"/> are initialized.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to initialize the cache for.</typeparam>
+        /// <param name="connection">The connection used to resolve MySQL-specific settings, such as the default schema.</param>
+        /// <remarks>
+        /// Every other extension method in this class calls this method automatically before doing its own work, so
+        /// calling it directly is only useful to pay the one-time initialization cost ahead of time (for example,
+        /// during application startup) rather than on the first real call.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static void LoadRuntimeCache<TEntity>(this MySqlConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves every <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, no
+        /// explicit ordering is applied.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo GetAllCommand<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetAllCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves every <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned rows must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, no
+        /// explicit ordering is applied.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo GetAllCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetAllCommand(connection, predicate, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves every <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned rows must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, no
+        /// explicit ordering is applied.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo GetAllCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetAllCommand(connection, filterNode, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the first <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// This overload and the corresponding <c>GetFirstOrDefaultCommand</c> overload generate the same SQL; the
+        /// difference between requiring a match and allowing none only matters when the command is executed.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo GetFirstCommand<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the first <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// This overload and the corresponding <c>GetFirstOrDefaultCommand</c> overload generate the same SQL; the
+        /// difference between requiring a match and allowing none only matters when the command is executed.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo GetFirstCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstCommand(connection, predicate, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the first <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// This overload and the corresponding <c>GetFirstOrDefaultCommand</c> overload generate the same SQL; the
+        /// difference between requiring a match and allowing none only matters when the command is executed.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo GetFirstCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstCommand(connection, filterNode, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the first <typeparamref name="TEntity"/> row, or none.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// This overload and the corresponding <c>GetFirstCommand</c> overload generate the same SQL; the difference
+        /// between requiring a match and allowing none only matters when the command is executed.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the first <typeparamref name="TEntity"/> row matching the specified
+        /// predicate, or none.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// This overload and the corresponding <c>GetFirstCommand</c> overload generate the same SQL; the difference
+        /// between requiring a match and allowing none only matters when the command is executed.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, predicate, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the first <typeparamref name="TEntity"/> row matching the specified
+        /// filter, or none.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty, the
+        /// results are ordered by the identifier property instead, to ensure a deterministic result.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// This overload and the corresponding <c>GetFirstCommand</c> overload generate the same SQL; the difference
+        /// between requiring a match and allowing none only matters when the command is executed.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo GetFirstOrDefaultCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetFirstOrDefaultCommand(connection, filterNode, sortDescriptors);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the single <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command does not limit the number of returned rows at the SQL level; enforcing that
+        /// exactly one row is returned is the responsibility of whichever code executes the command (for example,
+        /// Dapper's <c>QuerySingle</c>).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo GetSingleCommand<TEntity>(this MySqlConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleCommand(connection, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the single <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command does not limit the number of returned rows at the SQL level; enforcing that
+        /// exactly one row is returned is the responsibility of whichever code executes the command (for example,
+        /// Dapper's <c>QuerySingle</c>).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo GetSingleCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleCommand(connection, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the single <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command does not limit the number of returned rows at the SQL level; enforcing that
+        /// exactly one row is returned is the responsibility of whichever code executes the command (for example,
+        /// Dapper's <c>QuerySingle</c>).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo GetSingleCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleCommand(connection, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the single <typeparamref name="TEntity"/> row, or none.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command does not limit the number of returned rows at the SQL level; enforcing that at
+        /// most one row is returned is the responsibility of whichever code executes the command (for example,
+        /// Dapper's <c>QuerySingleOrDefault</c>).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this MySqlConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand(connection, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the single <typeparamref name="TEntity"/> row matching the specified
+        /// predicate, or none.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command does not limit the number of returned rows at the SQL level; enforcing that at
+        /// most one row is returned is the responsibility of whichever code executes the command (for example,
+        /// Dapper's <c>QuerySingleOrDefault</c>).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand(connection, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the single <typeparamref name="TEntity"/> row matching the specified
+        /// filter, or none.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned row must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command does not limit the number of returned rows at the SQL level; enforcing that at
+        /// most one row is returned is the responsibility of whichever code executes the command (for example,
+        /// Dapper's <c>QuerySingleOrDefault</c>).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo GetSingleOrDefaultCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetSingleOrDefaultCommand(connection, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves the <typeparamref name="TEntity"/> row with the specified identifier.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="id">
+        /// The identifier of the row to retrieve. Its runtime type must exactly match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="id"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The type of <paramref name="id"/> does not match the type of <typeparamref name="TEntity"/>'s identifier
+        /// property.
+        /// </exception>
+        public static DbCommandInfo GetByIdCommand<TEntity>(this MySqlConnection connection, object id) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetByIdCommand<TEntity>(connection, id);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves a page of <typeparamref name="TEntity"/> rows.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty and
+        /// <paramref name="skip"/> or <paramref name="take"/> is specified, the results are ordered by the
+        /// identifier property instead, to ensure stable pagination.
+        /// </param>
+        /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
+        /// <param name="take">
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
+        /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
+        /// <paramref name="take"/> in place of a fixed limit of one row.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo GetPageCommand<TEntity>(this MySqlConnection connection, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetPageCommand(connection, (IFilterNode<TEntity>?)null, sortDescriptors, skip, take);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves a page of <typeparamref name="TEntity"/> rows matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the returned rows must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty and
+        /// <paramref name="skip"/> or <paramref name="take"/> is specified, the results are ordered by the
+        /// identifier property instead, to ensure stable pagination.
+        /// </param>
+        /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
+        /// <param name="take">
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
+        /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
+        /// <paramref name="take"/> in place of a fixed limit of one row.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo GetPageCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetPageCommand(connection, predicate, sortDescriptors, skip, take);
+        }
+
+        /// <summary>
+        /// Builds the command that retrieves a page of <typeparamref name="TEntity"/> rows matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the returned rows must satisfy. When <see langword="null"/>, no filter is applied.
+        /// </param>
+        /// <param name="sortDescriptors">
+        /// The properties to sort the results by, in order of precedence. When <see langword="null"/> or empty and
+        /// <paramref name="skip"/> or <paramref name="take"/> is specified, the results are ordered by the
+        /// identifier property instead, to ensure stable pagination.
+        /// </param>
+        /// <param name="skip">The number of matching rows to skip. When <see langword="null"/> or negative, no rows are skipped.</param>
+        /// <param name="take">
+        /// The maximum number of rows to return. When <see langword="null"/> or negative, every row is returned,
+        /// starting after <paramref name="skip"/> if specified.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// When <paramref name="skip"/> is <see langword="null"/> or negative and <paramref name="take"/> is
+        /// specified, this generates the same command as the corresponding <c>GetFirstCommand</c> overload, using
+        /// <paramref name="take"/> in place of a fixed limit of one row.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo GetPageCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode, IEnumerable<SortDescriptor<TEntity>>? sortDescriptors = null, int? skip = null, int? take = null) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetPageCommand(connection, filterNode, sortDescriptors, skip, take);
+        }
+
+        /// <summary>
+        /// Builds the command that updates every column of <paramref name="entity"/>'s row, except its identifier,
+        /// any database-generated property, and any property marked <see cref="NotMappedAttribute"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="entity">The entity whose current property values are written back to its row.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the update.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
+        /// </exception>
+        public static DbCommandInfo UpdateCommand<TEntity>(this MySqlConnection connection, TEntity entity) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, entity);
+        }
+
+        /// <summary>
+        /// Builds the command that updates the specified columns for every <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="values">
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the update.</returns>
+        /// <remarks>
+        /// The generated command has no <c>WHERE</c> clause and updates every row in the table. Use one of the
+        /// overloads that also accepts a predicate or a filter to restrict which rows are updated.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
+        /// </exception>
+        public static DbCommandInfo UpdateCommand<TEntity>(this MySqlConnection connection, object values) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, values, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that updates the specified columns for every <typeparamref name="TEntity"/> row
+        /// matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="values">
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
+        /// </param>
+        /// <param name="predicate">
+        /// An optional predicate the updated rows must satisfy. When <see langword="null"/>, every row is updated.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the update.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo UpdateCommand<TEntity>(this MySqlConnection connection, object values, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, values, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that updates the specified columns for every <typeparamref name="TEntity"/> row
+        /// matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="values">
+        /// An object whose public properties specify the columns to update and their new values. A property that is
+        /// the identifier — either one named "Id" (case-insensitive), or the property marked with
+        /// <see cref="KeyAttribute"/> — or is marked as database-generated or <see cref="NotMappedAttribute"/>,
+        /// is silently ignored rather than treated as a column to update.
+        /// Every other property must correspond to an updatable property of <typeparamref name="TEntity"/>,
+        /// and its value must be assignable to that property's type.
+        /// </param>
+        /// <param name="filterNode">
+        /// An optional filter the updated rows must satisfy. When <see langword="null"/>, every row is updated.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the update.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="values"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="values"/> has no properties left to update once its identifier, database-generated, and
+        /// <see cref="NotMappedAttribute"/>-marked properties are excluded; or one of its remaining properties
+        /// does not correspond to an updatable property of <typeparamref name="TEntity"/>, or
+        /// a remaining property's value is not assignable to the corresponding property's type.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// More than one property of <paramref name="values"/> is marked with <see cref="KeyAttribute"/>, or
+        /// one of its property names is reserved for internal use by this library.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo UpdateCommand<TEntity>(this MySqlConnection connection, object values, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateCommand(connection, values, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that inserts <paramref name="entity"/> as a new row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to insert.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="entity">The entity to insert.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the insert.</returns>
+        /// <remarks>
+        /// Every property that is not marked <see cref="NotMappedAttribute"/> or as database-generated
+        /// is included in the generated <c>INSERT</c>, including the identifier property
+        /// unless it is itself database-generated.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
+        /// </exception>
+        public static DbCommandInfo InsertCommand<TEntity>(this MySqlConnection connection, TEntity entity) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.InsertCommand(connection, entity);
+        }
+
+        /// <summary>
+        /// Builds the command that deletes <paramref name="entity"/>'s row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="entity">The entity whose row is deleted, matched by its identifier.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the delete.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
+        /// </exception>
+        public static DbCommandInfo DeleteCommand<TEntity>(this MySqlConnection connection, TEntity entity) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand(connection, entity);
+        }
+
+        /// <summary>
+        /// Builds the command that deletes the <typeparamref name="TEntity"/> row with the specified identifier.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="id">
+        /// The identifier of the row to delete. Its runtime type must exactly match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the delete.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="id"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The type of <paramref name="id"/> does not match the type of <typeparamref name="TEntity"/>'s identifier
+        /// property.
+        /// </exception>
+        public static DbCommandInfo DeleteCommand<TEntity>(this MySqlConnection connection, object id) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand<TEntity>(connection, id);
+        }
+
+        /// <summary>
+        /// Builds the command that deletes every <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete rows from.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the delete.</returns>
+        /// <remarks>
+        /// The generated command has no <c>WHERE</c> clause and deletes every row in the table. Use one of the
+        /// overloads that accepts a predicate or a filter to restrict which rows are deleted.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo DeleteCommand<TEntity>(this MySqlConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand(connection, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that deletes every <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete rows from.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the deleted rows must satisfy. When <see langword="null"/>, every row is deleted.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the delete.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo DeleteCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand(connection, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that deletes every <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete rows from.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the deleted rows must satisfy. When <see langword="null"/>, every row is deleted.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the delete.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo DeleteCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteCommand(connection, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that inserts <paramref name="entity"/> as a new row, or updates its row if one
+        /// already exists.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to upsert.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="entity">The entity to insert or update.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the upsert.</returns>
+        /// <remarks>
+        /// Every property that is not marked as database-generated or <see cref="NotMappedAttribute"/>
+        /// is included in the <c>INSERT</c> portion of the statement;
+        /// the <c>UPDATE</c> portion updates the same set of properties, except the identifier and
+        /// any property marked <see cref="UpsertKeyAttribute"/>.
+        /// <para>
+        /// The generated command relies on MySQL's native <c>INSERT ... ON DUPLICATE KEY UPDATE</c> statement, which
+        /// detects an existing row through the table's own <c>UNIQUE</c> or primary key constraints. Marking a
+        /// property with <see cref="UpsertKeyAttribute"/> only excludes it from the
+        /// generated <c>UPDATE</c> portion of the statement; it does not, by itself, make MySQL treat that column as
+        /// the row's key. For this command to update rather than duplicate an existing row, the columns you intend
+        /// to match on must already be covered by a <c>UNIQUE</c> or primary key constraint in the database.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entity"/> is <see langword="null"/>.
+        /// </exception>
+        public static DbCommandInfo UpsertCommand<TEntity>(this MySqlConnection connection, TEntity entity) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpsertCommand(connection, entity);
+        }
+
+        /// <summary>
+        /// Builds the commands that retrieve the <typeparamref name="TEntity"/> rows with the specified identifiers.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the commands.</param>
+        /// <param name="ids">
+        /// The identifiers of the rows to retrieve. Neither the sequence nor any of its elements may be
+        /// <see langword="null"/>, and each identifier's runtime type must exactly match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </param>
+        /// <param name="batchSize">
+        /// The maximum number of identifiers included in a single command. When less than or equal to zero, every
+        /// identifier is included in a single command.
+        /// </param>
+        /// <returns>
+        /// The <see cref="DbCommandInfo"/> instances for the query, one per batch of up to <paramref name="batchSize"/>
+        /// identifiers.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="ids"/> is <see langword="null"/>, or one of its
+        /// elements is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The type of one of the elements of <paramref name="ids"/> does not match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </exception>
+        public static IReadOnlyList<DbCommandInfo> GetByIdRangeCommands<TEntity>(this MySqlConnection connection, IEnumerable ids, int batchSize = 500) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.GetByIdRangeCommands<TEntity>(connection, ids, batchSize, 0);
+        }
+
+        /// <summary>
+        /// Builds the commands that update every column, except the identifier, any database-generated property,
+        /// and any property marked <see cref="NotMappedAttribute"/>, of each of the specified entities' rows.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to update.</typeparam>
+        /// <param name="connection">The connection used to build the commands.</param>
+        /// <param name="entities">The entities whose current property values are written back to their rows.</param>
+        /// <param name="batchSize">
+        /// The maximum number of entities updated by a single command. When less than or equal to zero, every
+        /// entity is updated by a single command.
+        /// </param>
+        /// <returns>
+        /// The <see cref="DbCommandInfo"/> instances for the update, one per batch of up to
+        /// <paramref name="batchSize"/> entities.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
+        /// </exception>
+        public static IReadOnlyList<DbCommandInfo> UpdateRangeCommands<TEntity>(this MySqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpdateRangeCommands(connection, entities, batchSize, 0);
+        }
+
+        /// <summary>
+        /// Builds the commands that insert each of the specified entities as a new row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to insert.</typeparam>
+        /// <param name="connection">The connection used to build the commands.</param>
+        /// <param name="entities">The entities to insert.</param>
+        /// <param name="batchSize">
+        /// The maximum number of entities inserted by a single command. When less than or equal to zero, every
+        /// entity is inserted by a single command.
+        /// </param>
+        /// <returns>
+        /// The <see cref="DbCommandInfo"/> instances for the insert, one per batch of up to
+        /// <paramref name="batchSize"/> entities.
+        /// </returns>
+        /// <remarks>
+        /// Every property that is not marked <see cref="NotMappedAttribute"/> or as database-generated
+        /// is included in the generated <c>INSERT</c>, including the identifier property
+        /// unless it is itself database-generated.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
+        /// </exception>
+        public static IReadOnlyList<DbCommandInfo> InsertRangeCommands<TEntity>(this MySqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.InsertRangeCommands(connection, entities, batchSize, 0);
+        }
+
+        /// <summary>
+        /// Builds the commands that delete each of the specified entities' rows.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete.</typeparam>
+        /// <param name="connection">The connection used to build the commands.</param>
+        /// <param name="entities">The entities whose rows are deleted, matched by their identifiers.</param>
+        /// <param name="batchSize">
+        /// The maximum number of identifiers included in a single command. When less than or equal to zero, every
+        /// identifier is included in a single command.
+        /// </param>
+        /// <returns>
+        /// The <see cref="DbCommandInfo"/> instances for the delete, one per batch of up to
+        /// <paramref name="batchSize"/> identifiers.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
+        /// </exception>
+        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this MySqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteRangeCommands(connection, entities, batchSize, 0);
+        }
+
+        /// <summary>
+        /// Builds the commands that delete the <typeparamref name="TEntity"/> rows with the specified identifiers.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to delete.</typeparam>
+        /// <param name="connection">The connection used to build the commands.</param>
+        /// <param name="ids">
+        /// The identifiers of the rows to delete. Neither the sequence nor any of its elements may be
+        /// <see langword="null"/>, and each identifier's runtime type must exactly match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </param>
+        /// <param name="batchSize">
+        /// The maximum number of identifiers included in a single command. When less than or equal to zero, every
+        /// identifier is included in a single command.
+        /// </param>
+        /// <returns>
+        /// The <see cref="DbCommandInfo"/> instances for the delete, one per batch of up to
+        /// <paramref name="batchSize"/> identifiers.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="ids"/> is <see langword="null"/>, or one of its
+        /// elements is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The type of one of the elements of <paramref name="ids"/> does not match the type of
+        /// <typeparamref name="TEntity"/>'s identifier property.
+        /// </exception>
+        public static IReadOnlyList<DbCommandInfo> DeleteRangeCommands<TEntity>(this MySqlConnection connection, IEnumerable ids, int batchSize = 500) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.DeleteRangeCommands<TEntity>(connection, ids, batchSize, 0);
+        }
+
+        /// <summary>
+        /// Builds the commands that insert each of the specified entities as a new row, or update its row if one
+        /// already exists.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to upsert.</typeparam>
+        /// <param name="connection">The connection used to build the commands.</param>
+        /// <param name="entities">The entities to insert or update.</param>
+        /// <param name="batchSize">
+        /// The maximum number of entities upserted by a single command. When less than or equal to zero, every
+        /// entity is upserted by a single command.
+        /// </param>
+        /// <returns>
+        /// The <see cref="DbCommandInfo"/> instances for the upsert, one per batch of up to
+        /// <paramref name="batchSize"/> entities.
+        /// </returns>
+        /// <remarks>
+        /// Every property that is not marked as database-generated or <see cref="NotMappedAttribute"/>
+        /// is included in the <c>INSERT</c> portion of each row;
+        /// the <c>UPDATE</c> portion updates the same set of properties, except the identifier and
+        /// any property marked <see cref="UpsertKeyAttribute"/>.
+        /// <para>
+        /// The generated commands rely on MySQL's native <c>INSERT ... ON DUPLICATE KEY UPDATE</c> statement, which
+        /// detects an existing row through the table's own <c>UNIQUE</c> or primary key constraints. Marking a
+        /// property with <see cref="UpsertKeyAttribute"/> only excludes it from the
+        /// generated <c>UPDATE</c> portion of the statement; it does not, by itself, make MySQL treat that column as
+        /// the row's key. For these commands to update rather than duplicate existing rows, the columns you intend
+        /// to match on must already be covered by a <c>UNIQUE</c> or primary key constraint in the database.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="entities"/> is <see langword="null"/>.
+        /// </exception>
+        public static IReadOnlyList<DbCommandInfo> UpsertRangeCommands<TEntity>(this MySqlConnection connection, IEnumerable<TEntity> entities, int batchSize = 500) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.UpsertRangeCommands(connection, entities, batchSize, 0);
+        }
+
+        /// <summary>
+        /// Builds the command that determines whether any <typeparamref name="TEntity"/> row exists.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo ExistsCommand<TEntity>(this MySqlConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.ExistsCommand(connection, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that determines whether any <typeparamref name="TEntity"/> row matching the specified
+        /// predicate exists.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the matched row must satisfy. When <see langword="null"/>, any row counts as a match.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo ExistsCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.ExistsCommand(connection, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that determines whether any <typeparamref name="TEntity"/> row matching the specified
+        /// filter exists.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the matched row must satisfy. When <see langword="null"/>, any row counts as a match.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo ExistsCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.ExistsCommand(connection, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that counts every <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that counts every <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="predicate">
+        /// An optional predicate the counted rows must satisfy. When <see langword="null"/>, every row is counted.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that counts every <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="filterNode">
+        /// An optional filter the counted rows must satisfy. When <see langword="null"/>, every row is counted.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="connection"/> is <see langword="null"/>.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that counts the <typeparamref name="TEntity"/> rows in which the selected property is
+        /// not <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to count, for example <c>x =&gt; x.Discount</c>.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, selector, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that counts the <typeparamref name="TEntity"/> rows, matching the specified predicate,
+        /// in which the selected property is not <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to count, for example <c>x =&gt; x.Discount</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the counted rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, selector, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that counts the <typeparamref name="TEntity"/> rows, matching the specified filter,
+        /// in which the selected property is not <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to count, for example <c>x =&gt; x.Discount</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the counted rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, object?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, selector, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that counts the <typeparamref name="TEntity"/> rows in which the named property is not
+        /// <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to count.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection, string propertyName) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that counts the <typeparamref name="TEntity"/> rows, matching the specified predicate,
+        /// in which the named property is not <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to count.</param>
+        /// <param name="predicate">
+        /// An optional predicate the counted rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, propertyName, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that counts the <typeparamref name="TEntity"/> rows, matching the specified filter, in
+        /// which the named property is not <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to count.</param>
+        /// <param name="filterNode">
+        /// An optional filter the counted rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo CountCommand<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.CountCommand(connection, propertyName, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the average of the selected property across every <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to average, for example <c>x =&gt; x.Price</c>.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        public static DbCommandInfo AvgCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, selector, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the average of the selected property across every
+        /// <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to average, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo AvgCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, selector, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the average of the selected property across every
+        /// <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to average, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo AvgCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, selector, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the average of the named property across every
+        /// <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to average.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        public static DbCommandInfo AvgCommand<TEntity>(this MySqlConnection connection, string propertyName) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the average of the named property across every
+        /// <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to average.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo AvgCommand<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, propertyName, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the average of the named property across every
+        /// <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to average.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <remarks>
+        /// The generated command casts the computed average to a string; parsing it back into a
+        /// <see cref="decimal"/> is the responsibility of whichever code executes the command (the library's own
+        /// execution methods do this automatically).
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo AvgCommand<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.AvgCommand(connection, propertyName, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the sum of the selected property across every <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to sum, for example <c>x =&gt; x.Price</c>.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        public static DbCommandInfo SumCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, selector, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the sum of the selected property across every
+        /// <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to sum, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo SumCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, selector, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the sum of the selected property across every
+        /// <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to sum, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo SumCommand<TEntity>(this MySqlConnection connection, Expression<Func<TEntity, decimal?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, selector, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the sum of the named property across every <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to sum.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        public static DbCommandInfo SumCommand<TEntity>(this MySqlConnection connection, string propertyName) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, propertyName, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the sum of the named property across every <typeparamref name="TEntity"/>
+        /// row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to sum.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo SumCommand<TEntity>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, propertyName, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the sum of the named property across every <typeparamref name="TEntity"/>
+        /// row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to sum.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo SumCommand<TEntity>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.SumCommand(connection, propertyName, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the minimum value of the selected property across every
+        /// <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand(connection, selector, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the minimum value of the selected property across every
+        /// <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand(connection, selector, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the minimum value of the selected property across every
+        /// <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand(connection, selector, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the minimum value of the named property across every
+        /// <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or its type
+        /// does not match <typeparamref name="TProperty"/>.
+        /// </exception>
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this MySqlConnection connection, string propertyName) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand<TEntity, TProperty>(connection, propertyName, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the minimum value of the named property across every
+        /// <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or its type
+        /// does not match <typeparamref name="TProperty"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand<TEntity, TProperty>(connection, propertyName, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the minimum value of the named property across every
+        /// <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or its type
+        /// does not match <typeparamref name="TProperty"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo MinCommand<TEntity, TProperty>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MinCommand<TEntity, TProperty>(connection, propertyName, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the maximum value of the selected property across every
+        /// <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand(connection, selector, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the maximum value of the selected property across every
+        /// <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand(connection, selector, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the maximum value of the selected property across every
+        /// <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the selected property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="selector">An expression selecting the property to evaluate, for example <c>x =&gt; x.Price</c>.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="selector"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException"><paramref name="selector"/> does not select a simple property.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this MySqlConnection connection, Expression<Func<TEntity, TProperty?>> selector, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand(connection, selector, filterNode);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the maximum value of the named property across every
+        /// <typeparamref name="TEntity"/> row.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or its type
+        /// does not match <typeparamref name="TProperty"/>.
+        /// </exception>
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this MySqlConnection connection, string propertyName) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand<TEntity, TProperty>(connection, propertyName, (IFilterNode<TEntity>?)null);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the maximum value of the named property across every
+        /// <typeparamref name="TEntity"/> row matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="predicate">
+        /// An optional predicate the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or its type
+        /// does not match <typeparamref name="TProperty"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="predicate"/> uses an expression shape that the SQL translator does not support.
+        /// </exception>
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this MySqlConnection connection, string propertyName, Expression<Func<TEntity, bool>>? predicate) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand<TEntity, TProperty>(connection, propertyName, predicate);
+        }
+
+        /// <summary>
+        /// Builds the command that computes the maximum value of the named property across every
+        /// <typeparamref name="TEntity"/> row matching the specified filter.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type to query.</typeparam>
+        /// <typeparam name="TProperty">The type of the named property.</typeparam>
+        /// <param name="connection">The connection used to build the command.</param>
+        /// <param name="propertyName">The name of the property to evaluate.</param>
+        /// <param name="filterNode">
+        /// An optional filter the considered rows must satisfy. When <see langword="null"/>, every row is considered.
+        /// </param>
+        /// <returns>The <see cref="DbCommandInfo"/> for the query.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/> or <paramref name="propertyName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> does not match a property on <typeparamref name="TEntity"/>, or its type
+        /// does not match <typeparamref name="TProperty"/>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="filterNode"/> is not one of the node types defined by this library, and the SQL
+        /// translator does not know how to translate it.
+        /// </exception>
+        public static DbCommandInfo MaxCommand<TEntity, TProperty>(this MySqlConnection connection, string propertyName, IFilterNode<TEntity>? filterNode) where TEntity : class
+        {
+            DbCommandStrategy.Instance.LoadRuntimeCache<TEntity>(connection);
+            return DbCommandStrategy.Instance.MaxCommand<TEntity, TProperty>(connection, propertyName, filterNode);
+        }
+    }
+}
