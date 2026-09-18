@@ -13,6 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>dapper;orm;micro-orm;sql;data-access</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Missing XML doc comments are tracked as a Fase 2 roadmap item, not a build-breaking warning. -->
