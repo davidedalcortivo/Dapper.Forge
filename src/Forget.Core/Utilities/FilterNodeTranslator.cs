@@ -97,10 +97,12 @@ namespace Forget.Core.Utilities
                         }
                         else
                         {
-                            Array array = Array.CreateInstance(valueType, values.Count);
+                            bool isEnum = valueType.IsEnum;
+                            Type type = isEnum ? Enum.GetUnderlyingType(valueType) : valueType;
+                            Array array = Array.CreateInstance(type, values.Count);
 
                             for (int i = 0; i < values.Count; i++)
-                                array.SetValue(values[i], i);
+                                array.SetValue(isEnum ? Convert.ChangeType(values[i], type) : values[i], i);
 
                             string p = _ctx.AddParameter(array);
                             parts.Add($"({_ctx.SqlDialectStrategy.In(left, p, false)})");

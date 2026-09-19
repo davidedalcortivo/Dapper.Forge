@@ -36,6 +36,32 @@ namespace Forget.Tests.PostgreSql
                     "IsActive" BOOLEAN NOT NULL,
                     "Price" NUMERIC(18,2) NOT NULL
                 );
+
+                CREATE TABLE dbo."TypeMatrix" (
+                    "Id" INTEGER PRIMARY KEY,
+                    "BigValue" BIGINT NOT NULL,
+                    "SmallValue" SMALLINT NOT NULL,
+                    "DoubleValue" DOUBLE PRECISION NOT NULL,
+                    "SingleValue" REAL NOT NULL,
+                    "DecimalValue" NUMERIC(28,10) NOT NULL,
+                    "Flag" BOOLEAN NOT NULL,
+                    "Label" TEXT NOT NULL,
+                    "Moment" TIMESTAMP(6) NOT NULL,
+                    "OffsetMoment" TIMESTAMPTZ(6) NOT NULL,
+                    "CalendarDay" DATE NOT NULL,
+                    "TimeOfDay" TIME(6) NOT NULL,
+                    "Identifier" UUID NOT NULL UNIQUE,
+                    "Kind" INTEGER NOT NULL,
+                    "Payload" BYTEA NOT NULL,
+                    "NullableBig" BIGINT NULL,
+                    "NullableMoment" TIMESTAMP(6) NULL,
+                    "NullableGuid" UUID NULL,
+                    "NullableKind" INTEGER NULL,
+                    "NullableLabel" TEXT NULL
+                );
+
+                CREATE TABLE dbo."EnumKeyed" ("Id" INTEGER PRIMARY KEY, "Name" TEXT NOT NULL);
+                CREATE TABLE dbo."GuidKeyed" ("Id" UUID PRIMARY KEY, "Name" TEXT NOT NULL);
                 """;
             await command.ExecuteNonQueryAsync();
         }

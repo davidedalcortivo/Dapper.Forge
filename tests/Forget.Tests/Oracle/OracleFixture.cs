@@ -59,7 +59,16 @@ namespace Forget.Tests.Oracle
                 )
                 """);
 
+            await ExecuteAsync(Connection, """
+                CREATE TABLE "HandlerRow" (
+                    "Id" NUMBER(10) PRIMARY KEY,
+                    "Token" RAW(16) NOT NULL,
+                    "Note" VARCHAR2(50) NULL
+                )
+                """);
+
             await Connection.LoadDbCacheAsync<Widget>();
+            await Connection.LoadDbCacheAsync<HandlerRow>();
         }
 
         private static async Task ExecuteAsync(OracleConnection connection, string sql)

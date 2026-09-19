@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- PostgreSQL: every collection of enum values bound for `= ANY(@p)` failed, because it was bound as an `enum[]`
+  array that Npgsql cannot write. This affected `Contains` over a list of enums (for example
+  `kinds.Contains(x.Kind)`), `FilterDescriptor` with `ComparisonOperator.In` over enums, and
+  `GetByIdRange`/`DeleteRange` on an entity whose key is an enum. The array is now built from the enum's underlying
+  integral type, the same way Dapper binds a single enum value.
+
 ## [1.0.2] - 2026-09-18
 
 ### Added

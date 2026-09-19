@@ -149,6 +149,8 @@ namespace Forget.Core.Abstractions.Strategies
             int j = 0;
             int s = 0;
 
+            Type? underlyingIdType = typeof(TPrimaryKey).IsEnum ? Enum.GetUnderlyingType(typeof(TPrimaryKey)) : null;
+
             for (int i = 0; i < idArray.Length; i += _batchSize)
             {
                 if (chunkSize > 0 && chunkSize < batchSize)
@@ -159,7 +161,20 @@ namespace Forget.Core.Abstractions.Strategies
 
                 string parameterName = $"{idProperty.Name}Array{j}";
                 sqlBuffer.Append(sqlDialectStrategy.RenderParameter(parameterName));
-                parameters.Add(parameterName, idArray[i..end]);
+
+                if (underlyingIdType is null)
+                {
+                    parameters.Add(parameterName, idArray[i..end]);
+                }
+                else
+                {
+                    Array underlyingIdArray = Array.CreateInstance(underlyingIdType, end - i);
+
+                    for (int k = i; k < end; k++)
+                        underlyingIdArray.SetValue(Convert.ChangeType(idList[k], underlyingIdType), k - i);
+
+                    parameters.Add(parameterName, underlyingIdArray);
+                }
 
                 j++;
                 s += end - i;

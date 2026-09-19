@@ -36,6 +36,29 @@ namespace Forget.Tests.SqlServer
                     IsActive BIT NOT NULL,
                     Price DECIMAL(18,2) NOT NULL
                 );
+
+                CREATE TABLE dbo.TypeMatrix (
+                    Id INT PRIMARY KEY,
+                    BigValue BIGINT NOT NULL,
+                    SmallValue SMALLINT NOT NULL,
+                    DoubleValue FLOAT NOT NULL,
+                    SingleValue REAL NOT NULL,
+                    DecimalValue DECIMAL(28,10) NOT NULL,
+                    Flag BIT NOT NULL,
+                    Label NVARCHAR(200) NOT NULL,
+                    Moment DATETIME2(6) NOT NULL,
+                    OffsetMoment DATETIMEOFFSET(6) NOT NULL,
+                    CalendarDay DATE NOT NULL,
+                    TimeOfDay TIME(6) NOT NULL,
+                    Identifier UNIQUEIDENTIFIER NOT NULL UNIQUE,
+                    Kind INT NOT NULL,
+                    Payload VARBINARY(200) NOT NULL,
+                    NullableBig BIGINT NULL,
+                    NullableMoment DATETIME2(6) NULL,
+                    NullableGuid UNIQUEIDENTIFIER NULL,
+                    NullableKind INT NULL,
+                    NullableLabel NVARCHAR(200) NULL
+                );
                 """;
             await command.ExecuteNonQueryAsync();
         }

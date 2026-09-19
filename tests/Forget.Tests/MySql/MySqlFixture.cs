@@ -39,6 +39,32 @@ namespace Forget.Tests.MySql
                 );
                 """;
             await command.ExecuteNonQueryAsync();
+
+            await using MySqlCommand typeMatrixCommand = Connection.CreateCommand();
+            typeMatrixCommand.CommandText = """
+                CREATE TABLE `TypeMatrix` (
+                    `Id` INT PRIMARY KEY,
+                    `BigValue` BIGINT NOT NULL,
+                    `SmallValue` SMALLINT NOT NULL,
+                    `DoubleValue` DOUBLE NOT NULL,
+                    `SingleValue` FLOAT NOT NULL,
+                    `DecimalValue` DECIMAL(28,10) NOT NULL,
+                    `Flag` TINYINT(1) NOT NULL,
+                    `Label` VARCHAR(200) CHARACTER SET utf8mb4 NOT NULL,
+                    `Moment` DATETIME(6) NOT NULL,
+                    `CalendarDay` DATE NOT NULL,
+                    `TimeOfDay` TIME(6) NOT NULL,
+                    `Identifier` CHAR(36) NOT NULL UNIQUE,
+                    `Kind` INT NOT NULL,
+                    `Payload` VARBINARY(200) NOT NULL,
+                    `NullableBig` BIGINT NULL,
+                    `NullableMoment` DATETIME(6) NULL,
+                    `NullableGuid` CHAR(36) NULL,
+                    `NullableKind` INT NULL,
+                    `NullableLabel` VARCHAR(200) CHARACTER SET utf8mb4 NULL
+                );
+                """;
+            await typeMatrixCommand.ExecuteNonQueryAsync();
         }
 
         public async ValueTask DisposeAsync()
